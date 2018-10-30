@@ -1,7 +1,7 @@
 import React from 'react'
 import config from './config'
 import argologo from './argologo.svg'
-import User from './User'
+import UserList from './UserList'
 
 // UserManager implements the top level component that will handle retrieval and dipslay of user data
 class UserManager extends React.Component {
@@ -53,14 +53,22 @@ class UserManager extends React.Component {
     render() {
 
         // empty user placeholder
-        let userData = {'name':'ams_user_001', 
+        let userData = [{'name':'ams_user_001', 
                         'projects':[{'project':'TESTPROJECT','roles':['project_admin']}], 
                         'created_on': '2018-10-30T15:33:45Z', 
-                        'email':'example@foo',
-                        'description':'a test user'};
+                        'email':'example@foo'},
+                        {'name':'ams_user_002', 
+                        'projects':[{'project':'TESTPROJECT','roles':['consumer']},{'project':'TEST2','roles':['project_admin']}], 
+                        'created_on': '2018-10-30T16:33:45Z', 
+                        'email':'example02@foo'},
+                        {'name':'ams_user_002', 
+                        'projects':[{'project':'TESTPROJECT','roles':['publishier']}], 
+                        'created_on': '2018-10-30T16:33:45Z', 
+                        'email':'example03@foo'}
+                    ];
         // if retrieved user data from ams user the first user
         if (this.state.users.length > 0) {
-            userData = this.state.users[0]
+            userData = this.state.users;
         }
 
         return <div>
@@ -71,11 +79,7 @@ class UserManager extends React.Component {
         <span className="label">access-token: </span> <input className="round" id="token" onKeyPress={evt => this.handleTokenChange(evt)}/>
         </div>
         </header>
-        <p>For the time being render only one user item:</p>
-        <ul>
-          <User item={userData}/>
-          <hr/>
-        </ul>
+         <UserList item={userData}/>
         </div>
     }
 }
