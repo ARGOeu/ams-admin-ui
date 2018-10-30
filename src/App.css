@@ -7,6 +7,12 @@ ul {
   padding:0px;
 }
 
+button {
+  margin-left: 20px;
+  font-size:0.8em;
+  padding:3px 30px;
+}
+
 li {
   font-weight: bold;
   padding:20px 0px 20px 0px;
@@ -34,8 +40,9 @@ header {
 }
 
 header img{
-  height:30px;
+  height:40px;
   margin-right:10px;
+  margin-bottom:-10px;
 }
 
 .service-info input{
