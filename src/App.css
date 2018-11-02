@@ -1,0 +1,53 @@
+.App{
+  margin: 20px;
+}
+
+header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom:10px;
+  border-bottom: rgb(167, 167, 167) 1px solid;
+}
+
+header img{
+  height:30px;
+  margin-right:10px;
+}
+
+.service-info input{
+  border-radius: 20px;
+  background-color:rgb(236, 236, 236);
+  border: rgb(112, 112, 112) 1px solid;
+  font-size: 1em;
+}
+
+.service-info {
+  font-size: 1.3em;
+}
+
+
+.value {
+  font-weight:bold;
+}
+
+
+.round {
+  padding:5px 10px;
+  margin-right:10px;
+  border: rgb(70, 70, 70) 1px solid;
+}
+
+.label {
+  padding:0px;
+  margin-left:10px;
+}
+
+h1 span{
+  color:black;
+}
+
+header h1{
+  margin:0px;
+  color:grey;
+}
