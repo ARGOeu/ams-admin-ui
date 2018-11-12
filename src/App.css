@@ -9,6 +9,15 @@ ul {
 
 li {
   font-weight: bold;
+  padding:20px 0px 20px 0px;
+  margin: 0px 20px;
+  border-bottom:rgb(226, 226, 226) 1px solid;
+}
+
+li img{
+  height:40px;
+  margin-right:30px;
+  margin-bottom:-15px;
 }
 
 li span {
