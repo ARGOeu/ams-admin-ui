@@ -21,9 +21,9 @@ class User extends React.Component{
         return <li>
             <img src={userIcon} alt="user" />
             Name: <span>{this.props.item.name}</span>  
+            Email: <span>{this.props.item.email}</span>
             Roles:<span className="roleList">{prStr}</span> 
             Created-on: <span>{this.props.item.created_on}</span>
-            Email: <span>{this.props.item.email}</span>
             </li>
     }
 }
