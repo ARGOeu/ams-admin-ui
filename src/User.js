@@ -1,6 +1,6 @@
 import React from 'react';
-import userIcon from './user.svg'
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {Link} from 'react-router-dom';
 class User extends React.Component{
 
     validateEmail(email) {
@@ -33,8 +33,8 @@ class User extends React.Component{
         }
 
         return <li>
-            <img src={userIcon} alt="user" />
-            Name: <span>{this.props.item.name}</span>
+            <FontAwesomeIcon icon="user" />
+             <span><strong><Link to={"/users/details/" + this.props.item.name}>{this.props.item.name}</Link></strong></span>
             {   this.props.item.email !== "" &&
              <>
                 Email: <span className={this.validateEmail(this.props.item.email)}>{this.props.item.email}</span>
