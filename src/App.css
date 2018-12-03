@@ -7,6 +7,10 @@ ul {
   padding:0px;
 }
 
+.email-nonvalid{
+  border-bottom: red 1px dashed;
+}
+
 button {
   margin-left: 20px;
   font-size:0.8em;
@@ -17,13 +21,14 @@ li {
   font-weight: bold;
   padding:20px 0px 20px 0px;
   margin: 0px 20px;
+  margin-bottom:20px;
   border-bottom:rgb(226, 226, 226) 1px solid;
 }
 
 li img{
   height:40px;
   margin-right:30px;
-  margin-bottom:-15px;
+  margin-bottom:-10px;
 }
 
 li span {

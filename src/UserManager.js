@@ -15,6 +15,7 @@ class UserManager extends React.Component {
         let cachedToken = "";
         cachedToken = localStorage.getItem("ams_token");
 
+
         this.state = {
             users: [],
             token: cachedToken,
@@ -24,14 +25,15 @@ class UserManager extends React.Component {
 
         this.apiGetUser(cachedToken, config.endpoint)
         this.apiGetData(cachedToken, config.endpoint)
-       
 
+       
 
     }
 
     // handle when user enters a new token and hits enter
     handleTokenChange(event) {
         var keyCode = event.keyCode || event.which;
+
         if (keyCode === 13) {
             this.apiGetUser(event.target.value, this.state.endpoint);
             this.apiGetData(event.target.value, this.state.endpoint);
@@ -85,6 +87,7 @@ class UserManager extends React.Component {
                 this.setState({ username: json.name, token: token })
             })
             .catch(error => console.log(error));
+
     }
 
     // retrieves user data from ams endpoint using a specific access token
@@ -151,6 +154,7 @@ class UserManager extends React.Component {
         }
 
         return <div>
+
             <header className="App-header">
                 <h1 className="App-title"><img src={logo} className="App-logo" alt="logo" />Admin UI: <span>AMS Users</span></h1>
                 <div className="service-info">
@@ -178,6 +182,7 @@ class UserManager extends React.Component {
             {this.state.users.length === 0 && this.state.username === null &&
             <p>Empty data, please <strong>login</strong> to retrieve user list</p>
             }
+
         </div>
     }
 }
