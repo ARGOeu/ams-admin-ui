@@ -1,25 +1,129 @@
-
-nav {
-  background:rgb(42, 42, 42);
+main {
+  min-height:85vh;
 }
 
-nav a:hover{
-  text-decoration-line: underline;
+.popover-header {
+  text-align: center;
 }
 
-nav a {
-  display: inline-block;
-  padding: 5px 20px;
-  text-decoration: none;
+
+.popover-body {
+  text-align: center;
+}
+
+li .fa-user {
+  margin-right:20px;
+}
+.side-ico {
+  margin-right: 10px; 
+}
+
+.service-info{
+  border-bottom: 2px black solid;
+}
+
+.non-user-nav{
+  margin-left:15px;
+}
+
+.nav-item svg:hover{
+  color:rgb(250, 255, 197);
+}
+
+.ico-nav{
   color:white;
- 
+  font-size: 1.5em;
+}
+
+.ico-user{
+  color:rgb(250, 255, 181);
+  font-size: 1.5em;
+  border: 2px rgb(250,255,181) solid;
+  padding :2px;
+  border-radius: 5px;
+}
+
+.nav-item {
+  padding: 8px;
+  /* border: 1px grey solid;
+  border-radius: 2px; */
+}
+
+.nav-item a{
+
+  color: rgb(73, 73, 73)
+}
+
+
+#ico-user {
+  color:rgb(255, 252, 204);
+  margin-left: 5px;
+  border: 1px white solid;
+  padding: 3px;
+  border-radius: 2px;
+}
+
+
+#argo-nav {
+  background-color:#6f8dc4;
+}
+
+#ticker {
+  display: block;
+  margin:auto;
+}
+
+#logged-user {
+  color:white;
+  margin-right:20px;
+}
+
+.logo  {
+  padding-right: 20px;
+}
+
+footer {
+  border-top: 1px lightgray dashed;
+}
+
+.sticky-top .nav{
+ padding:20px 10px; 
+}
+
+.login-label {
+  margin-right:15px;
+}
+
+#sidebar nav a:hover{
+  text-decoration-line: underline;
+  color: white;
+}
+
+#sticky-sidebar {
+  border-right:1px lightgray solid;
+  bottom: 0px;
+}
+
+#sidebar nav a {
+  display: inline-block;
+  padding: .5rem 1rem;
+  text-decoration: none;
+  color: white;
+}
+
+.dropdown a {
+  color: black;
+}
+
+.dropdown a:hover {
+  color: black;
 }
 
 main {
   margin: 20px;
 }
 
-ul {
+main ul {
   list-style: none;
   padding:0px;
 }
@@ -34,7 +138,7 @@ button {
   padding:3px 30px;
 }
 
-li {
+main li {
   font-weight: bold;
   padding:20px 0px 20px 0px;
   margin: 0px 20px;
@@ -42,13 +146,13 @@ li {
   border-bottom:rgb(226, 226, 226) 1px solid;
 }
 
-li img{
+main li img{
   height:40px;
   margin-right:30px;
   margin-bottom:-10px;
 }
 
-li span {
+main li span {
   font-weight: normal;
   margin-right:20px;
 }
