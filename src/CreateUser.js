@@ -7,7 +7,6 @@ import {
 import { Link } from "react-router-dom";
 import config from "./config";
 import Authen from "./Authen";
-import Debug from "./Debug";
 
 window.valid_projects = [];
 

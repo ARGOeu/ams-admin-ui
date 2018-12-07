@@ -7,6 +7,34 @@ main {
 }
 
 
+
+
+
+
+
+.list-header .rt-resizable-header-content{
+  font-weight:bold;
+  margin:10px 2px;
+}
+
+.service-crown{
+  color:orange;
+}
+
+.service-metric{
+  color:red;
+}
+
+#usertoken{
+  width:450px;
+  font-family: 'Courier New', Courier, monospace;
+  color:#e83e8c;
+  margin:0px 10px;
+  padding:0px 20px;
+  border-radius:5px;
+  border: 1px grey solid;
+}
+
 .popover-body {
   text-align: center;
 }
@@ -35,6 +63,15 @@ li .fa-user {
   font-size: 1.5em;
 }
 
+
+.rt-tr:hover .edit-buttons{
+  visibility: visible;
+}
+
+.edit-buttons{
+  visibility: hidden;
+}
+
 .ico-user{
   color:rgb(250, 255, 181);
   font-size: 1.5em;
@@ -52,6 +89,10 @@ li .fa-user {
 .nav-item a{
 
   color: rgb(73, 73, 73)
+}
+
+.user-link{
+  color:black;
 }
 
 
@@ -132,11 +173,19 @@ main ul {
   border-bottom: red 1px dashed;
 }
 
-button {
+.ico-add-user {
+  font-size:16;
+}
+
+#main{
+  background-color:#ecf0f5;
+}
+
+/* button {
   margin-left: 20px;
   font-size:0.8em;
   padding:3px 30px;
-}
+} */
 
 main li {
   font-weight: bold;

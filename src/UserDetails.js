@@ -3,7 +3,19 @@ import Authen from "./Authen";
 import config from './config';
 import {Card, CardBody, CardHeader, CardFooter, Row} from 'reactstrap';
 import {Link} from 'react-router-dom';
+import ProjectRoles from './ProjectRoles';
+import {
+  NotificationContainer,
+  NotificationManager
+} from "react-notifications";
 
+
+function clip() {
+  let copyText = document.getElementById("usertoken");
+  copyText.select();
+  document.execCommand("copy");
+  NotificationManager.info("token copied to clipboard", null, 1000);
+}
 
 class UserDetails extends React.Component {
   constructor(props) {
@@ -56,6 +68,7 @@ class UserDetails extends React.Component {
     }
 
     return (<div>
+       <NotificationContainer />
       <Row>
       <div className="col-sm-6 mx-auto">
         <Card>    
@@ -63,13 +76,13 @@ class UserDetails extends React.Component {
       <CardBody>
         <table>
           <tbody>
-          <tr><td><strong>uuid:</strong></td><td>{this.state.user.uuid}</td></tr>
-          <tr><td><strong>email:</strong></td><td>{this.state.user.email}</td></tr>
-          <tr><td><strong>token:</strong></td><td><code>{this.state.user.token}</code></td></tr>
+          <tr><td><strong>uuid: </strong></td><td>{this.state.user.uuid}</td></tr>
+          <tr><td><strong>email: </strong></td><td>{this.state.user.email}</td></tr>
+          <tr><td><strong>token: </strong></td><td><input type="text" className="form-control-static" readOnly value={this.state.user.token} id="usertoken" /><button onClick={clip}className="btn btn-sm">Copy</button></td></tr>
           </tbody>
         </table>
         <hr/>
-        <em>Projects:</em><pre>{JSON.stringify(this.state.user.projects)}</pre>
+        <ProjectRoles projects={this.state.user.projects}/>
         <hr/>
         <table>
         <tbody>
@@ -80,7 +93,7 @@ class UserDetails extends React.Component {
         </table>
       </CardBody>
       <CardFooter>
-        <Link to="/users">Back</Link>
+        <Link to="/users" className="btn btn-dark">Back</Link>
       </CardFooter>
     </Card>
     </div>

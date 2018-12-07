@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import UserList from "./UserList";
+import UserTable from "./UserTable";
 import { BrowserRouter, Route, Switch, Link, Redirect, withRouter } from "react-router-dom";
 import About from "./About";
 import Subscriptions from "./Subscriptions";
@@ -267,7 +267,7 @@ class App extends Component {
                       exact
                       auth={this.authen.isLogged()}
                       path="/users"
-                      component={UserList}
+                      component={UserTable}
                     />
                     
                     <ProtectedRoute auth={this.authen.isLogged()} exact path="/about" component={About} />
