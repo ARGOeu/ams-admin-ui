@@ -25,9 +25,13 @@ import {
   faExclamationTriangle,
   faUser,
   faCrown,
-  faHeartbeat
+  faHeartbeat,
+  faCloudDownloadAlt,
+  faCloudUploadAlt,
+  faShieldAlt
 } from "@fortawesome/free-solid-svg-icons";
-library.add(faExclamationTriangle, faUser, faCrown, faHeartbeat);
+library.add(faExclamationTriangle, faUser, faCrown, faHeartbeat,  faCloudDownloadAlt,
+  faCloudUploadAlt,faShieldAlt);
 
 function clip() {
   let copyText = document.getElementById("usertoken");
@@ -360,8 +364,18 @@ class UserDetails extends React.Component {
 
                   <hr />
                   <ProjectRoles projects={this.state.user.projects} />
-                  <hr />
                 </CardBody>
+              </Card>
+              <Card className="mt-2 text-secondary">
+                <CardFooter>
+                <strong>Role icon legend:</strong>
+               <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="shield-alt" />: project admin</span>
+               <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="cloud-upload-alt" />: publisher
+               </span>
+                <span className="border p-2 mx-2 rounded"> <FontAwesomeIcon className="ml-1 mr-1" icon="cloud-download-alt" />: consumer</span>
+               
+                </CardFooter>
+                
               </Card>
               <div className="m-2 text-right">
                 {willDelete}

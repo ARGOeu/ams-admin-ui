@@ -1,5 +1,4 @@
 import React from "react";
-import User from "./User";
 import Authen from "./Authen";
 import argologoAnim from "./argologo_anim.svg";
 import config from "./config";
@@ -46,7 +45,7 @@ const colors = [
   "#212F3D",
 ];
 
-class UserList extends React.Component {
+class UserTable extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
@@ -165,14 +164,13 @@ class UserList extends React.Component {
     } 
       
     
-    return (<FontAwesomeIcon icon="user" />);
+    return (<FontAwesomeIcon icon="user" style={{color:"#616A6B"}} />);
     
 
   }
 
   render() {
-    let userComps = [];
-    let count = 0;
+   
     const projectColors=this.getProjectColors(this.getDistinctProjects(this.state.users))
     const columns = [
       {
@@ -191,7 +189,7 @@ class UserList extends React.Component {
         Header: "Name",
         accessor: "name",
         Cell: props => (
-          <Link className="user-link" to={"/users/details/" + props.value}>
+          <Link className="item-link" to={"/users/details/" + props.value}>
             {props.value}
           </Link>
         ),
@@ -280,10 +278,7 @@ class UserList extends React.Component {
       );
     }
 
-    for (let user of this.state.users) {
-      userComps.push(<User key={count} item={user} />);
-      count++;
-    }
+    
     return (
       <div>
         {userHeading}
@@ -302,4 +297,4 @@ class UserList extends React.Component {
   }
 }
 
-export default UserList;
+export default UserTable;
