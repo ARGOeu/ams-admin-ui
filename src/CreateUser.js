@@ -10,10 +10,9 @@ import Authen from "./Authen";
 
 window.valid_projects = [];
 
-function postData(url = ``, data = {}) {
-  // Default options are marked with *
+function sendData(url = ``, data = {}, method = "POST") {
   return fetch(url, {
-    method: "POST",
+    method: method,
     mode: "cors",
     cache: "no-cache",
     credentials: "same-origin",
@@ -31,7 +30,7 @@ function postData(url = ``, data = {}) {
       NotificationManager.info("Issues with user creation", null, 1000);
       return false;
     }
-  }); // parses response to JSON
+  });
 }
 
 function validate(values, other) {
@@ -83,8 +82,6 @@ function validate(values, other) {
     errListProjects.push(pErrors);
   });
 
- 
-
   // check if project errors are indeed empty
   let empty = true;
   for (let item of errListProjects) {
@@ -106,12 +103,81 @@ class CreateUser extends Component {
     this.authen = new Authen(config.endpoint);
     this.doCreateUser.bind(this);
 
-    this.state = {
-      projects: [],
-      roles: ["project_admin", "consumer", "producer"]
-    };
+    if (this.props.action === "create") {
+      this.state = {
+        action: this.props.action, // create or update
+        projects: [],
+        roles: ["project_admin", "consumer", "producer"],
+        initialValues: {
+          name: "",
+          email: "",
+          service_admin: false,
+          projects: [{ project: "", roles: "" }]
+        }
+      };
+    } else {
+      this.state = {
+        action: this.props.action, // create or update
+        projects: [],
+        roles: ["project_admin", "consumer", "producer"],
+        initialValues: this.apiGetData(
+          this.authen.getToken(),
+          config.endpoint,
+          this.props.match.params.username
+        )
+      };
+    }
 
     this.apiGetProjects(this.authen.getToken(), config.endpoint);
+  }
+
+  apiGetData(token, endpoint, username) {
+    // If token or endpoint empty return
+    if (token === "" || token === null || endpoint === "" || username === "") {
+      return;
+    }
+    // quickly construct request url
+    let url = "https://" + endpoint + "/v1/users/" + username + "?key=" + token;
+    // setup the required headers
+    let headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    };
+    // fetch the data and if succesfull change the component state - which will trigger a re-render
+    fetch(url, { headers: headers })
+      .then(response => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          return { users: [] };
+        }
+      })
+      .then(json => {
+        
+        
+        let initVal = {
+          name: json.name,
+          email: json.email,
+          service_admin: json.service_admin,
+          projects: [{project:'', roles:""}]
+        };
+
+       
+
+        if (json.projects.length>0){
+          let projectList = [];
+
+          for (let project of json.projects){
+            projectList.push({project:project.project, roles:project.roles.join()})
+          }
+          initVal.projects = projectList;
+        }
+
+        
+
+        this.setState({ initialValues: initVal });
+      })
+      .catch(error => console.log(error));
   }
 
   apiGetProjects(token, endpoint) {
@@ -173,7 +239,43 @@ class CreateUser extends Component {
       "?key=" +
       this.authen.getToken();
 
-    postData(url, body)
+    sendData(url, body, "POST")
+      .then(done => {
+        console.log(done);
+        if (done) {
+          window.location = "/users/details/" + name;
+        }
+      })
+      .catch(error => console.error(error));
+  }
+
+  doUpdateUser(data) {
+    let name = data.name;
+    let body = { email: data.email };
+
+    if (data.service_admin) {
+      body["service_roles"] = true;
+    } else {
+      let projects = [];
+      for (let project of data.projects) {
+        projects.push({
+          project: project.project,
+          roles: project.roles.split(",")
+        });
+      }
+      body["projects"] = projects;
+    }
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      config.endpoint +
+      "/v1/users/" +
+      name +
+      "?key=" +
+      this.authen.getToken();
+
+    sendData(url, body, "PUT")
       .then(done => {
         console.log(done);
         if (done) {
@@ -184,21 +286,35 @@ class CreateUser extends Component {
   }
 
   render() {
+    let actionOnUser = null;
+
+    if (this.state.action === "create") {
+      actionOnUser = "Create User";
+    } else if (this.state.action === "update") {
+      actionOnUser = "Update User";
+    }
+
+    if (this.state.initialValues===undefined){
+      return <h1>Loading ...</h1>
+    }
+
     return (
+
+     
+
       <div>
         <NotificationContainer />
-        <h1>Create User</h1>
+        <h2>{actionOnUser}</h2>
         <Formik
-          initialValues={{
-            name: "",
-            email: "",
-            service_admin: false,
-            projects: [{ project: "", roles: "" }]
-          }}
+          initialValues={this.state.initialValues || {name:"",email:"",projects:[{project:"",roles:""}]}}
           validate={validate}
           onSubmit={values => {
             // request to backend to create user
-            this.doCreateUser(values);
+            if (this.state.action === "create") {
+              this.doCreateUser(values);
+            } else {
+              this.doUpdateUser(values);
+            }
           }}
           render={({ values, errors, touched }) => (
             <Form>
@@ -312,13 +428,12 @@ class CreateUser extends Component {
                 </div>
               )}
               <button type="submit" className="btn btn-success">
-                Create user
+                {actionOnUser}
               </button>
               <span> </span>
               <Link className="btn btn-dark" to="/users">
                 Cancel
               </Link>
-              
             </Form>
           )}
         />
