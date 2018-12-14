@@ -16,7 +16,11 @@ library.add(
 
 
 
+<<<<<<< HEAD
 function getProjectColorIcon(projectName){
+=======
+function projectColorIcon(projectName){
+>>>>>>> ARGO-1540 List projects
   let color="#616A6B";
   if (projectName in config.project_colors){
     color = config.project_colors[projectName];
@@ -78,7 +82,11 @@ class ProjectTable extends React.Component {
       {
         Header: "#",
         accessor: "name",
+<<<<<<< HEAD
         Cell: props => (getProjectColorIcon(props.value)),
+=======
+        Cell: props => (projectColorIcon(props.value)),
+>>>>>>> ARGO-1540 List projects
         width: 40,
         headerClassName: "list-header",
         className: "text-center"
