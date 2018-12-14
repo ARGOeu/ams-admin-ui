@@ -6,7 +6,7 @@ import About from "./About";
 import Subscriptions from "./Subscriptions";
 import ProjectTable from "./ProjectTable";
 import ProjectDetails from "./ProjectDetails"
-import Topics from "./Topics";
+import TopicTable from "./TopicTable";
 import CreateUser from "./CreateUser";
 import CreateProject from "./CreateProject";
 import UserDetails from "./UserDetails";
@@ -252,7 +252,13 @@ class App extends Component {
                     <Route exact path="/welcome" component={Welcome}/>
                     <Route exact path="/login" component={withRouter(Login)} />
                    
-                    <Route exact path="/topics" component={Topics} />
+                    
+                    <ProtectedRoute
+                      exact
+                      auth={this.authen.isLogged()}
+                      path="/topics"
+                      component={TopicTable}
+                    />
                     <Route exact path="/subscriptions" component={Subscriptions} />
                     <ProtectedRoute
                       exact
@@ -279,6 +285,12 @@ class App extends Component {
                       path="/projects/create"
                       component={CreateProject}
                       action="create"
+                    />
+                     <ProtectedRoute exact
+                      auth={this.authen.isLogged()}
+                      path="/projects/update/:projectname"
+                      component={CreateProject}
+                      action="update"
                     />
                     <ProtectedRoute exact auth={this.authen.isLogged()} path="/" component={Welcome} />
                     <ProtectedRoute
