@@ -63,12 +63,14 @@ library.add(
   faUser
 );
 
-const ProtectedRoute = ({ auth: isAuth, component: Component, ...rest }) => (
+
+
+const ProtectedRoute = ({ action, toDelete, auth: isAuth, component: Component, ...rest }) => (
   <Route
     {...rest}
     render={props =>
       isAuth === true ? (
-        <Component {...props} />
+        <Component {...props} toDelete={toDelete} action={action} />
       ) : (
         <Redirect
           to={{
@@ -255,13 +257,28 @@ class App extends Component {
                     <ProtectedRoute
                       exact
                       auth={this.authen.isLogged()}
+                      path="/users/delete/:username"
+                      component={UserDetails}
+                      toDelete={true}
+                    />
+                    <ProtectedRoute
+                      exact
+                      auth={this.authen.isLogged()}
                       path="/users/details/:username"
                       component={UserDetails}
+                      toDelete={false}
+                    />
+                    <ProtectedRoute exact
+                      auth={this.authen.isLogged()}
+                      path="/users/update/:username"
+                      component={CreateUser}
+                      action="update"
                     />
                     <ProtectedRoute exact
                       auth={this.authen.isLogged()}
                       path="/users/create"
                       component={CreateUser}
+                      action="create"
                     />
                     <ProtectedRoute
                       exact
