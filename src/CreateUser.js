@@ -4,9 +4,9 @@ import {
   NotificationContainer,
   NotificationManager
 } from "react-notifications";
-import { Link } from "react-router-dom";
 import config from "./config";
 import Authen from "./Authen";
+import {Button} from "reactstrap"
 
 window.valid_projects = [];
 
@@ -431,9 +431,9 @@ class CreateUser extends Component {
                 {actionOnUser}
               </button>
               <span> </span>
-              <Link className="btn btn-dark" to="/users">
+              <Button onClick={()=>{window.history.back()}} className="btn btn-dark">
                 Cancel
-              </Link>
+              </Button>
             </Form>
           )}
         />

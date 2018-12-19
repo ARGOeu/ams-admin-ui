@@ -1,9 +1,20 @@
 import React from "react";
 import Authen from "./Authen";
-import config from './config';
-import {Button, Card, CardBody, CardHeader, CardFooter, Row} from 'reactstrap';
-import {Link} from 'react-router-dom';
-import ProjectRoles from './ProjectRoles';
+import config from "./config";
+import {
+  Col,
+  Popover,
+  PopoverHeader,
+  PopoverBody,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  CardFooter,
+  Row
+} from "reactstrap";
+import { Link } from "react-router-dom";
+import ProjectRoles from "./ProjectRoles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -11,12 +22,12 @@ import {
   NotificationManager
 } from "react-notifications";
 import {
-  faExclamationTriangle
-} from "@fortawesome/free-solid-svg-icons";
-library.add(
   faExclamationTriangle,
-);
-
+  faUser,
+  faCrown,
+  faHeartbeat
+} from "@fortawesome/free-solid-svg-icons";
+library.add(faExclamationTriangle, faUser, faCrown, faHeartbeat);
 
 function clip() {
   let copyText = document.getElementById("usertoken");
@@ -29,23 +40,72 @@ class UserDetails extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
-    console.log(this.props)
-    this.state = {user:null}
+    console.log(this.props);
+    this.state = { user: null, popoverOpen: false };
 
     this.apiGetData.bind(this);
 
     if (this.authen.isLogged()) {
       this.state = {
         toDelete: this.props.toDelete,
-        user: this.apiGetData(this.authen.getToken(), config.endpoint, this.props.match.params.username)}
-     } else {
-          this.state = {user:null};
-      }
-    
+        user: this.apiGetData(
+          this.authen.getToken(),
+          config.endpoint,
+          this.props.match.params.username
+        )
+      };
+    } else {
+      this.state = { user: null, popoverOpen: false };
+    }
+
+    this.toggle = this.toggle.bind(this);
+  }
+
+  toggle() {
+    this.setState({
+      popoverOpen: !this.state.popoverOpen
+    });
+  }
+
+  apiRenewToken(token, endpoint, username) {
+    // If token or endpoint empty return
+    if (token === "" || token === null || endpoint === "" || username === "") {
+      return;
+    }
+    // quickly construct request url
+    let url =
+      "https://" +
+      endpoint +
+      "/v1/users/" +
+      username +
+      ":refreshToken" +
+      "?key=" +
+      token;
+    // setup the required headers
+    let headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    };
+    // fetch the data and if succesfull change the component state - which will trigger a re-render
+    fetch(url, { method: "post", headers: headers })
+      .then(response => {
+        if (response.status === 200) {
+          NotificationManager.info("Token refreshed", null, 1000);
+          return response.json();
+        } else {
+          NotificationManager.error("Error", null, 1000);
+          return {};
+        }
+      })
+      .then(json => {
+        if ("token" in json) {
+          this.setState({ user: json });
+        }
+      })
+      .catch(error => console.log(error));
   }
 
   apiDelete(token, endpoint, username) {
-    
     // If token or endpoint empty return
     if (token === "" || token === null || endpoint === "" || username === "") {
       return;
@@ -58,7 +118,7 @@ class UserDetails extends React.Component {
       Accept: "application/json"
     };
     // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { method:'delete', headers: headers })
+    fetch(url, { method: "delete", headers: headers })
       .then(response => {
         if (response.status === 200) {
           NotificationManager.info("User Deleted", null, 1000);
@@ -67,20 +127,41 @@ class UserDetails extends React.Component {
           NotificationManager.error("Error", null, 1000);
           return false;
         }
-      }).then(done=>{
+      })
+      .then(done => {
         if (done) {
-            // display notification
-            setTimeout(function(){
-              window.location = "/users";
-            },1000);
+          // display notification
+          setTimeout(function() {
+            window.location = "/users";
+          }, 1000);
         }
       })
       .catch(error => console.log(error));
   }
 
+  // based on service role return an appropriate fa icon
+  beautifyServiceRoles(serviceRoles) {
+    if (serviceRoles !== undefined)  {
+      if (serviceRoles.includes("service_admin")) {
+        return (
+          <FontAwesomeIcon className="service-crown" icon="crown" size="4x" />
+        );
+      } else if (serviceRoles.includes("metric_viewer")) {
+        return (
+          <FontAwesomeIcon
+            className="service-metric"
+            icon="heartbeat"
+            size="4x"
+          />
+        );
+      }
+    }
+    
+
+    return <FontAwesomeIcon icon="user" size="4x" />;
+  }
 
   apiGetData(token, endpoint, username) {
-    
     // If token or endpoint empty return
     if (token === "" || token === null || endpoint === "" || username === "") {
       return;
@@ -101,69 +182,195 @@ class UserDetails extends React.Component {
           return { users: [] };
         }
       })
-      .then(json => {console.log(json); this.setState({ user: json})})
+      .then(json => {
+        console.log(json);
+        this.setState({ user: json });
+      })
       .catch(error => console.log(error));
   }
 
   render() {
-   
-  
-
     if (this.state.user === undefined) {
-      return <h3>loading</h3>
+      return <h3>loading</h3>;
     }
 
-    let willDelete = null
-    let willBack = null 
+    let willDelete = null;
+    let willBack = null;
 
     if (this.state.toDelete) {
-      willDelete = (<div>
-        <h2 className="bg-danger text-white p-2 rounded"><FontAwesomeIcon className="mx-3" icon="exclamation-triangle" />Are you sure you want to delete this user ?</h2>
-        <div className= "text-right"><Button color="danger" className="mr-2" onClick={()=>{this.apiDelete(this.authen.getToken(), config.endpoint, this.state.user.name)}}>Delete</Button>
-        <Link to="/users" className="btn btn-dark">Cancel</Link></div>
+      willDelete = (
+        <Card className="border-danger">
+          <CardHeader className="border-danger text-danger text-center">
+            <h5>
+             <FontAwesomeIcon className="mx-3" icon="exclamation-triangle" />
+            <strong>User Deletion</strong></h5>
+          </CardHeader>
+          <CardBody  className="border-danger text-danger text-center">
+            Are you sure you want to delete user: <strong>{this.state.user.name}</strong>
+          </CardBody>
+          <CardFooter className="border-danger text-danger text-center">
+          
+            <Button
+              color="danger"
+              className="mr-2"
+              onClick={() => {
+                this.apiDelete(
+                  this.authen.getToken(),
+                  config.endpoint,
+                  this.state.user.name
+                );
+              }}
+            >
+              Delete
+            </Button>
+            <Button
+              onClick={() => {
+                window.history.back();
+              }}
+              className="btn btn-dark"
+            >
+              Cancel
+            </Button>
+          
+          </CardFooter>
+         
         
-      </div>);
+          </Card>
+      );
     } else {
-      willBack = <Link to="/users" className="btn btn-dark">Back</Link>
-     
+      willBack = (
+        <Button
+          onClick={() => {
+            window.history.back();
+          }}
+          className="btn btn-dark"
+        >
+          Back
+        </Button>
+      );
     }
 
-    return (<div>
-      <NotificationContainer />
-      <Row>
-      <div className="col-sm-6 mx-auto">
-        <Card>    
-      <CardHeader>User: <strong>{this.state.user.name}</strong></CardHeader>
-      <CardBody>
-        <table>
-          <tbody>
-          <tr><td><strong>uuid: </strong></td><td>{this.state.user.uuid}</td></tr>
-          <tr><td><strong>email: </strong></td><td>{this.state.user.email}</td></tr>
-          <tr><td><strong>token: </strong></td><td><input type="text" className="form-control-static" readOnly value={this.state.user.token} id="usertoken" /><button onClick={clip}className="btn btn-sm">Copy</button></td></tr>
-          </tbody>
-        </table>
-        <hr/>
-        <ProjectRoles projects={this.state.user.projects}/>
-        <hr/>
-        <table>
-        <tbody>
-        <tr><td><strong>created by:</strong></td><td>{this.state.user.created_by}</td></tr>
-        <tr><td><strong>created on:</strong></td><td>{this.state.user.created_on}</td></tr>
-        <tr><td><strong>modified on:</strong></td><td>{this.state.user.modified_on}</td></tr>
-        </tbody>
-        </table>
-      </CardBody>
-      <CardFooter>
-        {willDelete}
-        {willBack}
-        </CardFooter>
-    </Card>
-    </div>
-    </Row>
-    
+    return (
+      <div>
+        <NotificationContainer />
+        <Row>
+          <Col>
+            <h2>User Details</h2>
+          </Col>
+          <Col className="text-right">
+            <Link
+              className="btn btn-info  ml-1 mr-1"
+              to={"/users/update/" + this.state.user.name}
+            >
+              <FontAwesomeIcon icon="pen" /> Modify User
+            </Link>
+            <a
+              className="btn btn-danger  ml-1 mr-1"
+              href={"/users/delete/" + this.state.user.name}
+            >
+              <FontAwesomeIcon icon="times" /> Delete User
+            </a>
+          </Col>
+        </Row>
 
-    
-     </div>
+        <div>
+          <Row>
+            <div className="col-md-4 col-sm-12 col-xs-12">
+              <Card>
+                <CardBody>
+                  <div className="mx-auto profile-circle"><div className="mt-3">{this.beautifyServiceRoles(this.state.user.service_roles)}</div></div>
+                  <br />
+                  <span>{this.state.user.name}</span>
+                  <hr />
+                  <strong>uuid:</strong> {this.state.user.uuid}
+                  <hr />
+                  <strong>email:</strong> {this.state.user.email}
+                </CardBody>
+                <CardFooter>
+                  <small>
+                    <strong>created:</strong>
+                  </small>
+                  <small> {this.state.user.created_on}</small>
+                  <br />
+                  <small>
+                    <strong>updated:</strong>
+                  </small>
+                  <small> {this.state.user.modified_on}</small>
+                  <small>
+                    <br />
+                    <strong>created by:</strong>
+                  </small>
+                  <small> {this.state.user.created_by}</small>
+                </CardFooter>
+              </Card>
+            </div>
+            <div className="col-md-8 col-sm-12 col-xs-12">
+              <Card>
+                <CardHeader>
+                  <strong>{this.state.user.name}</strong>
+                </CardHeader>
+                <CardBody>
+                  <strong>Token: </strong>
+                  <code className="p-2 border ml-2 rounded">
+                    {this.state.user.token}
+                  </code>
+                  <input
+                    type="text"
+                    className="form-control-static d-none"
+                    readOnly
+                    value={this.state.user.token}
+                    id="usertoken"
+                  />
+                  <button onClick={clip} className="btn btn-sm">
+                    Copy
+                  </button>
+                  <button
+                    id="renew-token"
+                    onClick={() => {
+                      this.toggle();
+                    }}
+                    className="ml-2 btn btn-sm btn-warning"
+                  >
+                    Renew
+                  </button>
+                  <Popover
+                    placement="bottom"
+                    isOpen={this.state.popoverOpen}
+                    target="renew-token"
+                    toggle={this.toggle}
+                  >
+                    <PopoverHeader>Are you sure ?</PopoverHeader>
+                    <PopoverBody>
+                      <button
+                        id="confirm-renew"
+                        onClick={() => {
+                          this.apiRenewToken(
+                            this.authen.getToken(),
+                            config.endpoint,
+                            this.state.user.name
+                          );
+                          this.toggle();
+                        }}
+                        className="ml-2 btn btn-sm btn-dark"
+                      >
+                        Confirm
+                      </button>
+                    </PopoverBody>
+                  </Popover>
+
+                  <hr />
+                  <ProjectRoles projects={this.state.user.projects} />
+                  <hr />
+                </CardBody>
+              </Card>
+              <div className="m-2 text-right">
+                {willDelete}
+                {willBack}
+              </div>
+            </div>
+          </Row>
+        </div>
+      </div>
     );
   }
 }
