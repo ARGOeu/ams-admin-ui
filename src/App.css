@@ -53,6 +53,18 @@ li .fa-user {
   color:rgb(250, 255, 197);
 }
 
+.subtle-list li{
+  font-weight: normal;
+  padding:10px;
+  margin:5px;
+  border: 0;
+}
+
+.subtle-list li a{
+  color:black;
+  
+}
+
 .ico-nav{
   color:white;
   font-size: 1.5em;

@@ -183,7 +183,7 @@ class UserDetails extends React.Component {
         if (response.status === 200) {
           return response.json();
         } else {
-          return { users: [] };
+          return { user: [] };
         }
       })
       .then(json => {
@@ -209,7 +209,7 @@ class UserDetails extends React.Component {
              <FontAwesomeIcon className="mx-3" icon="exclamation-triangle" />
             <strong>User Deletion</strong></h5>
           </CardHeader>
-          <CardBody  className="border-danger text-danger text-center">
+          <CardBody  className="border-danger text-center">
             Are you sure you want to delete user: <strong>{this.state.user.name}</strong>
           </CardBody>
           <CardFooter className="border-danger text-danger text-center">
