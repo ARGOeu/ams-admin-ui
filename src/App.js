@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Switch, Link, Redirect, withRouter } from "react-
 import About from "./About";
 import Subscriptions from "./Subscriptions";
 import ProjectTable from "./ProjectTable";
+import ProjectDetails from "./ProjectDetails"
 import Topics from "./Topics";
 import CreateUser from "./CreateUser";
 import UserDetails from "./UserDetails";
@@ -257,6 +258,13 @@ class App extends Component {
                       auth={this.authen.isLogged()}
                       path="/projects"
                       component={ProjectTable}
+                    />
+                    <ProtectedRoute
+                      exact
+                      auth={this.authen.isLogged()}
+                      path="/projects/details/:projectname"
+                      component={ProjectDetails}
+                      toDelete={false}
                     />
                     <ProtectedRoute exact auth={this.authen.isLogged()} path="/" component={Welcome} />
                     <ProtectedRoute

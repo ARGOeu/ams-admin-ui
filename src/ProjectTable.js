@@ -16,7 +16,7 @@ library.add(
 
 
 
-function projectColorIcon(projectName){
+function getProjectColorIcon(projectName){
   let color="#616A6B";
   if (projectName in config.project_colors){
     color = config.project_colors[projectName];
@@ -78,7 +78,7 @@ class ProjectTable extends React.Component {
       {
         Header: "#",
         accessor: "name",
-        Cell: props => (projectColorIcon(props.value)),
+        Cell: props => (getProjectColorIcon(props.value)),
         width: 40,
         headerClassName: "list-header",
         className: "text-center"
