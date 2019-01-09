@@ -8,6 +8,7 @@ import ProjectTable from "./ProjectTable";
 import ProjectDetails from "./ProjectDetails"
 import Topics from "./Topics";
 import CreateUser from "./CreateUser";
+import CreateProject from "./CreateProject";
 import UserDetails from "./UserDetails";
 import Welcome from "./Welcome";
 import Login from "./Login";
@@ -265,6 +266,19 @@ class App extends Component {
                       path="/projects/details/:projectname"
                       component={ProjectDetails}
                       toDelete={false}
+                    />
+                    <ProtectedRoute
+                      exact
+                      auth={this.authen.isLogged()}
+                      path="/projects/delete/:projectname"
+                      component={ProjectDetails}
+                      toDelete={true}
+                    />
+                     <ProtectedRoute exact
+                      auth={this.authen.isLogged()}
+                      path="/projects/create"
+                      component={CreateProject}
+                      action="create"
                     />
                     <ProtectedRoute exact auth={this.authen.isLogged()} path="/" component={Welcome} />
                     <ProtectedRoute
