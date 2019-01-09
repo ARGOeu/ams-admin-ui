@@ -203,13 +203,17 @@ class UserDetails extends React.Component {
 
     if (this.state.toDelete) {
       willDelete = (
-        <Card className="border-danger">
-          <CardHeader className="border-danger text-danger text-center">
+        <Card className="border-danger mb-3">
+          <CardHeader className="border-danger text-danger text-center ">
             <h5>
              <FontAwesomeIcon className="mx-3" icon="exclamation-triangle" />
             <strong>User Deletion</strong></h5>
           </CardHeader>
+<<<<<<< HEAD
           <CardBody  className="border-danger text-center">
+=======
+          <CardBody  className="border-danger text-danger text-center">
+>>>>>>> ARGO-1512 Renew user token
             Are you sure you want to delete user: <strong>{this.state.user.name}</strong>
           </CardBody>
           <CardFooter className="border-danger text-danger text-center">
@@ -309,6 +313,9 @@ class UserDetails extends React.Component {
               </Card>
             </div>
             <div className="col-md-8 col-sm-12 col-xs-12">
+            
+                {willDelete}
+             
               <Card>
                 <CardHeader>
                   <strong>{this.state.user.name}</strong>
@@ -378,7 +385,6 @@ class UserDetails extends React.Component {
                 
               </Card>
               <div className="m-2 text-right">
-                {willDelete}
                 {willBack}
               </div>
             </div>

@@ -72,13 +72,13 @@ class ProjectDetails extends React.Component {
     }
   }
 
-  apiDelete(token, endpoint, username) {
+  apiDelete(token, endpoint, projectname) {
     // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || username === "") {
+    if (token === "" || token === null || endpoint === "" || projectname === "") {
       return;
     }
     // quickly construct request url
-    let url = "https://" + endpoint + "/v1/users/" + username + "?key=" + token;
+    let url = "https://" + endpoint + "/v1/projects/" + projectname + "?key=" + token;
     // setup the required headers
     let headers = {
       "Content-Type": "application/json",
@@ -88,7 +88,7 @@ class ProjectDetails extends React.Component {
     fetch(url, { method: "delete", headers: headers })
       .then(response => {
         if (response.status === 200) {
-          NotificationManager.info("User Deleted", null, 1000);
+          NotificationManager.info("Project Deleted", null, 1000);
           return true;
         } else {
           NotificationManager.error("Error", null, 1000);
@@ -99,7 +99,7 @@ class ProjectDetails extends React.Component {
         if (done) {
           // display notification
           setTimeout(function() {
-            window.location = "/users";
+            window.location = "/projects";
           }, 1000);
         }
       })
@@ -265,7 +265,7 @@ class ProjectDetails extends React.Component {
 
     if (this.state.toDelete) {
       willDelete = (
-        <Card className="border-danger">
+        <Card className="border-danger mb-2">
           <CardHeader className="border-danger text-danger text-center">
             <h5>
               <FontAwesomeIcon className="mx-3" icon="exclamation-triangle" />
@@ -273,8 +273,8 @@ class ProjectDetails extends React.Component {
             </h5>
           </CardHeader>
           <CardBody className="border-danger text-center">
-            Are you sure you want to delete user:{" "}
-            <strong>{this.state.user.name}</strong>
+            Are you sure you want to delete project:{" "}
+            <strong>{this.state.project.name}</strong>
           </CardBody>
           <CardFooter className="border-danger text-danger text-center">
             <Button
@@ -284,7 +284,7 @@ class ProjectDetails extends React.Component {
                 this.apiDelete(
                   this.authen.getToken(),
                   config.endpoint,
-                  this.state.user.name
+                  this.state.project.name
                 );
               }}
             >
@@ -371,6 +371,9 @@ class ProjectDetails extends React.Component {
               </Card>
             </div>
             <div className="col-md-8 col-sm-12 col-xs-12">
+            
+                {willDelete}
+             
               <Card>
                 <CardHeader>
                   <strong>Topics</strong>
@@ -384,7 +387,6 @@ class ProjectDetails extends React.Component {
                 <CardBody>{subList}</CardBody>
               </Card>
               <div className="m-2 text-right">
-                {willDelete}
                 {willBack}
               </div>
             </div>
