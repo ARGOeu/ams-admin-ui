@@ -7,11 +7,6 @@ main {
 }
 
 
-
-
-
-
-
 .list-header .rt-resizable-header-content{
   font-weight:bold;
   margin:10px 2px;
@@ -91,7 +86,7 @@ li .fa-user {
   color: rgb(73, 73, 73)
 }
 
-.user-link{
+.item-link{
   color:black;
 }
 

@@ -4,7 +4,7 @@ import UserTable from "./UserTable";
 import { BrowserRouter, Route, Switch, Link, Redirect, withRouter } from "react-router-dom";
 import About from "./About";
 import Subscriptions from "./Subscriptions";
-import Projects from "./Projects";
+import ProjectTable from "./ProjectTable";
 import Topics from "./Topics";
 import CreateUser from "./CreateUser";
 import UserDetails from "./UserDetails";
@@ -249,10 +249,15 @@ class App extends Component {
                   <Switch>
                     <Route exact path="/welcome" component={Welcome}/>
                     <Route exact path="/login" component={withRouter(Login)} />
-                    <Route exact path="/projects" component={Projects} />
+                   
                     <Route exact path="/topics" component={Topics} />
                     <Route exact path="/subscriptions" component={Subscriptions} />
-
+                    <ProtectedRoute
+                      exact
+                      auth={this.authen.isLogged()}
+                      path="/projects"
+                      component={ProjectTable}
+                    />
                     <ProtectedRoute exact auth={this.authen.isLogged()} path="/" component={Welcome} />
                     <ProtectedRoute
                       exact
