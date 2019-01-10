@@ -10,6 +10,7 @@ import {
   CardFooter,
   Row
 } from "reactstrap";
+import { ReactAutoComplete } from "react-autocomplete"
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -233,21 +234,21 @@ class ProjectDetails extends React.Component {
       let topics = [];
       for (let topic of this.state.topics) {
         topics.push(
-          <li key={topic.name} className="list-group-item">
+          <span key={topic.name} className="badge blue-badge mr-2 p-2 mb-2">
             <FontAwesomeIcon icon="envelope" className="mr-2" />
-            <Link to={"/topics/details" + topic.name}>
+            <Link to={"topics/details/" + getShortName(topic.name)} className="text-white">
               {getShortName(topic.name)}
             </Link>
-          </li>
+          </span>
         );
       }
-      topicList = <ul className="list-group">{topics}</ul>;
+      topicList = <div>{topics}</div>;
     }
 
     if (this.state.subs !== null && this.state.subs !== undefined) {
       let topicSubs = {}
       for (let sub of this.state.subs) {
-        let subItem = <li key={sub.name} className="list-group-item"><FontAwesomeIcon icon="envelope-open" className="mr-2" /><Link to={"subs/details/"+sub.name}>{getShortName(sub.name)}</Link></li>
+        let subItem = <span className="badge blue-badge  mr-2 p-2 mb-2"><FontAwesomeIcon icon="envelope-open" className="mr-2" /><Link className="text-white" to={"subs/details/"+getShortName(sub.name)}>{getShortName(sub.name)}</Link></span>
         if (sub.topic in topicSubs){
           topicSubs[sub.topic].push(subItem)
         } else {
@@ -257,10 +258,10 @@ class ProjectDetails extends React.Component {
       let topicSubList = []
       for (let topic in topicSubs) {
          
-         topicSubList.push(<li key={topic} className="list-group-item"><FontAwesomeIcon icon="envelope" className="mr-2" />{getShortName(topic)}<ul className="mt-2 list-group">{topicSubs[topic]}</ul></li>)
+         topicSubList.push(<span key={topic} ><FontAwesomeIcon icon="envelope" className="mr-2" />{getShortName(topic)}<p className="mt-2 ml-2">{topicSubs[topic]}</p></span>)
       }
       
-      subList= <ul className="list-group">{topicSubList}</ul>
+      subList= <div>{topicSubList}</div>
     }
 
     if (this.state.toDelete) {
@@ -348,9 +349,9 @@ class ProjectDetails extends React.Component {
                     </div>
                   </div>
                   <br />
-                  <span>{this.state.project.name}</span>
+                  <span className="text-center"><h4>{this.state.project.name}</h4></span>
                   <hr />
-                  <strong>description:</strong> {this.state.project.description}
+                  <span className="text-center d-block">{this.state.project.description}</span>
                 </CardBody>
                 <CardFooter>
                   <small>
@@ -385,6 +386,17 @@ class ProjectDetails extends React.Component {
                   <strong>Subscriptions</strong>
                 </CardHeader>
                 <CardBody>{subList}</CardBody>
+              </Card>
+              <Card className="mt-2 text-secondary">
+                <CardFooter>
+                <strong>Icon legend:</strong>
+               <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="envelope" /> topic</span>
+               <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="envelope-open" /> subscription
+               </span>
+               
+               
+                </CardFooter>
+                
               </Card>
               <div className="m-2 text-right">
                 {willBack}

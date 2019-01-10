@@ -6,7 +6,7 @@ import {
 } from "react-notifications";
 import config from "./config";
 import Authen from "./Authen";
-import {Button} from "reactstrap"
+import { Button, Card } from "reactstrap";
 
 window.valid_projects = [];
 
@@ -153,27 +153,24 @@ class CreateUser extends Component {
         }
       })
       .then(json => {
-        
-        
         let initVal = {
           name: json.name,
           email: json.email,
           service_admin: json.service_admin,
-          projects: [{project:'', roles:""}]
+          projects: [{ project: "", roles: "" }]
         };
 
-       
-
-        if (json.projects.length>0){
+        if (json.projects.length > 0) {
           let projectList = [];
 
-          for (let project of json.projects){
-            projectList.push({project:project.project, roles:project.roles.join()})
+          for (let project of json.projects) {
+            projectList.push({
+              project: project.project,
+              roles: project.roles.join()
+            });
           }
           initVal.projects = projectList;
         }
-
-        
 
         this.setState({ initialValues: initVal });
       })
@@ -294,149 +291,164 @@ class CreateUser extends Component {
       actionOnUser = "Update User";
     }
 
-    if (this.state.initialValues===undefined){
-      return <h1>Loading ...</h1>
+    if (this.state.initialValues === undefined) {
+      return <h1>Loading ...</h1>;
     }
 
     return (
-
-     
-
       <div>
         <NotificationContainer />
-        <h2>{actionOnUser}</h2>
-        <Formik
-          initialValues={this.state.initialValues || {name:"",email:"",projects:[{project:"",roles:""}]}}
-          validate={validate}
-          onSubmit={values => {
-            // request to backend to create user
-            if (this.state.action === "create") {
-              this.doCreateUser(values);
-            } else {
-              this.doUpdateUser(values);
+
+        <div className="row mb-2">
+          <div className="col-2">
+            <h2>{actionOnUser}</h2>
+          </div>
+        </div>
+        <Card className="p-4">
+          <Formik
+            initialValues={
+              this.state.initialValues || {
+                name: "",
+                email: "",
+                projects: [{ project: "", roles: "" }]
+              }
             }
-          }}
-          render={({ values, errors, touched }) => (
-            <Form>
-              <div className="form-group">
-                <label htmlFor="name">Name</label>
-                <Field name="name" className="form-control" />
-                <small className="field-error form-text text-danger">
-                  <ErrorMessage name="name" />
-                </small>
-              </div>
-              <div className="form-group">
-                <label htmlFor="email">Email</label>
-                <Field name="email" type="email" className="form-control" />
-                <small className="field-error form-text text-danger">
-                  <ErrorMessage name="email" />
-                </small>
-              </div>
-              <div className="form-check">
-                <Field
-                  name="service_admin"
-                  className="form-check-input"
-                  type="checkbox"
-                />
-                <label htmlFor="service_admin">Service Admin</label>
-              </div>
-              {!values.service_admin && (
-                <div className="form-group border p-3 col">
-                  <FieldArray
-                    name="projects"
-                    render={({ insert, remove, push }) => (
-                      <div>
-                        <div className="mb-2">
-                          <label className="mr-3">
-                            Project/Role membership:
-                          </label>
-                          <button
-                            type="button"
-                            className="btn btn-success"
-                            onClick={() => push({ project: "", roles: "" })}
-                          >
-                            Assign project/roles
-                          </button>
-                        </div>
-                        {values.projects.length > 0 &&
-                          values.projects.map((projects, index) => (
-                            <div className="row form-row" key={index}>
-                              <div className="form-group col">
-                                <label
-                                  className="sr-only"
-                                  htmlFor={`projects.${index}.project`}
-                                >
-                                  Project:
-                                </label>
-                                <div className="input-group mb-2 mr-sm-2">
-                                  <div className="input-group-prepend">
-                                    <div className="input-group-text">
-                                      Project:
-                                    </div>
-                                  </div>
-                                  <Field
-                                    name={`projects.${index}.project`}
-                                    type="text"
-                                    className="form-control"
-                                  />
-                                </div>
-                                <ErrorMessage
-                                  name={`projects.${index}.project`}
-                                  component="div"
-                                  className="field-error form-text text-danger"
-                                />
-                              </div>
-                              <div className="form-group col">
-                                <label
-                                  className="sr-only"
-                                  htmlFor={`projects.${index}.roles`}
-                                >
-                                  Roles:
-                                </label>
-                                <div className="input-group mb-2 mr-sm-2">
-                                  <div className="input-group-prepend">
-                                    <div className="input-group-text">
-                                      Roles:
-                                    </div>
-                                  </div>
-                                  <Field
-                                    name={`projects.${index}.roles`}
-                                    className="form-control"
-                                    type="text"
-                                  />
-                                </div>
-                                <ErrorMessage
-                                  name={`projects.${index}.roles`}
-                                  component="div"
-                                  className="field-error form-text text-danger"
-                                />
-                              </div>
-                              <div className="form-group col">
-                                <button
-                                  type="button"
-                                  className="btn btn-danger"
-                                  onClick={() => remove(index)}
-                                >
-                                  X
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                  />
+            validate={validate}
+            onSubmit={values => {
+              // request to backend to create user
+              if (this.state.action === "create") {
+                this.doCreateUser(values);
+              } else {
+                this.doUpdateUser(values);
+              }
+            }}
+            render={({ values, errors, touched }) => (
+              <Form>
+                <div className="form-group">
+                  <label htmlFor="name">Name</label>
+                  <Field name="name" className="form-control" />
+                  <small className="field-error form-text text-danger">
+                    <ErrorMessage name="name" />
+                  </small>
                 </div>
-              )}
-              <button type="submit" className="btn btn-success">
-                {actionOnUser}
-              </button>
-              <span> </span>
-              <Button onClick={()=>{window.history.back()}} className="btn btn-dark">
-                Cancel
-              </Button>
-            </Form>
-          )}
-        />
+                <div className="form-group">
+                  <label htmlFor="email">Email</label>
+                  <Field name="email" type="email" className="form-control" />
+                  <small className="field-error form-text text-danger">
+                    <ErrorMessage name="email" />
+                  </small>
+                </div>
+                <div className="form-check">
+                  <Field
+                    name="service_admin"
+                    className="form-check-input"
+                    type="checkbox"
+                  />
+                  <label htmlFor="service_admin">Service Admin</label>
+                </div>
+                {!values.service_admin && (
+                  <div className="form-group border p-3 col">
+                    <FieldArray
+                      name="projects"
+                      render={({ insert, remove, push }) => (
+                        <div>
+                          <div className="mb-2">
+                            <label className="mr-3">
+                              Project/Role membership:
+                            </label>
+                            <button
+                              type="button"
+                              className="btn btn-success"
+                              onClick={() => push({ project: "", roles: "" })}
+                            >
+                              Assign project/roles
+                            </button>
+                          </div>
+                          {values.projects.length > 0 &&
+                            values.projects.map((projects, index) => (
+                              <div className="row form-row" key={index}>
+                                <div className="form-group col">
+                                  <label
+                                    className="sr-only"
+                                    htmlFor={`projects.${index}.project`}
+                                  >
+                                    Project:
+                                  </label>
+                                  <div className="input-group mb-2 mr-sm-2">
+                                    <div className="input-group-prepend">
+                                      <div className="input-group-text">
+                                        Project:
+                                      </div>
+                                    </div>
+                                    <Field
+                                      name={`projects.${index}.project`}
+                                      type="text"
+                                      className="form-control"
+                                    />
+                                  </div>
+                                  <ErrorMessage
+                                    name={`projects.${index}.project`}
+                                    component="div"
+                                    className="field-error form-text text-danger"
+                                  />
+                                </div>
+                                <div className="form-group col">
+                                  <label
+                                    className="sr-only"
+                                    htmlFor={`projects.${index}.roles`}
+                                  >
+                                    Roles:
+                                  </label>
+                                  <div className="input-group mb-2 mr-sm-2">
+                                    <div className="input-group-prepend">
+                                      <div className="input-group-text">
+                                        Roles:
+                                      </div>
+                                    </div>
+                                    <Field
+                                      name={`projects.${index}.roles`}
+                                      className="form-control"
+                                      type="text"
+                                    />
+                                  </div>
+                                  <ErrorMessage
+                                    name={`projects.${index}.roles`}
+                                    component="div"
+                                    className="field-error form-text text-danger"
+                                  />
+                                </div>
+                                <div className="form-group col">
+                                  <button
+                                    type="button"
+                                    className="btn btn-danger"
+                                    onClick={() => remove(index)}
+                                  >
+                                    X
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    />
+                  </div>
+                )}
+                <button type="submit" className="btn btn-success">
+                  {actionOnUser}
+                </button>
+                <span> </span>
+                <Button
+                  onClick={() => {
+                    window.history.back();
+                  }}
+                  className="btn btn-dark"
+                >
+                  Cancel
+                </Button>
+              </Form>
+            )}
+          />
+        </Card>
       </div>
     );
   }

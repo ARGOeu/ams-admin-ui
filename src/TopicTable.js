@@ -3,48 +3,39 @@ import Authen from "./Authen";
 import argologoAnim from "./argologo_anim.svg";
 import config from "./config";
 import { Link } from "react-router-dom";
+import { ReactAutocomplete } from "react-autocomplete";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
+import { Card, CardBody } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-  faDiceD6,
-} from "@fortawesome/free-solid-svg-icons";
-library.add(
-  faDiceD6,
-);
+import { faDiceD6 } from "@fortawesome/free-solid-svg-icons";
+library.add(faDiceD6);
 
-
-
-function getProjectColorIcon(projectName){
-  let color="#616A6B";
-  if (projectName in config.project_colors){
+function getProjectColorIcon(projectName) {
+  let color = "#616A6B";
+  if (projectName in config.project_colors) {
     color = config.project_colors[projectName];
   }
 
-  return <FontAwesomeIcon icon="dice-d6" style={{color:color}}/>
+  return <FontAwesomeIcon icon="dice-d6" style={{ color: color }} />;
 }
 
-
-class ProjectTable extends React.Component {
+class TopicTable extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
-    this.projectColors = {}
+    this.projectColors = {};
     this.state = { projects: [] };
 
     if (this.authen.isLogged()) {
       this.state = {
         projects: this.apiGetProjects(this.authen.getToken(), config.endpoint)
       };
-    } 
+    }
   }
 
-
-
-
-
-  // get project data
+  // get topic data
   apiGetProjects(token, endpoint) {
     // If token or endpoint empty return
     if (token === "" || token === null || endpoint === "") {
@@ -70,15 +61,12 @@ class ProjectTable extends React.Component {
       .catch(error => console.log(error));
   }
 
-  
   render() {
-    
-    
     const columns = [
       {
         Header: "#",
         accessor: "name",
-        Cell: props => (getProjectColorIcon(props.value)),
+        Cell: props => getProjectColorIcon(props.value),
         width: 40,
         headerClassName: "list-header",
         className: "text-center"
@@ -107,9 +95,7 @@ class ProjectTable extends React.Component {
       {
         Header: "Description",
         accessor: "description",
-        Cell: props => (
-          <span>{props.value}</span>
-        ),
+        Cell: props => <span>{props.value}</span>,
         headerClassName: "list-header"
       },
       {
@@ -144,16 +130,40 @@ class ProjectTable extends React.Component {
     ];
 
     const projectHeading = (
-      <div className="row  mb-2">
-        <div className="col-2">
-          <h2>Projects</h2>
+      <div>
+        <div className="row  mb-2">
+          <div className="col-2">
+            <h2>Topics</h2>
+          </div>
+          <div className="col">
+            <Link className="btn btn-light" to="/projects/create">
+              <FontAwesomeIcon className="mr-2" icon="plus" size="lg" /> Create
+              Topic
+            </Link>
+          </div>
         </div>
-        <div className="col">
-          <Link className="btn btn-light" to="/projects/create">
-            <FontAwesomeIcon className="mr-2" icon="plus" size="lg" /> Create
-            Project
-          </Link>
-        </div>
+
+        <Card className="mb-2">
+          <CardBody>
+            <div className="row">
+              <div className="col-4">
+                <div className="input-group mb-2 mr-sm-2">
+                  <div className="input-group-prepend">
+                    <div className="input-group-text">Project:</div>
+                  </div>
+                  <input
+                    name="project-topic"
+                    className="form-control"
+                    type="text"
+                  />
+                </div>
+                </div>
+              <div className="col-4 p-2">
+                Type a project name to list its topics
+              </div>
+            </div>
+          </CardBody>
+        </Card>
       </div>
     );
 
@@ -169,12 +179,11 @@ class ProjectTable extends React.Component {
       );
     }
 
-    
     return (
       <div>
         {projectHeading}
         <div className="card p-4">
-          <h4 className="pt-2 pb-2">List of projects</h4>
+          <h4 className="pt-2 pb-2">List of topics</h4>
           <ReactTable
             data={this.state.projects}
             columns={columns}
@@ -187,4 +196,4 @@ class ProjectTable extends React.Component {
   }
 }
 
-export default ProjectTable;
+export default TopicTable;

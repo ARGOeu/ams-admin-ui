@@ -1,14 +1,15 @@
 import React, { Component } from "react";
-import { Formik, Field, Form, ErrorMessage, FieldArray } from "formik";
+import { Formik, Field, Form, ErrorMessage } from "formik";
 import {
   NotificationContainer,
   NotificationManager
 } from "react-notifications";
 import config from "./config";
 import Authen from "./Authen";
-import {Button} from "reactstrap"
+import {Button, Card} from "reactstrap"
 
 window.valid_projects = [];
+
 
 function sendData(url = ``, data = {}, method = "POST") {
   return fetch(url, {
@@ -42,7 +43,7 @@ function validate(values, other) {
   } else if (!/^[A-Z0-9_-]+$/i.test(values.name)) {
     errors.name =
       "Invalid name (use only letters, numbers, underscores and dashes)";
-  } else if (window.valid_projects.indexOf(values.name) > -1) {
+  } else if (values.action === "create" && window.valid_projects.indexOf(values.name) > -1) {
     errors.name = 
       "Project name already exists. Choose another one";
   }
@@ -67,6 +68,7 @@ class CreateProject extends Component {
         initialValues: {
           name: "",
           description: "",
+          action: "create"
         }
       };
     } else {
@@ -112,7 +114,8 @@ class CreateProject extends Component {
         
         let initVal = {
           name: json.name,
-          description: json.description
+          description: json.description,
+          action: "update"
         };
         
 
@@ -215,13 +218,20 @@ class CreateProject extends Component {
       return <h1>Loading ...</h1>
     }
 
+    
+
     return (
 
      
 
       <div>
         <NotificationContainer />
-        <h2>{actionOnProject}</h2>
+        <div className="row mb-2">
+          <div className="col-2">
+            <h2>{actionOnProject}</h2>
+          </div>
+        </div>
+        <Card className="p-4" >
         <Formik
           initialValues={this.state.initialValues || {name:"",email:"",projects:[{project:"",roles:""}]}}
           validate={validate}
@@ -237,7 +247,8 @@ class CreateProject extends Component {
             <Form>
               <div className="form-group">
                 <label htmlFor="name">Name</label>
-                <Field name="name" className="form-control" />
+                
+                <Field name="name" className="form-control" disabled={(this.state.initialValues.action==="update")}/>
                 <small className="field-error form-text text-danger">
                   <ErrorMessage name="name" />
                 </small>
@@ -259,6 +270,7 @@ class CreateProject extends Component {
             </Form>
           )}
         />
+        </Card>
       </div>
     );
   }
