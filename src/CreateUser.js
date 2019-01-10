@@ -177,6 +177,8 @@ class CreateUser extends Component {
       .catch(error => console.log(error));
   }
 
+
+
   apiGetProjects(token, endpoint) {
     // If token or endpoint empty return
     if (token === "" || token === null || endpoint === "") {

@@ -10,7 +10,6 @@ import {
   CardFooter,
   Row
 } from "reactstrap";
-import { ReactAutoComplete } from "react-autocomplete"
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -236,7 +235,7 @@ class ProjectDetails extends React.Component {
         topics.push(
           <span key={topic.name} className="badge blue-badge mr-2 p-2 mb-2">
             <FontAwesomeIcon icon="envelope" className="mr-2" />
-            <Link to={"topics/details/" + getShortName(topic.name)} className="text-white">
+            <Link to={"/topics/details" + topic.name} className="text-white">
               {getShortName(topic.name)}
             </Link>
           </span>

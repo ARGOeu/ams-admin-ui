@@ -12,6 +12,7 @@ import CreateProject from "./CreateProject";
 import UserDetails from "./UserDetails";
 import Welcome from "./Welcome";
 import Login from "./Login";
+import TopicDetails from "./TopicDetails"
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import Authen from "./Authen";
@@ -265,6 +266,13 @@ class App extends Component {
                       auth={this.authen.isLogged()}
                       path="/projects"
                       component={ProjectTable}
+                    />
+                    <ProtectedRoute
+                      exact 
+                      auth={this.authen.isLogged()}
+                      path="/topics/details/projects/:projectname/topics/:topicname"
+                      component={TopicDetails}
+                      toDelete={false}
                     />
                     <ProtectedRoute
                       exact
