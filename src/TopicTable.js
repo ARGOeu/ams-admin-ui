@@ -3,14 +3,14 @@ import Authen from "./Authen";
 import argologoAnim from "./argologo_anim.svg";
 import config from "./config";
 import { Link } from "react-router-dom";
-import { ReactAutocomplete } from "react-autocomplete";
+import Autocomplete from "react-autocomplete";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 import { Card, CardBody } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faDiceD6 } from "@fortawesome/free-solid-svg-icons";
-library.add(faDiceD6);
+import { faDiceD6, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+library.add(faDiceD6, faEnvelope);
 
 function getProjectColorIcon(projectName) {
   let color = "#616A6B";
@@ -26,16 +26,45 @@ class TopicTable extends React.Component {
     super(props);
     this.authen = new Authen(config.endpoint);
     this.projectColors = {};
-    this.state = { projects: [] };
+    this.state = { projects: [], topics: [], value: "" };
 
     if (this.authen.isLogged()) {
       this.state = {
-        projects: this.apiGetProjects(this.authen.getToken(), config.endpoint)
+        projects: this.apiGetProjects(this.authen.getToken(), config.endpoint),
+        value: window.location.hash.substring(1),
+        topics: this.apiGetTopics(
+          this.authen.getToken(),
+          config.endpoint,
+          window.location.hash.substring(1)
+        )
       };
     }
   }
 
-  // get topic data
+  getProjects() {
+    if (this.state.projects === undefined) return [];
+    return this.state.projects;
+  }
+
+  matchProjects(state, value) {
+    return state.name.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+  }
+
+  loadProjectTopics(value) {
+    // if project value exists in known projects
+    if (this.state.projects.indexOf(value)) {
+      this.setState({
+        topics: this.apiGetTopics(
+          this.authen.getToken(),
+          config.endpoint,
+          value
+        )
+      });
+      window.location.hash = value;
+    }
+  }
+
+  // get project data
   apiGetProjects(token, endpoint) {
     // If token or endpoint empty return
     if (token === "" || token === null || endpoint === "") {
@@ -61,12 +90,49 @@ class TopicTable extends React.Component {
       .catch(error => console.log(error));
   }
 
+  // get topic data
+  apiGetTopics(token, endpoint, project) {
+    // If token or endpoint empty return
+    if (token === "" || token === null || endpoint === "") {
+      return;
+    }
+    // quickly construct request url
+    let url =
+      "https://" +
+      endpoint +
+      "/v1/projects/" +
+      project +
+      "/topics?key=" +
+      token;
+    // setup the required headers
+    let headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    };
+    // fetch the data and if succesfull change the component state - which will trigger a re-render
+    fetch(url, { headers: headers })
+      .then(response => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          return { topics: [] };
+        }
+      })
+      .then(json => this.setState({ topics: json.topics, token: token }))
+      .catch(error => console.log(error));
+  }
+
   render() {
     const columns = [
       {
         Header: "#",
         accessor: "name",
-        Cell: props => getProjectColorIcon(props.value),
+        Cell: props => (
+          <FontAwesomeIcon
+            icon="envelope"
+            style={{ color: "rgb(97, 106, 107)" }}
+          />
+        ),
         width: 40,
         headerClassName: "list-header",
         className: "text-center"
@@ -75,27 +141,24 @@ class TopicTable extends React.Component {
         Header: "Name",
         accessor: "name",
         Cell: props => (
-          <Link className="item-link" to={"/projects/details/" + props.value}>
+          <Link className="item-link" to={"/topics/details" + props.value}>
+            {props.value.split("/")[4]}
+          </Link>
+        ),
+        minWidth: 20,
+
+        headerClassName: "list-header"
+      },
+      {
+        Header: "Full Name",
+        accessor: "name",
+        Cell: props => (
+          <Link className="item-link" to={"/topics/details" + props.value}>
             {props.value}
           </Link>
         ),
-        minWidth: 55,
-        filterable: true,
-        headerClassName: "list-header"
-      },
-      {
-        Header: "Date",
-        accessor: "modified_on",
-        Cell: props => (
-          <span className="date-format">{props.value.split("T")[0]}</span>
-        ),
-        width: 100,
-        headerClassName: "list-header"
-      },
-      {
-        Header: "Description",
-        accessor: "description",
-        Cell: props => <span>{props.value}</span>,
+        minWidth: 80,
+
         headerClassName: "list-header"
       },
       {
@@ -146,18 +209,49 @@ class TopicTable extends React.Component {
         <Card className="mb-2">
           <CardBody>
             <div className="row">
-              <div className="col-4">
+              <div className="col-8">
                 <div className="input-group mb-2 mr-sm-2">
                   <div className="input-group-prepend">
                     <div className="input-group-text">Project:</div>
                   </div>
-                  <input
-                    name="project-topic"
-                    className="form-control"
-                    type="text"
+                  <Autocomplete
+                    value={this.state.value}
+                    inputProps={{
+                      id: "states-autocomplete",
+                      className: "form-control"
+                    }}
+                    wrapperProps={{
+                      className: "input-group-append"
+                    }}
+                    wrapperStyle={{ width: "75%" }}
+                    items={this.getProjects()}
+                    getItemValue={item => item.name}
+                    shouldItemRender={this.matchProjects}
+                    onChange={(event, value) => {
+                      this.setState({ value });
+                      // this.loadProjectTopics(value);
+                    }}
+                    onSelect={value => {
+                      this.setState({ value });
+                      this.loadProjectTopics(value);
+                    }}
+                    renderMenu={children => (
+                      <div className="menu">{children}</div>
+                    )}
+                    renderItem={(item, isHighlighted) => (
+                      <div
+                        className={`item ${
+                          isHighlighted ? "item-highlighted" : ""
+                        }`}
+                        key={item.name}
+                      >
+                        {getProjectColorIcon(item.name)}
+                        <span className="ml-2">{item.name}</span>
+                      </div>
+                    )}
                   />
                 </div>
-                </div>
+              </div>
               <div className="col-4 p-2">
                 Type a project name to list its topics
               </div>
@@ -185,7 +279,7 @@ class TopicTable extends React.Component {
         <div className="card p-4">
           <h4 className="pt-2 pb-2">List of topics</h4>
           <ReactTable
-            data={this.state.projects}
+            data={this.state.topics}
             columns={columns}
             className="-striped -highlight"
             defaultPageSize={20}

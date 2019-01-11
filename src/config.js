@@ -5,7 +5,7 @@ var config = {
 	service: "ams",
 	project_colors: {
 		"ARGO": "#769B9E",
-		"ARGOTEST": "#769B9E",
+		"ARGOTEST": "#769B9E"
 	}
 
 }

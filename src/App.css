@@ -88,6 +88,8 @@ li .fa-user {
   border-radius: 2px; */
 }
 
+
+
 .nav-item a{
 
   color: rgb(73, 73, 73)
@@ -265,4 +267,35 @@ h1 span{
 header h1{
   margin:0px;
   color:grey;
+}
+
+.menu {
+  margin-top: 40px;
+  position: absolute;
+  box-sizing: border-box;
+  width: 75%;
+  border: 1px solid #cccccc;
+  z-index: 998;
+  background: white;
+
+}
+
+.item {
+  padding: 2px 6px;
+  cursor: default;
+}
+
+.item-highlighted {
+  color: white;
+  background-color: #4095bf;
+}
+
+.item-header {
+  background-color: #eeeeee;
+  color: #454545;
+  font-weight: bold;
+}
+
+.recharts-wrapper {
+  margin : 0 auto;
 }
