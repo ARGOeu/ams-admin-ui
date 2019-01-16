@@ -13,6 +13,7 @@ import UserDetails from "./UserDetails";
 import Welcome from "./Welcome";
 import Login from "./Login";
 import TopicDetails from "./TopicDetails"
+import CreateTopic from "./CreateTopic"
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import Authen from "./Authen";
@@ -253,7 +254,12 @@ class App extends Component {
                     <Route exact path="/welcome" component={Welcome}/>
                     <Route exact path="/login" component={withRouter(Login)} />
                    
-                    
+                    <ProtectedRoute exact
+                      auth={this.authen.isLogged()}
+                      path="/topics/create"
+                      component={CreateTopic}
+                      action="create"
+                    />
                     <ProtectedRoute
                       exact
                       auth={this.authen.isLogged()}

@@ -22,11 +22,15 @@ function getProjectColorIcon(projectName) {
 }
 
 class TopicTable extends React.Component {
+
+
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
     this.projectColors = {};
     this.state = { projects: [], topics: [], value: "" };
+
+  
 
     if (this.authen.isLogged()) {
       this.state = {
@@ -51,6 +55,9 @@ class TopicTable extends React.Component {
   }
 
   loadProjectTopics(value) {
+
+
+
     // if project value exists in known projects
     if (this.state.projects.indexOf(value)) {
       this.setState({
@@ -199,7 +206,7 @@ class TopicTable extends React.Component {
             <h2>Topics</h2>
           </div>
           <div className="col">
-            <Link className="btn btn-light" to="/projects/create">
+            <Link className="btn btn-light" to={"/topics/create#"+this.state.value}>
               <FontAwesomeIcon className="mr-2" icon="plus" size="lg" /> Create
               Topic
             </Link>
