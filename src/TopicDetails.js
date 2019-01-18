@@ -22,7 +22,7 @@ import {
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { NotificationContainer } from "react-notifications";
+import { NotificationContainer, NotificationManager } from "react-notifications";
 import {
   faDiceD6,
   faEnvelope,
@@ -44,6 +44,8 @@ function getProjectName(fullName) {
   }
   return "";
 }
+
+
 
 function getProjectColorIcon(projectName) {
   let color = "#616A6B";
@@ -87,6 +89,40 @@ class TopicDetails extends React.Component {
     } else {
       this.state = { topic: null };
     }
+  }
+
+  apiDelete(token, endpoint, project, topic) {
+    // If token or endpoint empty return
+    if (token === "" || endpoint === null || project === "" || topic === "") {
+      return;
+    }
+    // quickly construct request url
+    let url = "https://" + endpoint + "/v1/projects/" + project + "/topics/" + topic +"?key=" + token;
+    // setup the required headers
+    let headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    };
+    // fetch the data and if succesfull change the component state - which will trigger a re-render
+    fetch(url, { method: "delete", headers: headers })
+      .then(response => {
+        if (response.status === 200) {
+          NotificationManager.info("Topic Deleted", null, 1000);
+          return true;
+        } else {
+          NotificationManager.error("Error", null, 1000);
+          return false;
+        }
+      })
+      .then(done => {
+        if (done) {
+          // display notification
+          setTimeout(function() {
+            window.location = "/topics#" + project ;
+          }, 1000);
+        }
+      })
+      .catch(error => console.log(error));
   }
 
   apiGetData(token, endpoint, projectName, topicName) {
@@ -320,10 +356,10 @@ class TopicDetails extends React.Component {
         }
       }
       metrics = <div>
-          <div class="row p-3">{smallMetricList}</div>
+          <div className="row p-3">{smallMetricList}</div>
           
-          <div class="row text-right">
-            <div class="col-12"><small>{latestDate}</small></div>
+          <div className="row text-right">
+            <div className="col-12"><small>{latestDate}</small></div>
           </div>
           <br/>
           <div>{metricList}</div>
@@ -344,7 +380,14 @@ class TopicDetails extends React.Component {
             <strong>{this.state.topic.name}</strong>
           </CardBody>
           <CardFooter className="border-danger text-danger text-center">
-            <Button color="danger" className="mr-2" onClick={() => {}}>
+            <Button color="danger" className="mr-2" onClick={() => {
+                this.apiDelete(
+                  this.authen.getToken(),
+                  config.endpoint,
+                  this.props.match.params.projectname,
+                  this.props.match.params.topicname
+                );
+              }}>
               Delete
             </Button>
             <Button
@@ -381,13 +424,13 @@ class TopicDetails extends React.Component {
           <Col className="text-right">
             <Link
               className="btn btn-info  ml-1 mr-1"
-              to={"/topics/update-acl/" + this.state.topic.name}
+              to={"/topics/mod-acl" + this.state.topic.name}
             >
               <FontAwesomeIcon icon="user-lock" /> Modify ACL
             </Link>
             <a
               className="btn btn-danger  ml-1 mr-1"
-              href={"/topics/delete/" + this.state.topic.name}
+              href={"/topics/delete" + this.state.topic.name}
             >
               <FontAwesomeIcon icon="times" /> Delete Topic
             </a>

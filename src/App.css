@@ -74,6 +74,22 @@ li .fa-user {
   visibility: hidden;
 }
 
+.close-link {
+  text-decoration: none;
+  color:white;
+  background-color: #454545;
+  border-radius:15px;
+  padding:0px 8px;
+  border:none;
+}
+
+.close-link:hover {
+  color:white;
+  background-color: #353535;
+
+
+}
+
 .ico-user{
   color:rgb(250, 255, 181);
   font-size: 1.5em;
@@ -88,7 +104,14 @@ li .fa-user {
   border-radius: 2px; */
 }
 
-
+.tag-style{
+  font-size: 1.2em;
+  padding: 5px 5px 5px 15px;
+  background-color: rgb(230, 230, 230);
+  border: rgb(224, 224, 224) 2px solid;
+  margin: 5px;
+  border-radius: 15px;
+}
 
 .nav-item a{
 
