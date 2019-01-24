@@ -3,7 +3,6 @@ import "./App.css";
 import UserTable from "./UserTable";
 import { BrowserRouter, Route, Switch, Link, Redirect, withRouter } from "react-router-dom";
 import About from "./About";
-import Subscriptions from "./Subscriptions";
 import ProjectTable from "./ProjectTable";
 import ProjectDetails from "./ProjectDetails"
 import TopicTable from "./TopicTable";
@@ -17,8 +16,13 @@ import CreateTopic from "./CreateTopic"
 import TopicACL from "./TopicACL"
 import SubTable from "./SubTable"
 import SubDetails from "./SubDetails"
+import CreateSub from "./CreateSub"
+import UpdateSub from "./UpdateSub"
+import SubACL from "./SubACL"
+import SubModOffset from "./SubModOffset"
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import DataManager from "./DataManager"
 
 import Authen from "./Authen";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -107,7 +111,7 @@ class App extends Component {
 
     this.toggle = this.toggle.bind(this);
     this.toggle2 = this.toggle2.bind(this);
-   
+    window.DM = new DataManager(config.endpoint, this.authen.getToken())
   }
 
   toggle() {
@@ -257,6 +261,37 @@ class App extends Component {
                   <Switch>
                     <Route exact path="/welcome" component={Welcome}/>
                     <Route exact path="/login" component={withRouter(Login)} />
+                    <ProtectedRoute 
+                      exact
+                      auth={this.authen.isLogged()}
+                      path="/subs/mod-offset/projects/:projectname/subscriptions/:subname"
+                      component={SubModOffset}
+                    />
+                    <ProtectedRoute exact
+                      auth={this.authen.isLogged()}
+                      path="/subs/update/projects/:projectname/subscriptions/:subname"
+                      component={UpdateSub}
+                      
+                    />
+                     <ProtectedRoute
+                      exact 
+                      auth={this.authen.isLogged()}
+                      path="/subs/delete/projects/:projectname/subscriptions/:subname"
+                      component={SubDetails}
+                      toDelete={true}
+                    />
+                    <ProtectedRoute 
+                      exact
+                      auth={this.authen.isLogged()}
+                      path="/subs/mod-acl/projects/:projectname/subscriptions/:subname"
+                      component={SubACL}
+                    />
+                    <ProtectedRoute exact
+                      auth={this.authen.isLogged()}
+                      path="/subs/create"
+                      component={CreateSub}
+                      action="create"
+                    />
                     <ProtectedRoute
                       exact 
                       auth={this.authen.isLogged()}
@@ -294,7 +329,6 @@ class App extends Component {
                       path="/topics"
                       component={TopicTable}
                     />
-                    <Route exact path="/subscriptions" component={Subscriptions} />
                     <ProtectedRoute
                       exact
                       auth={this.authen.isLogged()}

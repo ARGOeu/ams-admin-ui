@@ -7,31 +7,23 @@ import {
 import config from "./config";
 import Authen from "./Authen";
 import { Button, Card } from "reactstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {
+  faExclamationTriangle,
+  faUser,
+  faCrown,
+  faHeartbeat,
+  faCloudDownloadAlt,
+  faCloudUploadAlt,
+  faShieldAlt
+} from "@fortawesome/free-solid-svg-icons";
+import DataManager from "./DataManager";
+library.add(faExclamationTriangle, faUser, faCrown, faHeartbeat,  faCloudDownloadAlt,
+  faCloudUploadAlt,faShieldAlt);
 
 window.valid_projects = [];
 
-function sendData(url = ``, data = {}, method = "POST") {
-  return fetch(url, {
-    method: method,
-    mode: "cors",
-    cache: "no-cache",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json; charset=utf-8"
-    },
-    redirect: "follow",
-    referrer: "no-referrer",
-    body: JSON.stringify(data)
-  }).then(response => {
-    if (response.status === 200) {
-      NotificationManager.info("User Created", null, 1000);
-      return true;
-    } else {
-      NotificationManager.info("Issues with user creation", null, 1000);
-      return false;
-    }
-  });
-}
 
 function validate(values, other) {
   let errors = {};
@@ -49,7 +41,8 @@ function validate(values, other) {
       "Invalid name (use only letters, numbers, underscores and dashes)";
   }
 
-  let errListProjects = [];
+  if (!values.service_admin) {
+    let errListProjects = [];
   values.projects.forEach(project => {
     let pErrors = {};
     if (!project.project) pErrors.project = "Required";
@@ -93,6 +86,9 @@ function validate(values, other) {
   if (!empty) {
     errors.projects = errListProjects;
   }
+  }
+
+  
 
   return errors;
 }
@@ -101,6 +97,7 @@ class CreateUser extends Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
+    this.DM = new DataManager(config.endpoint, this.authen.getToken());
     this.doCreateUser.bind(this);
 
     if (this.props.action === "create") {
@@ -121,8 +118,6 @@ class CreateUser extends Component {
         projects: [],
         roles: ["project_admin", "consumer", "producer"],
         initialValues: this.apiGetData(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.username
         )
       };
@@ -131,39 +126,24 @@ class CreateUser extends Component {
     this.apiGetProjects(this.authen.getToken(), config.endpoint);
   }
 
-  apiGetData(token, endpoint, username) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || username === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/users/" + username + "?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { users: [] };
-        }
-      })
-      .then(json => {
+  apiGetData(username) {
+    this.DM.userGet(username).then(r => {
+      if (r.done){
+        console.log(r.data)
+        let sa_value = false;
+        if (r.data.service_roles.length > 0) sa_value = true; 
+
         let initVal = {
-          name: json.name,
-          email: json.email,
-          service_admin: json.service_admin,
+          name: r.data.name,
+          email: r.data.email,
+          service_admin: sa_value,
           projects: [{ project: "", roles: "" }]
         };
 
-        if (json.projects.length > 0) {
+        if (r.data.projects.length > 0) {
           let projectList = [];
 
-          for (let project of json.projects) {
+          for (let project of r.data.projects) {
             projectList.push({
               project: project.project,
               roles: project.roles.join()
@@ -173,115 +153,72 @@ class CreateUser extends Component {
         }
 
         this.setState({ initialValues: initVal });
-      })
-      .catch(error => console.log(error));
+      }
+    })
+
   }
 
-
-
-  apiGetProjects(token, endpoint) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/projects?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { projects: [] };
-        }
-      })
-      .then(json => {
+  apiGetProjects() {
+    this.DM.projectGet().then( r =>{
+      if (r.done){
         let projects = [];
-        for (let project of json.projects) {
+        for (let project of r.data.projects) {
           projects.push(project.name);
         }
 
         window.valid_projects = projects;
         this.setState({ projects: projects });
-      })
-      .catch(error => console.log(error));
+      }
+
+    })
+  }
+
+  prepUser(data) {
+    let name = data.name;
+    let body = { email: data.email };
+
+    if (data.service_admin) {
+      body["service_roles"] = ["service_admin"]
+    } else {
+      let projects = [];
+      for (let project of data.projects) {
+        projects.push({
+          project: project.project,
+          roles: project.roles.split(",")
+        });
+      }
+      body["projects"] = projects;
+    }
+    return {name: name, body: body}
   }
 
   doCreateUser(data) {
-    let name = data.name;
-    let body = { email: data.email };
+    let comp = this;
+    let {name, body} = this.prepUser(data);
 
-    if (data.service_admin) {
-      body["service_roles"] = true;
-    } else {
-      let projects = [];
-      for (let project of data.projects) {
-        projects.push({
-          project: project.project,
-          roles: project.roles.split(",")
-        });
+    this.DM.userCreate(name,body).then(r => {
+      if (r.done){
+        NotificationManager.info("User Created!", null, 1000);
+        setTimeout(()=>{comp.props.history.push("/users/details/" + name)},1000)
+      } else {
+        NotificationManager.error("User Creation Failed...", null, 1000);
       }
-      body["projects"] = projects;
-    }
-
-    // quickly construct request url
-    let url =
-      "https://" +
-      config.endpoint +
-      "/v1/users/" +
-      name +
-      "?key=" +
-      this.authen.getToken();
-
-    sendData(url, body, "POST")
-      .then(done => {
-        console.log(done);
-        if (done) {
-          window.location = "/users/details/" + name;
-        }
-      })
-      .catch(error => console.error(error));
+    })
   }
 
   doUpdateUser(data) {
-    let name = data.name;
-    let body = { email: data.email };
+    let comp = this;
+    let {name, body} = this.prepUser(data);
 
-    if (data.service_admin) {
-      body["service_roles"] = true;
-    } else {
-      let projects = [];
-      for (let project of data.projects) {
-        projects.push({
-          project: project.project,
-          roles: project.roles.split(",")
-        });
-      }
-      body["projects"] = projects;
-    }
-
-    // quickly construct request url
-    let url =
-      "https://" +
-      config.endpoint +
-      "/v1/users/" +
-      name +
-      "?key=" +
-      this.authen.getToken();
-
-    sendData(url, body, "PUT")
-      .then(done => {
-        console.log(done);
-        if (done) {
-          window.location = "/users/details/" + name;
+    this.DM.userUpdate(name,body).then(r => {
+      if (r.done){
+        NotificationManager.info("User Updated!", null, 1000);
+          setTimeout(()=>{comp.props.history.push("/users/details/" + name)},1000)
+        } else {
+          NotificationManager.error("User Update Failed...", null, 1000);
         }
-      })
-      .catch(error => console.error(error));
+      
+    })
   }
 
   render() {
@@ -431,17 +368,26 @@ class CreateUser extends Component {
                               </div>
                             ))}
                         </div>
+                        
+                        
                       )}
                     />
+                    <div>
+                        <strong>Available roles:</strong>
+                        <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="shield-alt" /> project admin</span>
+                        <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="cloud-upload-alt" /> publisher
+                        </span>
+                        <span className="border p-2 mx-2 rounded"> <FontAwesomeIcon className="ml-1 mr-1" icon="cloud-download-alt" /> consumer</span> 
+                        </div>
                   </div>
                 )}
                 <button type="submit" className="btn btn-success">
                   {actionOnUser}
                 </button>
                 <span> </span>
-                <Button
+                <Button type="button"
                   onClick={() => {
-                    window.history.back();
+                    this.props.history.goBack();
                   }}
                   className="btn btn-dark"
                 >
@@ -450,6 +396,8 @@ class CreateUser extends Component {
               </Form>
             )}
           />
+          
+           
         </Card>
       </div>
     );

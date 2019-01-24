@@ -28,7 +28,6 @@ class Authen {
         }
       })
       .then(json => {
-        console.log(json)
         if (json.error === undefined) {
           this.setLogin(json.name, token)
           if (callback !== undefined){

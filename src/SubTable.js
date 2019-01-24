@@ -9,8 +9,9 @@ import "react-table/react-table.css";
 import { Card, CardBody } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faDiceD6, faEnvelopeOpen, faUserLock, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
-library.add(faDiceD6, faEnvelopeOpen, faPaperPlane, faUserLock);
+import { faDiceD6, faEnvelopeOpen, faUserLock, faPaperPlane, faSlidersH, faPen } from "@fortawesome/free-solid-svg-icons";
+import DataManager from "./DataManager";
+library.add(faDiceD6, faEnvelopeOpen, faPaperPlane, faUserLock, faPen, faSlidersH);
 
 function getProjectColorIcon(projectName) {
   let color = "#616A6B";
@@ -27,6 +28,7 @@ class SubTable extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
+    this.DM = new DataManager(config.endpoint, this.authen.getToken());
     this.projectColors = {};
     this.state = { projects: [], subs: [], value: "" };
 
@@ -34,12 +36,10 @@ class SubTable extends React.Component {
 
     if (this.authen.isLogged()) {
       this.state = {
-        projects: this.apiGetProjects(this.authen.getToken(), config.endpoint),
+        projects: this.apiGetProjects(),
         value: window.location.hash.substring(1),
         subs: this.apiGetSubs(
-          this.authen.getToken(),
-          config.endpoint,
-          window.location.hash.substring(1)
+           window.location.hash.substring(1)
         )
       };
     }
@@ -62,9 +62,7 @@ class SubTable extends React.Component {
     if (this.state.projects.indexOf(value)) {
       this.setState({
         subs: this.apiGetSubs(
-          this.authen.getToken(),
-          config.endpoint,
-          value
+           value
         )
       });
       window.location.hash = value;
@@ -72,61 +70,21 @@ class SubTable extends React.Component {
   }
 
   // get project data
-  apiGetProjects(token, endpoint) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/projects?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { projects: [] };
-        }
-      })
-      .then(json => this.setState({ projects: json.projects, token: token }))
-      .catch(error => console.log(error));
+  apiGetProjects() {
+    this.DM.projectGet().then(r=>{
+      if (r.done){
+        this.setState({projects:r.data.projects})
+      }
+    })
   }
 
   // get subscription data
-  apiGetSubs(token, endpoint, project) {
-    // If token or endpoint empty return
-    if (token === null || endpoint === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      project +
-      "/subscriptions?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { subs: [] };
-        }
-      })
-      .then(json => this.setState({ subs: json.subscriptions }))
-      .catch(error => console.log(error));
+  apiGetSubs(project) {
+    this.DM.subGet(project).then(r=>{
+      if (r.done){
+        this.setState({subs:r.data.subscriptions})
+      }
+    })
   }
 
   render() {
@@ -207,13 +165,25 @@ class SubTable extends React.Component {
             </Link>
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
-              to={"/subs/delete/" + props.value}
+              to={"/subs/update" + props.value}
+            >
+              <FontAwesomeIcon icon="pen" />
+            </Link>
+            <Link
+              className="btn btn-light btn-sm ml-1 mr-1"
+              to={"/subs/mod-offset" + props.value}
+            >
+              <FontAwesomeIcon icon="sliders-h" />
+            </Link>
+            <Link
+              className="btn btn-light btn-sm ml-1 mr-1"
+              to={"/subs/delete" + props.value}
             >
               <FontAwesomeIcon icon="times" />
             </Link>
           </div>
         ),
-        width: 130,
+        width: 210,
         headerClassName: "list-header",
         className: "text-center"
       }
@@ -226,7 +196,7 @@ class SubTable extends React.Component {
             <h2>Subscriptions</h2>
           </div>
           <div className="col">
-            <Link className="btn btn-light" to={"/topics/create#"+this.state.value}>
+            <Link className="btn btn-light" to={"/subs/create#"+this.state.value}>
               <FontAwesomeIcon className="mr-2" icon="plus" size="lg" /> Create
               Subscription
             </Link>

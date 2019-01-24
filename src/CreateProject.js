@@ -7,32 +7,11 @@ import {
 import config from "./config";
 import Authen from "./Authen";
 import {Button, Card} from "reactstrap"
+import DataManager from "./DataManager";
 
 window.valid_projects = [];
 
 
-function sendData(url = ``, data = {}, method = "POST") {
-  return fetch(url, {
-    method: method,
-    mode: "cors",
-    cache: "no-cache",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json; charset=utf-8"
-    },
-    redirect: "follow",
-    referrer: "no-referrer",
-    body: JSON.stringify(data)
-  }).then(response => {
-    if (response.status === 200) {
-      NotificationManager.info("Project Created", null, 1000);
-      return true;
-    } else {
-      NotificationManager.info("Issues with Project creation", null, 1000);
-      return false;
-    }
-  });
-}
 
 function validate(values, other) {
   let errors = {};
@@ -58,6 +37,7 @@ class CreateProject extends Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
+    this.DM = new DataManager(config.endpoint, this.authen.getToken());
     this.doCreateProject.bind(this);
 
     if (this.props.action === "create") {
@@ -78,8 +58,6 @@ class CreateProject extends Component {
         projects: [],
         roles: ["project_admin", "consumer", "producer"],
         initialValues: this.apiGetData(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname
         )
       };
@@ -88,121 +66,67 @@ class CreateProject extends Component {
     this.apiGetProjects(this.authen.getToken(), config.endpoint);
   }
 
-  apiGetData(token, endpoint, projectname) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || projectname === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/projects/" + projectname + "?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { project: null };
-        }
-      })
-      .then(json => {
-        
-        
+  apiGetData(projectname) {
+
+    this.DM.projectGet(projectname).then(r =>{
+      if (r.done){
         let initVal = {
-          name: json.name,
-          description: json.description,
+          name: r.data.name,
+          description: r.data.description,
           action: "update"
         };
         
 
         this.setState({ initialValues: initVal });
-      })
-      .catch(error => console.log(error));
+      }
+    })
+
   }
 
-  apiGetProjects(token, endpoint) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/projects?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { projects: [] };
-        }
-      })
-      .then(json => {
+  apiGetProjects() {
+    this.DM.projectGet().then(r => {
+      if (r.done) {
         let projects = [];
-        for (let project of json.projects) {
+        for (let project of r.data.projects) {
           projects.push(project.name);
         }
 
         window.valid_projects = projects;
         this.setState({ projects: projects });
-      })
-      .catch(error => console.log(error));
+      }
+    })
   }
 
   doCreateProject(data) {
+    let comp = this;
     let name = data.name;
     let body = { description: data.description };
 
-   
+    this.DM.projectCreate(name,body).then(r=>{
+      if (r.done){
+        NotificationManager.info("Project Created!", null, 1000);
+        setTimeout(()=>{comp.props.history.push("/projects/details/" + name)},1000)
+      } else {
+        NotificationManager.error("Project Creation Failed...", null, 1000);
+      }
+    })
 
-    // quickly construct request url
-    let url =
-      "https://" +
-      config.endpoint +
-      "/v1/projects/" +
-      name +
-      "?key=" +
-      this.authen.getToken();
-
-    sendData(url, body, "POST")
-      .then(done => {
-        console.log(done);
-        if (done) {
-          window.location = "/projects/details/" + name;
-        }
-      })
-      .catch(error => console.error(error));
   }
 
   doUpdateProject(data) {
+    let comp = this;
     let name = data.name;
     let body = { description: data.description };
 
-    // quickly construct request url
-    let url =
-      "https://" +
-      config.endpoint +
-      "/v1/projects/" +
-      name +
-      "?key=" +
-      this.authen.getToken();
+    this.DM.projectUpdate(name,body).then(r=>{
+      if (r.done){
+        NotificationManager.info("Project Update!", null, 1000);
+        setTimeout(()=>{comp.props.history.push("/projects/details/" + name)},1000)
+      } else {
+        NotificationManager.error("Project Update Failed...", null, 1000);
+      }
+    })
 
-    sendData(url, body, "PUT")
-      .then(done => {
-        console.log(done);
-        if (done) {
-          window.location = "/projects/details/" + name;
-        }
-      })
-      .catch(error => console.error(error));
   }
 
   render() {
@@ -264,7 +188,7 @@ class CreateProject extends Component {
                 {actionOnProject}
               </button>
               <span> </span>
-              <Button onClick={()=>{window.history.back()}} className="btn btn-dark">
+              <Button onClick={()=>{this.props.history.goBack()}} className="btn btn-dark">
                 Cancel
               </Button>
             </Form>

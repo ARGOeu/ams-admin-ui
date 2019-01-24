@@ -10,6 +10,7 @@ import Autocomplete from "react-autocomplete";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faDiceD6, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import DataManager from "./DataManager";
 library.add(faDiceD6, faEnvelope);
 
 function getProjectColorIcon(projectName) {
@@ -21,45 +22,19 @@ function getProjectColorIcon(projectName) {
   return <FontAwesomeIcon icon="dice-d6" style={{ color: color }} />;
 }
 
-function sendData(url = ``, data = {}, method = "POST") {
-  return fetch(url, {
-    method: method,
-    mode: "cors",
-    cache: "no-cache",
-    credentials: "same-origin",
-    headers: {
-      "Content-Type": "application/json; charset=utf-8"
-    },
-    redirect: "follow",
-    referrer: "no-referrer",
-    body: JSON.stringify(data)
-  }).then(response => {
-    if (response.status === 200) {
-      NotificationManager.info("Topic Created", null, 1000);
-      return true;
-    } else {
-      NotificationManager.info("Issues with topic creation", null, 1000);
-      return false;
-    }
-  });
-}
-
 class CreateTopic extends Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
+    this.DM = new DataManager(config.endpoint, this.authen.getToken());
     this.state = { projects: [], topics: [], value: "" };
     if (this.authen.isLogged()) {
       this.state = {
-        projects: this.apiGetProjects(this.authen.getToken(), config.endpoint),
+        projects: this.apiGetProjects(),
         value: window.location.hash.substring(1),
         error: "",
         topic: "",
-        topics: this.apiGetTopics(
-          this.authen.getToken(),
-          config.endpoint,
-          window.location.hash.substring(1)
-        )
+        topics: this.apiGetTopics(window.location.hash.substring(1))
       };
     }
     this.handleTopicChange = this.handleTopicChange.bind(this);
@@ -69,6 +44,14 @@ class CreateTopic extends Component {
   handleTopicChange(e) {
     this.setState({ topic: e.target.value });
     // quickly validate
+    if (e.target.value === "") {
+      this.setState({ error: "Name Required" });
+    } else if (!/^[A-Z0-9_-]+$/i.test(e.target.value)) {
+      this.setState({
+        error:
+          "Invalid name (use only letters, numbers, underscores and dashes)"
+      });
+    }
     if (this.state.topics.indexOf(e.target.value) > -1) {
       this.setState({ error: "Topic with the same name already exists" });
     } else {
@@ -87,143 +70,66 @@ class CreateTopic extends Component {
     return this.state.projects;
   }
 
-  apiGetData(token, endpoint, projectname) {
-    // If token or endpoint empty return
-    if (
-      token === "" ||
-      token === null ||
-      endpoint === "" ||
-      projectname === ""
-    ) {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" + endpoint + "/v1/projects/" + projectname + "?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { project: null };
-        }
-      })
-      .then(json => {
-        let initVal = {
-          project: ""
-        };
+  // apiGetData(projectname) {
+  //   this.DM.projectGet(projectname).then(r=>{
+  //     if (r.done){
+  //       let initVal = {
+  //         project: ""
+  //       };
 
-        this.setState({ initialValues: initVal });
-      })
-      .catch(error => console.log(error));
-  }
+  //       this.setState({ initialValues: initVal });
+  //     }
+  //   })
+
+  // }
 
   // get project data
-  apiGetProjects(token, endpoint) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/projects?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { projects: [] };
-        }
-      })
-      .then(json => this.setState({ projects: json.projects, token: token }))
-      .catch(error => console.log(error));
+  apiGetProjects() {
+    this.DM.projectGet().then(r => {
+      if (r.done) {
+        this.setState({ projects: r.data.projects });
+      }
+    });
   }
 
   doCreateTopic(project, topic) {
-    if (topic === "") return;
-    // quickly construct request url
-    let url =
-      "https://" +
-      config.endpoint +
-      "/v1/projects/" +
-      project +
-      "/topics/" +
-      topic +
-      "?key=" +
-      this.authen.getToken();
-
-    sendData(url, "", "PUT")
-      .then(done => {
-        console.log(done);
-        if (done) {
-          window.location =
-            "/topics/details/projects/" + project + "/topics/" + topic;
-        }
-      })
-      .catch(error => console.error(error));
+    let comp = this;
+    this.DM.topicCreate(project, topic).then(r => {
+      if (r.done) {
+        NotificationManager.info("Topic Created!", null, 1000);
+        setTimeout(() => {
+          comp.props.history.push(
+            "/topics/details/projects/" + project + "/topics/" + topic
+          );
+        }, 1000);
+      } else {
+        NotificationManager.error("Error during topic creation!", null, 1000);
+      }
+    });
+   
   }
 
   loadProjectTopics(value) {
     // if project value exists in known projects
     if (this.state.projects.indexOf(value)) {
       this.setState({
-        topics: this.apiGetTopics(
-          this.authen.getToken(),
-          config.endpoint,
-          value
-        )
+        topics: this.apiGetTopics(value)
       });
       window.location.hash = value;
     }
   }
 
-  apiGetTopics(token, endpoint, project) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      project +
-      "/topics?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { topics: [] };
-        }
-      })
-      .then(json => {
+  apiGetTopics(project) {
+    this.DM.topicGet(project).then(r => {
+      if (r.done) {
         let listOfTopics = [];
-        for (let itemTopic of json.topics) {
+        for (let itemTopic of r.data.topics) {
           listOfTopics.push(itemTopic.name.split("/")[4]);
         }
-        console.log(listOfTopics);
-        this.setState({ topics: listOfTopics, token: token });
-      })
-      .catch(error => console.log(error));
+
+        this.setState({ topics: listOfTopics });
+      }
+    });
   }
 
   matchProjects(state, value) {
@@ -301,7 +207,7 @@ class CreateTopic extends Component {
                   <span> </span>
                   <button
                     onClick={() => {
-                      window.history.back();
+                      this.props.history.goBack();
                     }}
                     className="btn btn-dark"
                   >
