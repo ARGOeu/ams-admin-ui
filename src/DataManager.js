@@ -11,6 +11,21 @@ class DataManager {
     this.token = token;
   }
 
+  projectGetMetrics(project) {
+    if (!project || !this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project +
+      ":metrics?key=" +
+      this.token;
+    return this.doGet(url, "metrics");
+  }
+
   projectGet(projectName) {
     if (!this.token || !this.endpoint) return Promise.resolve({ done: false });
     let project = "";

@@ -126,7 +126,8 @@ class SubACL extends Component {
                     <label className="ml-4">Subscription Name:</label>
                     <strong className="ml-2">{this.state.sub}</strong>
                   </div>
-                  
+                  <em className="mb-2" style={{color:"#555555"}}>Enter a username to be added to the <strong>{this.state.sub}</strong> subscription's authorized list. User should be member of the <strong>{this.state.project}</strong> project</em>
+                
                   <div className="form-control-group">
                     <div className="input-group mb-2">
                           <div className="input-group-prepend">

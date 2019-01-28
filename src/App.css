@@ -90,6 +90,11 @@ li .fa-user {
 
 }
 
+abbr[title] {
+
+  text-decoration: none !important;
+}
+
 .ico-user{
   color:rgb(250, 255, 181);
   font-size: 1.5em;

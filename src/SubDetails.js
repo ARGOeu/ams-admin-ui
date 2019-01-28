@@ -26,7 +26,8 @@ import {
   faUser,
   faUserLock,
   faPaperPlane,
-  faSlidersH
+  faSlidersH,
+  faInfoCircle
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
 library.add(
@@ -36,7 +37,8 @@ library.add(
   faUser,
   faUserLock,
   faPaperPlane,
-  faSlidersH
+  faSlidersH,
+  faInfoCircle
 );
 
 function getShortName(fullName) {
@@ -264,6 +266,7 @@ class SubDetails extends React.Component {
                 <h6>
                   <abbr title={item.description}>
                     {item.metric.split(".")[1]}
+                    <FontAwesomeIcon icon="info-circle"  className="ml-2" style={{color:"grey"}} />
                   </abbr>
                 </h6>
                 <br />
