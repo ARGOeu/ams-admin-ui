@@ -15,7 +15,10 @@ import Login from "./Login";
 import TopicDetails from "./TopicDetails"
 import CreateTopic from "./CreateTopic"
 import TopicACL from "./TopicACL"
+import SubTable from "./SubTable"
+import SubDetails from "./SubDetails"
 import "bootstrap/dist/css/bootstrap.min.css";
+
 
 import Authen from "./Authen";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -228,7 +231,7 @@ class App extends Component {
                       </Link>
                     </NavItem>
                     <NavItem>
-                      <Link to="/subscriptions">
+                      <Link to="/subs">
                         <FontAwesomeIcon
                           className="side-ico"
                           icon="envelope-open"
@@ -254,6 +257,19 @@ class App extends Component {
                   <Switch>
                     <Route exact path="/welcome" component={Welcome}/>
                     <Route exact path="/login" component={withRouter(Login)} />
+                    <ProtectedRoute
+                      exact 
+                      auth={this.authen.isLogged()}
+                      path="/subs/details/projects/:projectname/subscriptions/:subname"
+                      component={SubDetails}
+                      toDelete={false}
+                    />
+                    <ProtectedRoute
+                      exact
+                      auth={this.authen.isLogged()}
+                      path="/subs"
+                      component={SubTable}
+                    />
                     <ProtectedRoute
                       exact 
                       auth={this.authen.isLogged()}
