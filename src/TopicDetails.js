@@ -28,10 +28,11 @@ import {
   faEnvelope,
   faEnvelopeOpen,
   faUser,
-  faUserLock
+  faUserLock,
+  faInfoCircle
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
-library.add(faDiceD6, faEnvelope, faEnvelopeOpen, faUser, faUserLock);
+library.add(faDiceD6, faEnvelope, faEnvelopeOpen, faUser, faUserLock,faInfoCircle);
 
 function getShortName(fullName) {
   let tokens = fullName.split("/");
@@ -241,7 +242,7 @@ class TopicDetails extends React.Component {
                   <NumberFormat value={item.timeseries[0].value} displayType={'text'} thousandSeparator={true} />
                   </strong>
                 </h3>
-                <br/><h6><abbr title={item.description}>{item.metric.split(".")[1]}</abbr></h6>
+                <br/><h6><abbr title={item.description}>{item.metric.split(".")[1]} <FontAwesomeIcon icon="info-circle"  className="ml-2" style={{color:"grey"}} /></abbr></h6>
                 <br/>
                 
               

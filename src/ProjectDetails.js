@@ -1,6 +1,8 @@
 import React from "react";
 import Authen from "./Authen";
 import config from "./config";
+import NumberFormat from "react-number-format";
+import { BarChart, CartesianGrid, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import {
   Col,
   Button,
@@ -20,10 +22,11 @@ import {
 import {
   faDiceD6,
   faEnvelope,
-  faEnvelopeOpen
+  faEnvelopeOpen,
+  faInfoCircle
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
-library.add(faDiceD6, faEnvelope, faEnvelopeOpen);
+library.add(faDiceD6, faEnvelope, faEnvelopeOpen, faInfoCircle);
 
 function getShortName(fullName) {
   let tokens = fullName.split("/");
@@ -43,8 +46,8 @@ class ProjectDetails extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken())
-    this.state = { project: null, topics: null, subs: null };
+    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.state = { project: null, topics: null, subs: null, metrics: [] };
 
     this.apiGetData.bind(this);
     this.apiGetTopics.bind(this);
@@ -53,61 +56,58 @@ class ProjectDetails extends React.Component {
     if (this.authen.isLogged()) {
       this.state = {
         toDelete: this.props.toDelete,
-        project: this.apiGetData(
-          this.props.match.params.projectname
-        ),
-        topics: this.apiGetTopics(
-          this.props.match.params.projectname
-        ),
-        subs: this.apiGetSubs(
-          this.props.match.params.projectname
-        )
+        project: this.apiGetData(this.props.match.params.projectname),
+        topics: this.apiGetTopics(this.props.match.params.projectname),
+        subs: this.apiGetSubs(this.props.match.params.projectname),
+        metrics: this.apiGetMetrics(this.props.match.params.projectname)
       };
-    } else {
-      this.state = { project: null, topics: null, subs: null };
     }
+  }
+
+  apiGetMetrics(projectName) {
+    this.DM.projectGetMetrics(projectName).then(r => {
+      if (r.done) {
+        this.setState({ metrics: r.data });
+      }
+    });
   }
 
   apiDelete(projectname) {
     let comp = this;
-    this.DM.projectDelete(projectname).then(done=>{
-      if (done){
+    this.DM.projectDelete(projectname).then(done => {
+      if (done) {
         NotificationManager.info("Project Deleted", null, 1000);
         setTimeout(function() {
           comp.props.history.push("/projects");
-         }, 1000);
+        }, 1000);
       } else {
         NotificationManager.error("Error during project deletion", null, 1000);
       }
-    })
-    
+    });
   }
 
   apiGetData(projectName) {
-    this.DM.projectGet(projectName).then(r=>{
-      if (r.done){
-        this.setState({project: r.data})
+    this.DM.projectGet(projectName).then(r => {
+      if (r.done) {
+        this.setState({ project: r.data });
       }
-    })
-
-
+    });
   }
 
   apiGetTopics(projectName) {
-    this.DM.topicGet(projectName).then(r=>{
-      if (r.done){
-        this.setState({topics: r.data.topics})
+    this.DM.topicGet(projectName).then(r => {
+      if (r.done) {
+        this.setState({ topics: r.data.topics });
       }
-    })
-    
+    });
   }
 
   apiGetSubs(projectName) {
-    this.DM.subGet(projectName).then(r=>{
-      if (r.done){
-        this.setState({subs: r.data.subscriptions})
+    this.DM.subGet(projectName).then(r => {
+      if (r.done) {
+        this.setState({ subs: r.data.subscriptions });
       }
-    })
+    });
   }
 
   render() {
@@ -120,6 +120,7 @@ class ProjectDetails extends React.Component {
 
     let topicList = null;
     let subList = null;
+    let metrics = null;
 
     if (this.state.topics !== null && this.state.topics !== undefined) {
       let topics = [];
@@ -137,22 +138,34 @@ class ProjectDetails extends React.Component {
     }
 
     if (this.state.subs !== null && this.state.subs !== undefined) {
-      let topicSubs = {}
+      let topicSubs = {};
       for (let sub of this.state.subs) {
-        let subItem = <span key={sub.name} className="badge blue-badge  mr-2 p-2 mb-2"><FontAwesomeIcon icon="envelope-open" className="mr-2" /><Link className="text-white" to={"/subs/details"+sub.name}>{getShortName(sub.name)}</Link></span>
-        if (sub.topic in topicSubs){
-          topicSubs[sub.topic].push(subItem)
+        let subItem = (
+          <span key={sub.name} className="badge blue-badge  mr-2 p-2 mb-2">
+            <FontAwesomeIcon icon="envelope-open" className="mr-2" />
+            <Link className="text-white" to={"/subs/details" + sub.name}>
+              {getShortName(sub.name)}
+            </Link>
+          </span>
+        );
+        if (sub.topic in topicSubs) {
+          topicSubs[sub.topic].push(subItem);
         } else {
           topicSubs[sub.topic] = [subItem];
         }
       }
-      let topicSubList = []
+      let topicSubList = [];
       for (let topic in topicSubs) {
-         
-         topicSubList.push(<span key={topic} ><FontAwesomeIcon icon="envelope" className="mr-2" />{getShortName(topic)}<p className="mt-2 ml-2">{topicSubs[topic]}</p></span>)
+        topicSubList.push(
+          <span key={topic}>
+            <FontAwesomeIcon icon="envelope" className="mr-2" />
+            {getShortName(topic)}
+            <p className="mt-2 ml-2">{topicSubs[topic]}</p>
+          </span>
+        );
       }
-      
-      subList= <div>{topicSubList}</div>
+
+      subList = <div>{topicSubList}</div>;
     }
 
     if (this.state.toDelete) {
@@ -173,9 +186,7 @@ class ProjectDetails extends React.Component {
               color="danger"
               className="mr-2"
               onClick={() => {
-                this.apiDelete(
-                  this.state.project.name
-                );
+                this.apiDelete(this.state.project.name);
               }}
             >
               Delete
@@ -201,6 +212,170 @@ class ProjectDetails extends React.Component {
         >
           Back
         </Button>
+      );
+    }
+
+    if (this.state.metrics && this.state.metrics.metrics.length > 0) {
+      let smallMetricList = [];
+      let metricList = [];
+      let latestDate = "";
+      let userMetricList = [];
+
+      for (let item of this.state.metrics["metrics"]) {
+        let timedata = [];
+        let chart = null;
+
+        // If metric contains large timeseries of data plot it on it's own card
+        if (item.timeseries.length > 1) {
+          chart = (
+            <div style={{ overflow: "hidden" }}>
+              <BarChart
+                width={700}
+                height={300}
+                data={item.timeseries.reverse()}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="timestamp" />
+                <YAxis dataKey="value" />
+                <Tooltip />
+                <Bar dataKey="value" fill="#8884d8" />
+              </BarChart>
+            </div>
+          );
+
+          for (let timedatum of item.timeseries) {
+            timedata.push(
+              <tr key={timedatum.timestamp}>
+                <td style={{ width: "1%", whiteSpace: "nowrap" }}>
+                  <small>{timedatum.timestamp}</small>
+                </td>
+                <td className="td-fit">
+                  <code>{timedatum.value}</code>
+                </td>
+              </tr>
+            );
+          }
+
+          let card = (
+            <Card key={item.metric} className="mb-4">
+              <CardHeader>
+                <strong>name: </strong>
+                {item.metric}
+              </CardHeader>
+              <CardBody>
+                {chart}
+                <table className="table table-sm table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th
+                        style={{ width: "1%", whiteSpace: "nowrap" }}
+                        scope="col"
+                      >
+                        Timestamp
+                      </th>
+                      <th className="th-fit" scope="col">
+                        Value
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>{timedata}</tbody>
+                </table>
+              </CardBody>
+              <CardFooter>{item.description}</CardFooter>
+            </Card>
+          );
+
+          metricList.push(card);
+        } else if (item.timeseries.length === 1) {
+          // combine smaller metrics in one view
+          latestDate = item.timeseries[0].timestamp;
+
+          if (item["resource_type"] === "project.user") {
+            let metricItem = (
+              <Card
+                key={item.metric + "/" + item["resource_name"]}
+                className="col-4 p-2 rounded"
+              >
+                <CardBody className="text-center">
+                  <h3>
+                    <strong>
+                      <NumberFormat
+                        value={item.timeseries[0].value}
+                        displayType={"text"}
+                        thousandSeparator={true}
+                      />
+                    </strong>
+                  </h3>
+                  <br />
+                  <h6>
+                    <abbr title={item.description}>
+                      
+                      <strong>{item["resource_name"].split(".")[1]} 's </strong>{" "}
+                      {item.metric.split(".")[2]}{" "}
+                      <FontAwesomeIcon
+                        icon="info-circle"
+                        className="ml-2"
+                        style={{ color: "grey" }}
+                      />
+                    </abbr>
+                  </h6>
+                  <br />
+                </CardBody>
+              </Card>
+            );
+            userMetricList.push(metricItem);
+          } else {
+            let metricItem = (
+              <Card key={item.metric} className="col-4 p-2 rounded">
+                <CardBody className="text-center">
+                  <h3>
+                    <strong>
+                      <NumberFormat
+                        value={item.timeseries[0].value}
+                        displayType={"text"}
+                        thousandSeparator={true}
+                      />
+                    </strong>
+                  </h3>
+                  <br />
+                  <h6>
+                    <abbr title={item.description}>
+                      {item.metric.split(".")[1]}{" "}
+                      <FontAwesomeIcon
+                        icon="info-circle"
+                        className="ml-2"
+                        style={{ color: "grey" }}
+                      />
+                    </abbr>
+                  </h6>
+                  <br />
+                </CardBody>
+              </Card>
+            );
+            smallMetricList.push(metricItem);
+          }
+        }
+      }
+      metrics = (
+        <div>
+          <h6>
+            <strong>Project Metrics:</strong>
+          </h6>
+          <div className="row p-3">{smallMetricList}</div>
+          <br />
+          <h6>
+            <strong>Project User Metrics:</strong>
+          </h6>
+          <div className="row p-3">{userMetricList}</div>
+
+          <div className="row text-right">
+            <div className="col-12">
+              <small>{latestDate}</small>
+            </div>
+          </div>
+          <br />
+          <div>{metricList}</div>
+        </div>
       );
     }
 
@@ -238,9 +413,13 @@ class ProjectDetails extends React.Component {
                     </div>
                   </div>
                   <br />
-                  <span className="text-center"><h4>{this.state.project.name}</h4></span>
+                  <span className="text-center">
+                    <h4>{this.state.project.name}</h4>
+                  </span>
                   <hr />
-                  <span className="text-center d-block">{this.state.project.description}</span>
+                  <span className="text-center d-block">
+                    {this.state.project.description}
+                  </span>
                 </CardBody>
                 <CardFooter>
                   <small>
@@ -261,35 +440,59 @@ class ProjectDetails extends React.Component {
               </Card>
             </div>
             <div className="col-md-8 col-sm-12 col-xs-12">
-            
-                {willDelete}
-             
+              {willDelete}
+
               <Card>
                 <CardHeader>
-                  <strong>Topics</strong><Link style={{borderColor:"grey"}} className="btn btn-light btn-sm ml-4" to={"/topics/create#" + this.state.project.name}>+ Create a new topic</Link>
+                  <strong>Topics</strong>
+                  <Link
+                    style={{ borderColor: "grey" }}
+                    className="btn btn-light btn-sm ml-4"
+                    to={"/topics/create#" + this.state.project.name}
+                  >
+                    + Create a new topic
+                  </Link>
                 </CardHeader>
                 <CardBody>{topicList}</CardBody>
               </Card>
               <Card className="mt-3">
                 <CardHeader>
-                  <strong>Subscriptions</strong><Link style={{borderColor:"grey"}} className="btn btn-light btn-sm ml-4" to={"/subs/create#" + this.state.project.name}>+ Create a new subscription</Link>
+                  <strong>Subscriptions</strong>
+                  <Link
+                    style={{ borderColor: "grey" }}
+                    className="btn btn-light btn-sm ml-4"
+                    to={"/subs/create#" + this.state.project.name}
+                  >
+                    + Create a new subscription
+                  </Link>
                 </CardHeader>
                 <CardBody>{subList}</CardBody>
               </Card>
               <Card className="mt-2 text-secondary">
                 <CardFooter>
-                <strong>Icon legend:</strong>
-               <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="envelope" /> topic</span>
-               <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="envelope-open" /> subscription
-               </span>
-               
-               
+                  <strong>Icon legend:</strong>
+                  <span className="border p-2 mx-2 rounded">
+                    <FontAwesomeIcon className="ml-1 mr-1" icon="envelope" />{" "}
+                    topic
+                  </span>
+                  <span className="border p-2 mx-2 rounded">
+                    <FontAwesomeIcon
+                      className="ml-1 mr-1"
+                      icon="envelope-open"
+                    />{" "}
+                    subscription
+                  </span>
                 </CardFooter>
-                
               </Card>
-              <div className="m-2 text-right">
-                {willBack}
-              </div>
+
+              <Card className="mt-4">
+                <CardHeader>
+                  <strong>Metrics</strong>
+                </CardHeader>
+                <CardBody>{metrics}</CardBody>
+              </Card>
+
+              <div className="m-2 text-right">{willBack}</div>
             </div>
           </Row>
         </div>

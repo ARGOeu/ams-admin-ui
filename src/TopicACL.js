@@ -127,6 +127,7 @@ class TopicACL extends Component {
                     <strong className="ml-2">{this.state.topic}</strong>
                   </div>
                   
+                  <em className="mb-2" style={{color:"#555555"}}>Enter a username to be added to the <strong>{this.state.topic}</strong> topic's authorized list. User should be member of the <strong>{this.state.project}</strong> project</em>
                   <div className="form-control-group">
                     <div className="input-group mb-2">
                           <div className="input-group-prepend">
