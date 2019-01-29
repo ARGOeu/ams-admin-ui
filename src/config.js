@@ -1,7 +1,7 @@
 // Basic config here.
 // Replace endpoint value with target AMS endpoint you want to retrieve data from
 var config = {
-	endpoint: "msg-devel.argo.grnet.gr", 
+	endpoint: "localhost", 
 	service: "ams",
 	project_colors: {
 		"ARGO": "#769B9E",

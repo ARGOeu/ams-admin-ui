@@ -22,6 +22,7 @@ import {
   faEnvelope,
   faEnvelopeOpen
 } from "@fortawesome/free-solid-svg-icons";
+import DataManager from "./DataManager";
 library.add(faDiceD6, faEnvelope, faEnvelopeOpen);
 
 function getShortName(fullName) {
@@ -42,6 +43,7 @@ class ProjectDetails extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
+    this.DM = new DataManager(config.endpoint, this.authen.getToken())
     this.state = { project: null, topics: null, subs: null };
 
     this.apiGetData.bind(this);
@@ -52,18 +54,12 @@ class ProjectDetails extends React.Component {
       this.state = {
         toDelete: this.props.toDelete,
         project: this.apiGetData(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname
         ),
         topics: this.apiGetTopics(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname
         ),
         subs: this.apiGetSubs(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname
         )
       };
@@ -72,150 +68,46 @@ class ProjectDetails extends React.Component {
     }
   }
 
-  apiDelete(token, endpoint, projectname) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || projectname === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/projects/" + projectname + "?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { method: "delete", headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          NotificationManager.info("Project Deleted", null, 1000);
-          return true;
-        } else {
-          NotificationManager.error("Error", null, 1000);
-          return false;
-        }
-      })
-      .then(done => {
-        if (done) {
-          // display notification
-          setTimeout(function() {
-            window.location = "/projects";
-          }, 1000);
-        }
-      })
-      .catch(error => console.log(error));
+  apiDelete(projectname) {
+    let comp = this;
+    this.DM.projectDelete(projectname).then(done=>{
+      if (done){
+        NotificationManager.info("Project Deleted", null, 1000);
+        setTimeout(function() {
+          comp.props.history.push("/projects");
+         }, 1000);
+      } else {
+        NotificationManager.error("Error during project deletion", null, 1000);
+      }
+    })
+    
   }
 
-  apiGetData(token, endpoint, projectName) {
-    // If token or endpoint empty return
-    if (
-      token === "" ||
-      token === null ||
-      endpoint === "" ||
-      projectName === ""
-    ) {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" + endpoint + "/v1/projects/" + projectName + "?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { project: [] };
-        }
-      })
-      .then(json => {
-        console.log(json);
-        this.setState({ project: json });
-      })
-      .catch(error => console.log(error));
+  apiGetData(projectName) {
+    this.DM.projectGet(projectName).then(r=>{
+      if (r.done){
+        this.setState({project: r.data})
+      }
+    })
+
+
   }
 
-  apiGetTopics(token, endpoint, projectName) {
-    // If token or endpoint empty return
-    if (
-      token === "" ||
-      token === null ||
-      endpoint === "" ||
-      projectName === ""
-    ) {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      projectName +
-      "/topics?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { topics: [] };
-        }
-      })
-      .then(json => {
-        console.log(json);
-        this.setState({ topics: json.topics });
-      })
-      .catch(error => console.log(error));
+  apiGetTopics(projectName) {
+    this.DM.topicGet(projectName).then(r=>{
+      if (r.done){
+        this.setState({topics: r.data.topics})
+      }
+    })
+    
   }
 
-  apiGetSubs(token, endpoint, projectName) {
-    // If token or endpoint empty return
-    if (
-      token === "" ||
-      token === null ||
-      endpoint === "" ||
-      projectName === ""
-    ) {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      projectName +
-      "/subscriptions?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { subs: [] };
-        }
-      })
-      .then(json => {
-        console.log(json);
-        this.setState({ subs: json.subscriptions });
-      })
-      .catch(error => console.log(error));
+  apiGetSubs(projectName) {
+    this.DM.subGet(projectName).then(r=>{
+      if (r.done){
+        this.setState({subs: r.data.subscriptions})
+      }
+    })
   }
 
   render() {
@@ -247,7 +139,7 @@ class ProjectDetails extends React.Component {
     if (this.state.subs !== null && this.state.subs !== undefined) {
       let topicSubs = {}
       for (let sub of this.state.subs) {
-        let subItem = <span className="badge blue-badge  mr-2 p-2 mb-2"><FontAwesomeIcon icon="envelope-open" className="mr-2" /><Link className="text-white" to={"subs/details/"+getShortName(sub.name)}>{getShortName(sub.name)}</Link></span>
+        let subItem = <span key={sub.name} className="badge blue-badge  mr-2 p-2 mb-2"><FontAwesomeIcon icon="envelope-open" className="mr-2" /><Link className="text-white" to={"/subs/details"+sub.name}>{getShortName(sub.name)}</Link></span>
         if (sub.topic in topicSubs){
           topicSubs[sub.topic].push(subItem)
         } else {
@@ -282,8 +174,6 @@ class ProjectDetails extends React.Component {
               className="mr-2"
               onClick={() => {
                 this.apiDelete(
-                  this.authen.getToken(),
-                  config.endpoint,
                   this.state.project.name
                 );
               }}
@@ -292,7 +182,7 @@ class ProjectDetails extends React.Component {
             </Button>
             <Button
               onClick={() => {
-                window.history.back();
+                this.props.history.goBack();
               }}
               className="btn btn-dark"
             >
@@ -305,7 +195,7 @@ class ProjectDetails extends React.Component {
       willBack = (
         <Button
           onClick={() => {
-            window.history.back();
+            this.props.history.goBack();
           }}
           className="btn btn-dark"
         >
@@ -376,13 +266,13 @@ class ProjectDetails extends React.Component {
              
               <Card>
                 <CardHeader>
-                  <strong>Topics</strong>
+                  <strong>Topics</strong><Link style={{borderColor:"grey"}} className="btn btn-light btn-sm ml-4" to={"/topics/create#" + this.state.project.name}>+ Create a new topic</Link>
                 </CardHeader>
                 <CardBody>{topicList}</CardBody>
               </Card>
               <Card className="mt-3">
                 <CardHeader>
-                  <strong>Subscriptions</strong>
+                  <strong>Subscriptions</strong><Link style={{borderColor:"grey"}} className="btn btn-light btn-sm ml-4" to={"/subs/create#" + this.state.project.name}>+ Create a new subscription</Link>
                 </CardHeader>
                 <CardBody>{subList}</CardBody>
               </Card>

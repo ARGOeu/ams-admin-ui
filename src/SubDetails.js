@@ -25,15 +25,18 @@ import {
   faEnvelopeOpen,
   faUser,
   faUserLock,
-  faPaperPlane
+  faPaperPlane,
+  faSlidersH
 } from "@fortawesome/free-solid-svg-icons";
+import DataManager from "./DataManager";
 library.add(
   faDiceD6,
   faEnvelope,
   faEnvelopeOpen,
   faUser,
   faUserLock,
-  faPaperPlane
+  faPaperPlane,
+  faSlidersH
 );
 
 function getShortName(fullName) {
@@ -62,7 +65,8 @@ class SubDetails extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
-    this.state = { sub: null, acl: null };
+    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.state = { sub: null, acl: null, offsets: {min:0, current:0, max:0} };
 
     this.apiGetData.bind(this);
 
@@ -70,20 +74,18 @@ class SubDetails extends React.Component {
       this.state = {
         toDelete: this.props.toDelete,
         sub: this.apiGetData(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname,
           this.props.match.params.subname
         ),
         acl: this.apiGetAcl(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname,
           this.props.match.params.subname
         ),
+        offsets: this.apiGetOffsets(
+        this.props.match.params.projectname,
+        this.props.match.params.subname)
+        ,
         metrics: this.apiGetMetrics(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname,
           this.props.match.params.subname
         )
@@ -93,151 +95,54 @@ class SubDetails extends React.Component {
     }
   }
 
-  apiDelete(token, endpoint, project, sub) {
-    // If token or endpoint empty return
-    if (token === "" || endpoint === null || project === "" || sub === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      project +
-      "/subscriptions/" +
-      sub +
-      "?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { method: "delete", headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          NotificationManager.info("Sub Deleted", null, 1000);
-          return true;
-        } else {
-          NotificationManager.error("Error", null, 1000);
-          return false;
-        }
-      })
-      .then(done => {
-        if (done) {
-          // display notification
-          setTimeout(function() {
-            window.location = "/subs#" + project;
-          }, 1000);
-        }
-      })
-      .catch(error => console.log(error));
+  apiDelete(project, sub) {
+    let comp = this;
+    this.DM.subDelete(project, sub).then(done=>{
+      if (done){
+        NotificationManager.info("Subscription Deleted", null, 1000);
+        setTimeout(function() {
+          comp.props.history.push("/subs#" + project);
+        }, 1000);
+      } else {
+        NotificationManager.error("Error during subscription deletion", null, 1000);
+      }
+    })
   }
 
-  apiGetData(token, endpoint, projectName, subName) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || subName === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      projectName +
-      "/subscriptions/" +
-      subName +
-      "?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { sub: [] };
-        }
-      })
-      .then(json => {
-        this.setState({ sub: json });
-      })
-      .catch(error => console.log(error));
+  apiGetData(projectName, subName) {
+    this.DM.subGet(projectName,subName).then(r=>{
+      if (r.done){
+        this.setState({sub:r.data})
+      }
+    })
+    
   }
 
-  apiGetMetrics(token, endpoint, projectName, subName) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || subName === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      projectName +
-      "/subscriptions/" +
-      subName +
-      ":metrics?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { metrics: [] };
-        }
-      })
-      .then(json => {
-        this.setState({ metrics: json });
-      })
-      .catch(error => console.log(error));
+  apiGetMetrics(projectName, subName) {
+    this.DM.subGetMetrics(projectName,subName).then(r=>{
+      if (r.done){
+        this.setState({metrics:r.data})
+      }
+    })
+
+   
   }
 
-  apiGetAcl(token, endpoint, projectName, subName) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || subName === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      projectName +
-      "/subscriptions/" +
-      subName +
-      ":acl?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { acl: [] };
-        }
-      })
-      .then(json => {
-        this.setState({ acl: json });
-      })
-      .catch(error => console.log(error));
+  apiGetOffsets(projectName, subName) {
+    this.DM.subGetOffsets(projectName, subName).then(r=>{
+      if (r.done){
+        this.setState({offsets: r.data})
+      }
+    })
+  }
+
+  apiGetAcl(projectName, subName) {
+    this.DM.subGetACL(projectName, subName).then(r=>{
+      if (r.done){
+        this.setState({acl:r.data})
+      }
+    })
+    
   }
 
   render() {
@@ -403,8 +308,6 @@ class SubDetails extends React.Component {
               className="mr-2"
               onClick={() => {
                 this.apiDelete(
-                  this.authen.getToken(),
-                  config.endpoint,
                   this.props.match.params.projectname,
                   this.props.match.params.subname
                 );
@@ -414,7 +317,7 @@ class SubDetails extends React.Component {
             </Button>
             <Button
               onClick={() => {
-                window.history.back();
+                this.props.history.goBack();
               }}
               className="btn btn-dark"
             >
@@ -427,7 +330,7 @@ class SubDetails extends React.Component {
       willBack = (
         <Button
           onClick={() => {
-            window.history.back();
+            this.props.history.goBack();
           }}
           className="btn btn-dark"
         >
@@ -452,13 +355,25 @@ class SubDetails extends React.Component {
           <Col className="text-right">
             <Link
               className="btn btn-info  ml-1 mr-1"
-              to={"/subscriptions/mod-acl" + this.state.sub.name}
+              to={"/subs/update" + this.state.sub.name}
+            >
+              <FontAwesomeIcon icon="pen" /> Modify Subscription
+            </Link>
+            <Link
+              className="btn btn-info  ml-1 mr-1"
+              to={"/subs/mod-acl" + this.state.sub.name}
             >
               <FontAwesomeIcon icon="user-lock" /> Modify ACL
             </Link>
+            <Link
+              className="btn btn-info  ml-1 mr-1"
+              to={"/subs/mod-offset" + this.state.sub.name}
+            >
+              <FontAwesomeIcon icon="sliders-h" /> Modify Offset
+            </Link>
             <a
               className="btn btn-danger  ml-1 mr-1"
-              href={"/subscriptions/delete" + this.state.sub.name}
+              href={"/subs/delete" + this.state.sub.name}
             >
               <FontAwesomeIcon icon="times" /> Delete Sub
             </a>
@@ -483,27 +398,49 @@ class SubDetails extends React.Component {
                   <span className="text-center">
                     <h4>{getShortName(this.state.sub.name)}</h4>
                   </span>
-                  <hr />
+                  
+                  <ul className="list-group mb-4">
+                  <li className="list-group-item">
                   <span className="text-center d-block">
                     <strong>project:</strong>{" "}
                     {getProjectColorIcon(getProjectName(this.state.sub.name))}{" "}
-                    {getProjectName(this.state.sub.name)}
+                    <Link style={{color:"black"}} to={"/projects/details/" + getProjectName(this.state.sub.name)}>{getProjectName(this.state.sub.name)}</Link>
                   </span>
-                  <span className="text-center d-block">
+                  </li>
+                  <li className="list-group-item">
+                  <span >
                     <strong>full name:</strong>{" "}
                     <code>{this.state.sub.name}</code>
                   </span>
-                  <span className="text-center d-block">
+                  </li>
+                  <li className="list-group-item">
+                  <span >
                     <strong>attached to topic:</strong>{" "}
-                    <code>{this.state.sub.topic}</code>
+                    <code><Link to={"/topics/details"+this.state.sub.topic} >{this.state.sub.topic}</Link></code>
                   </span>
-                  { this.state.sub.pushConfig.pushEndpoint != "" && 
-                  <span className="text-center d-block">
+                  </li>
+                  <li className="list-group-item">
+                  <span >
+                    <strong>offsets (min,cur,max):</strong>{" "}
+                    { this.state.offsets && <code>{this.state.offsets.min},{this.state.offsets.current},{this.state.offsets.max}</code> }
+                  </span>
+                  </li>
+                  <li className="list-group-item">
+                  <span >
+                    <strong>ack deadline:</strong>{" "}
+                    <code>{this.state.sub.ackDeadlineSeconds}</code>
+                  </span>
+                  </li>
+                  { this.state.sub.pushConfig.pushEndpoint !== "" && 
+                   <li className="list-group-item">
+                  <span >
                     <strong>push endpoint:</strong>{" "}
                     <code>{this.state.sub.pushConfig.pushEndpoint}</code>
                   </span>
+                  </li>
                   }
-                   <hr />
+                  </ul>
+                   
                   {acl}
                 </CardBody>
               </Card>

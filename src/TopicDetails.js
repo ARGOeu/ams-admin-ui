@@ -30,6 +30,7 @@ import {
   faUser,
   faUserLock
 } from "@fortawesome/free-solid-svg-icons";
+import DataManager from "./DataManager";
 library.add(faDiceD6, faEnvelope, faEnvelopeOpen, faUser, faUserLock);
 
 function getShortName(fullName) {
@@ -60,6 +61,7 @@ class TopicDetails extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
+    this.DM = new DataManager(config.endpoint, this.authen.getToken());
     this.state = { topics: null, acl: null };
 
     this.apiGetData.bind(this);
@@ -68,20 +70,14 @@ class TopicDetails extends React.Component {
       this.state = {
         toDelete: this.props.toDelete,
         topic: this.apiGetData(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname,
           this.props.match.params.topicname
         ),
         acl: this.apiGetAcl(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname,
           this.props.match.params.topicname
         ),
         metrics: this.apiGetMetrics(
-          this.authen.getToken(),
-          config.endpoint,
           this.props.match.params.projectname,
           this.props.match.params.topicname
         )
@@ -92,142 +88,43 @@ class TopicDetails extends React.Component {
   }
 
   apiDelete(token, endpoint, project, topic) {
-    // If token or endpoint empty return
-    if (token === "" || endpoint === null || project === "" || topic === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/projects/" + project + "/topics/" + topic +"?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { method: "delete", headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          NotificationManager.info("Topic Deleted", null, 1000);
-          return true;
-        } else {
-          NotificationManager.error("Error", null, 1000);
-          return false;
-        }
-      })
-      .then(done => {
-        if (done) {
-          // display notification
-          setTimeout(function() {
-            window.location = "/topics#" + project ;
-          }, 1000);
-        }
-      })
-      .catch(error => console.log(error));
+    let comp = this;
+    this.DM.topicDelete(project, topic).then(done=>{
+      if (done){
+        NotificationManager.info("Topic Deleted", null, 1000);
+        setTimeout(function() {
+          comp.props.history.push("/topics#" + project);
+        }, 1000);
+      } else {
+        NotificationManager.error("Error during topic deletion", null, 1000);
+      }
+    })
   }
 
-  apiGetData(token, endpoint, projectName, topicName) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || topicName === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      projectName +
-      "/topics/" +
-      topicName +
-      "?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { topic: [] };
-        }
-      })
-      .then(json => {
-        this.setState({ topic: json });
-      })
-      .catch(error => console.log(error));
+  apiGetData(projectName, topicName) {
+    this.DM.topicGet(projectName,topicName).then(r=>{
+      if (r.done){
+        this.setState({topic:r.data})
+      }
+    })
+    
   }
 
-  apiGetMetrics(token, endpoint, projectName, topicName) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || topicName === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      projectName +
-      "/topics/" +
-      topicName +
-      ":metrics?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { metrics: [] };
-        }
-      })
-      .then(json => {
-        this.setState({ metrics: json });
-      })
-      .catch(error => console.log(error));
+  apiGetMetrics(projectName, topicName) {
+    this.DM.topicGetMetrics(projectName,topicName).then(r=>{
+      if (r.done){
+        this.setState({metrics:r.data})
+      }
+    })
+   
   }
 
-  apiGetAcl(token, endpoint, projectName, topicName) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || topicName === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      projectName +
-      "/topics/" +
-      topicName +
-      ":acl?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { acl: [] };
-        }
-      })
-      .then(json => {
-        this.setState({ acl: json });
-      })
-      .catch(error => console.log(error));
+  apiGetAcl(projectName, topicName) {
+    this.DM.topicGetACL(projectName,topicName).then(r=>{
+      if (r.done){
+        this.setState({acl: r.data})
+      }
+    })
   }
 
   render() {
@@ -392,7 +289,7 @@ class TopicDetails extends React.Component {
             </Button>
             <Button
               onClick={() => {
-                window.history.back();
+                this.props.history.goBack();
               }}
               className="btn btn-dark"
             >
@@ -405,7 +302,7 @@ class TopicDetails extends React.Component {
       willBack = (
         <Button
           onClick={() => {
-            window.history.back();
+            this.props.history.goBack();
           }}
           className="btn btn-dark"
         >
@@ -459,7 +356,7 @@ class TopicDetails extends React.Component {
                   <span className="text-center d-block">
                     <strong>project:</strong>{" "}
                     {getProjectColorIcon(getProjectName(this.state.topic.name))}{" "}
-                    {getProjectName(this.state.topic.name)}
+                    <Link style={{color:"black"}} to={"/projects/details/" + getProjectName(this.state.topic.name)}>{getProjectName(this.state.topic.name)}</Link>
                   </span>
                   <span className="text-center d-block">
                     <strong>full name:</strong>{" "}

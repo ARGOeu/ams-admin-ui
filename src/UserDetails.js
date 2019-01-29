@@ -1,6 +1,7 @@
 import React from "react";
 import Authen from "./Authen";
 import config from "./config";
+import DataManager from "./DataManager"
 import {
   Col,
   Popover,
@@ -30,6 +31,7 @@ import {
   faCloudUploadAlt,
   faShieldAlt
 } from "@fortawesome/free-solid-svg-icons";
+
 library.add(faExclamationTriangle, faUser, faCrown, faHeartbeat,  faCloudDownloadAlt,
   faCloudUploadAlt,faShieldAlt);
 
@@ -44,17 +46,17 @@ class UserDetails extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
-    console.log(this.props);
+    this.DM = new DataManager(config.endpoint, this.authen.getToken())
     this.state = { user: null, popoverOpen: false };
 
-    this.apiGetData.bind(this);
+    this.apiGetData = this.apiGetData.bind(this);
+    this.apiDelete = this.apiDelete.bind(this);
 
     if (this.authen.isLogged()) {
       this.state = {
         toDelete: this.props.toDelete,
         user: this.apiGetData(
-          this.authen.getToken(),
-          config.endpoint,
+         
           this.props.match.params.username
         )
       };
@@ -71,76 +73,29 @@ class UserDetails extends React.Component {
     });
   }
 
-  apiRenewToken(token, endpoint, username) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || username === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/users/" +
-      username +
-      ":refreshToken" +
-      "?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { method: "post", headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          NotificationManager.info("Token refreshed", null, 1000);
-          return response.json();
-        } else {
-          NotificationManager.error("Error", null, 1000);
-          return {};
-        }
-      })
-      .then(json => {
-        if ("token" in json) {
-          this.setState({ user: json });
-        }
-      })
-      .catch(error => console.log(error));
+  apiRenewToken(username) {
+    this.DM.userRefreshToken(username).then(res => {
+      if (res.done) {
+        NotificationManager.info("Token refreshed", null, 1000);
+        this.setState({user: res.data})
+      }
+      else NotificationManager.error("Token refresh operation failed", null ,1000)
+    })
   }
 
-  apiDelete(token, endpoint, username) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || username === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/users/" + username + "?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { method: "delete", headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          NotificationManager.info("User Deleted", null, 1000);
-          return true;
-        } else {
-          NotificationManager.error("Error", null, 1000);
-          return false;
-        }
-      })
-      .then(done => {
-        if (done) {
-          // display notification
-          setTimeout(function() {
-            window.location = "/users";
-          }, 1000);
-        }
-      })
-      .catch(error => console.log(error));
+  apiDelete(username) {
+    let comp = this;
+    this.DM.userDelete(username).then(done => {
+      if (done) {
+        NotificationManager.info("User Deleted", null, 1000);
+        setTimeout(function() {
+          comp.props.history.push("/users")
+          console.log(comp.props);
+        }, 1000);
+      } else {
+        NotificationManager.error("Error deleting user", null, 1000);
+      }
+    })
   }
 
   // based on service role return an appropriate fa icon
@@ -165,32 +120,12 @@ class UserDetails extends React.Component {
     return <FontAwesomeIcon icon="user" size="4x" />;
   }
 
-  apiGetData(token, endpoint, username) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "" || username === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/users/" + username + "?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { user: [] };
-        }
-      })
-      .then(json => {
-        console.log(json);
-        this.setState({ user: json });
-      })
-      .catch(error => console.log(error));
+  apiGetData(username) {
+    this.DM.userGet(username).then(r => {
+      if (r.done){
+        this.setState({user:r.data})
+      }
+    })
   }
 
   render() {
@@ -219,8 +154,6 @@ class UserDetails extends React.Component {
               className="mr-2"
               onClick={() => {
                 this.apiDelete(
-                  this.authen.getToken(),
-                  config.endpoint,
                   this.state.user.name
                 );
               }}
@@ -229,7 +162,7 @@ class UserDetails extends React.Component {
             </Button>
             <Button
               onClick={() => {
-                window.history.back();
+                this.props.history.goBack();
               }}
               className="btn btn-dark"
             >
@@ -245,7 +178,7 @@ class UserDetails extends React.Component {
       willBack = (
         <Button
           onClick={() => {
-            window.history.back();
+            this.props.history.goBack();
           }}
           className="btn btn-dark"
         >
@@ -315,12 +248,12 @@ class UserDetails extends React.Component {
                 </CardHeader>
                 <CardBody>
                   <strong>Token: </strong>
-                  <code className="p-2 border ml-2 rounded">
+                  <code className="p-2 border ml-2 rounded d-none">
                     {this.state.user.token}
                   </code>
                   <input
                     type="text"
-                    className="form-control-static d-none"
+                    className="form-control-static"
                     readOnly
                     value={this.state.user.token}
                     id="usertoken"
@@ -349,8 +282,6 @@ class UserDetails extends React.Component {
                         id="confirm-renew"
                         onClick={() => {
                           this.apiRenewToken(
-                            this.authen.getToken(),
-                            config.endpoint,
                             this.state.user.name
                           );
                           this.toggle();

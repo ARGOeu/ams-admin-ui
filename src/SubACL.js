@@ -9,22 +9,23 @@ import { CardBody, Card } from "reactstrap";
 import DataManager from "./DataManager";
 
 
-class TopicACL extends Component {
+
+class SubACL extends Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.DM = new DataManager(config.endpoint, this.authen.getToken())
     this.state = {  project: "",
-    topic: "",
+    sub: "",
     user:"",
     acl: [] };
 
     if (this.authen.isLogged()) {
       this.state = {
         project: this.props.match.params.projectname,
-        topic: this.props.match.params.topicname,
+        sub: this.props.match.params.subname,
         user: "",
-        acl: this.apiGetTopicACL(this.props.match.params.projectname,this.props.match.params.topicname)
+        acl: this.apiGetSubACL(this.props.match.params.projectname,this.props.match.params.subname)
         
       };
     }
@@ -44,7 +45,7 @@ class TopicACL extends Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.doModACL(this.state.project, this.state.topic);
+    this.doModACL(this.state.project, this.state.sub);
   }
 
 
@@ -55,20 +56,19 @@ class TopicACL extends Component {
   }
 
 
-  doModACL(project, topic) {
+  doModACL(project, sub) {
     let comp = this;
-    this.DM.topicModACL(project, topic, {authorized_users:this.state.acl}).then(done=>{
-      if (done){
-        comp.props.history.push(
-          "/topics/details/projects/" + project + "/topics/" + topic);
-      }
+    this.DM.subModACL(project, sub, {authorized_users:this.state.acl}).then(done=>{
+      comp.props.history.push("/subs/details/projects/" + project + "/subscriptions/" + sub);
     })
   }
 
 
 
   apiUserExists(user) {
+  
     this.DM.userGet(user).then(r=>{
+      console.log(r)
       if (r.done){
         let acl = this.state.acl
         if (acl.indexOf(this.state.user) > -1) return;
@@ -87,10 +87,10 @@ class TopicACL extends Component {
     })
   }
 
-  apiGetTopicACL(project, topic) {
-    this.DM.topicGetACL(project, topic).then(r =>{
+  apiGetSubACL(project, sub) {
+    this.DM.subGetACL(project,sub).then(r=>{
       if (r.done){
-        this.setState({acl:r.data.authorized_users})
+        this.setState({acl: r.data.authorized_users})
       }
     })
   }
@@ -110,8 +110,8 @@ class TopicACL extends Component {
       <div>
         <NotificationContainer />
         <div className="row mb-2">
-          <div className="col-2">
-            <h2>Modify Topic ACL</h2>
+          <div className="col">
+            <h2>Modify Subscription ACL</h2>
           </div>
         </div>
         <Card className="mb-2">
@@ -123,8 +123,8 @@ class TopicACL extends Component {
                   <div className="form-control-group">
                     <label>Project: </label>
                     <strong className="ml-2">{this.state.project}</strong>
-                    <label className="ml-4">Topic Name:</label>
-                    <strong className="ml-2">{this.state.topic}</strong>
+                    <label className="ml-4">Subscription Name:</label>
+                    <strong className="ml-2">{this.state.sub}</strong>
                   </div>
                   
                   <div className="form-control-group">
@@ -163,4 +163,4 @@ class TopicACL extends Component {
   }
 }
 
-export default TopicACL;
+export default SubACL;

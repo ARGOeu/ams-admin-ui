@@ -1,6 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
+import {Link} from "react-router-dom"
 import config from './config'
 import {
   faCrown,
@@ -69,7 +70,7 @@ class ProjectRoles extends React.Component {
         }
         prList.push(
           <span key={project.project} className="mr-2 badge badge-dark" style={{backgroundColor:color}}>
-            {project.project}
+            <Link style={{color:"white"}} to={"/projects/details/" + project.project} >{project.project}</Link>
             <span className="ml-1">{rolesList}</span>
           </span>
         );

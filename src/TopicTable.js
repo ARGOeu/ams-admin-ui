@@ -10,6 +10,7 @@ import { Card, CardBody } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faDiceD6, faEnvelope, faUserLock } from "@fortawesome/free-solid-svg-icons";
+import DataManager from "./DataManager";
 library.add(faDiceD6, faEnvelope, faUserLock);
 
 function getProjectColorIcon(projectName) {
@@ -27,6 +28,7 @@ class TopicTable extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
+    this.DM = new DataManager(config.endpoint, this.authen.getToken());
     this.projectColors = {};
     this.state = { projects: [], topics: [], value: "" };
 
@@ -34,11 +36,9 @@ class TopicTable extends React.Component {
 
     if (this.authen.isLogged()) {
       this.state = {
-        projects: this.apiGetProjects(this.authen.getToken(), config.endpoint),
+        projects: this.apiGetProjects(),
         value: window.location.hash.substring(1),
         topics: this.apiGetTopics(
-          this.authen.getToken(),
-          config.endpoint,
           window.location.hash.substring(1)
         )
       };
@@ -62,8 +62,6 @@ class TopicTable extends React.Component {
     if (this.state.projects.indexOf(value)) {
       this.setState({
         topics: this.apiGetTopics(
-          this.authen.getToken(),
-          config.endpoint,
           value
         )
       });
@@ -72,61 +70,22 @@ class TopicTable extends React.Component {
   }
 
   // get project data
-  apiGetProjects(token, endpoint) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/projects?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { projects: [] };
-        }
-      })
-      .then(json => this.setState({ projects: json.projects, token: token }))
-      .catch(error => console.log(error));
+  apiGetProjects() {
+    this.DM.projectGet().then(r=>{
+      if (r.done){
+        this.setState({projects:r.data.projects})
+      }
+    })
+    
   }
 
   // get topic data
-  apiGetTopics(token, endpoint, project) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "") {
-      return;
-    }
-    // quickly construct request url
-    let url =
-      "https://" +
-      endpoint +
-      "/v1/projects/" +
-      project +
-      "/topics?key=" +
-      token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { topics: [] };
-        }
-      })
-      .then(json => this.setState({ topics: json.topics, token: token }))
-      .catch(error => console.log(error));
+  apiGetTopics(project) {
+    this.DM.topicGet(project).then(r=>{
+      if (r.done){
+        this.setState({topics: r.data.topics})
+      }
+    })
   }
 
   render() {

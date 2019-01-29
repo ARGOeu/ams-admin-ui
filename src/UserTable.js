@@ -19,6 +19,7 @@ import {
   faCloudUploadAlt,
   faShieldAlt
 } from "@fortawesome/free-solid-svg-icons";
+import DataManager from "./DataManager";
 library.add(
   faCrown,
   faCrown,
@@ -49,6 +50,7 @@ class UserTable extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
+    this.DM = new DataManager(config.endpoint, this.authen.getToken())
     this.projectColors = {}
     this.state = { users: [] };
 
@@ -94,29 +96,12 @@ class UserTable extends React.Component {
   }
 
   // get user data
-  apiGetData(token, endpoint) {
-    // If token or endpoint empty return
-    if (token === "" || token === null || endpoint === "") {
-      return;
-    }
-    // quickly construct request url
-    let url = "https://" + endpoint + "/v1/users?key=" + token;
-    // setup the required headers
-    let headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    };
-    // fetch the data and if succesfull change the component state - which will trigger a re-render
-    fetch(url, { headers: headers })
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          return { users: [] };
-        }
-      })
-      .then(json => this.setState({ users: json.users, token: token }))
-      .catch(error => console.log(error));
+  apiGetData() {
+    this.DM.userGet().then(r => {
+      if (r.done){
+        this.setState({users:r.data.users})
+      }
+    })
   }
 
   // based on specific role return an appropriate fa icon
@@ -142,7 +127,7 @@ class UserTable extends React.Component {
       }
       prList.push(
         <span key="project" className="mr-2 badge badge-dark" style={{backgroundColor:projectColors[project.project]}}>
-          {project.project}
+          <Link style={{color:"white"}} to={"/projects/details/"+project.project}>{project.project}</Link>
           <span className="ml-1">{rolesList}</span>
         </span>
       );
