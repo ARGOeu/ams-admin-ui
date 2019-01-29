@@ -9,8 +9,8 @@ import "react-table/react-table.css";
 import { Card, CardBody } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faDiceD6, faEnvelope } from "@fortawesome/free-solid-svg-icons";
-library.add(faDiceD6, faEnvelope);
+import { faDiceD6, faEnvelope, faUserLock } from "@fortawesome/free-solid-svg-icons";
+library.add(faDiceD6, faEnvelope, faUserLock);
 
 function getProjectColorIcon(projectName) {
   let color = "#616A6B";
@@ -22,11 +22,15 @@ function getProjectColorIcon(projectName) {
 }
 
 class TopicTable extends React.Component {
+
+
   constructor(props) {
     super(props);
     this.authen = new Authen(config.endpoint);
     this.projectColors = {};
     this.state = { projects: [], topics: [], value: "" };
+
+  
 
     if (this.authen.isLogged()) {
       this.state = {
@@ -51,6 +55,9 @@ class TopicTable extends React.Component {
   }
 
   loadProjectTopics(value) {
+
+
+
     // if project value exists in known projects
     if (this.state.projects.indexOf(value)) {
       this.setState({
@@ -168,19 +175,19 @@ class TopicTable extends React.Component {
           <div className="edit-buttons">
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
-              to={"/projects/details/" + props.value}
+              to={"/topics/details" + props.value}
             >
               <FontAwesomeIcon icon="list" />
             </Link>
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
-              to={"/projects/update/" + props.value}
+              to={"/topics/mod-acl" + props.value}
             >
-              <FontAwesomeIcon icon="pen" />
+              <FontAwesomeIcon icon="user-lock" />
             </Link>
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
-              to={"/projects/delete/" + props.value}
+              to={"/topics/delete/" + props.value}
             >
               <FontAwesomeIcon icon="times" />
             </Link>
@@ -199,7 +206,7 @@ class TopicTable extends React.Component {
             <h2>Topics</h2>
           </div>
           <div className="col">
-            <Link className="btn btn-light" to="/projects/create">
+            <Link className="btn btn-light" to={"/topics/create#"+this.state.value}>
               <FontAwesomeIcon className="mr-2" icon="plus" size="lg" /> Create
               Topic
             </Link>

@@ -13,6 +13,8 @@ import UserDetails from "./UserDetails";
 import Welcome from "./Welcome";
 import Login from "./Login";
 import TopicDetails from "./TopicDetails"
+import CreateTopic from "./CreateTopic"
+import TopicACL from "./TopicACL"
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import Authen from "./Authen";
@@ -252,8 +254,24 @@ class App extends Component {
                   <Switch>
                     <Route exact path="/welcome" component={Welcome}/>
                     <Route exact path="/login" component={withRouter(Login)} />
-                   
-                    
+                    <ProtectedRoute
+                      exact 
+                      auth={this.authen.isLogged()}
+                      path="/topics/delete/projects/:projectname/topics/:topicname"
+                      component={TopicDetails}
+                      toDelete={true}
+                    />
+                    <ProtectedRoute exact
+                      auth={this.authen.isLogged()}
+                      path="/topics/mod-acl/projects/:projectname/topics/:topicname"
+                      component={TopicACL}
+                    />
+                    <ProtectedRoute exact
+                      auth={this.authen.isLogged()}
+                      path="/topics/create"
+                      component={CreateTopic}
+                      action="create"
+                    />
                     <ProtectedRoute
                       exact
                       auth={this.authen.isLogged()}
