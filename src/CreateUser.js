@@ -4,7 +4,7 @@ import {
   NotificationContainer,
   NotificationManager
 } from "react-notifications";
-import config from "./config";
+
 import Authen from "./Authen";
 import { Button, Card } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -96,8 +96,8 @@ function validate(values, other) {
 class CreateUser extends Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.authen = new Authen();
+    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
     this.doCreateUser.bind(this);
 
     if (this.props.action === "create") {
@@ -123,7 +123,7 @@ class CreateUser extends Component {
       };
     }
 
-    this.apiGetProjects(this.authen.getToken(), config.endpoint);
+    this.apiGetProjects(this.authen.getToken(), this.authen.getEndpoint());
   }
 
   apiGetData(username) {

@@ -23,13 +23,18 @@ const validate = values => {
 class Login extends React.Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
+    // add first available endpoint as default
+    this.authen = new Authen();
+    this.authen.setEndpoint(config.endpoint);
     this.state = {
       redirectToReferrer: this.authen.isLogged()
     };
   }
 
   doLogin(data) {
+    this.authen.setEndpoint(data.backend);
+    console.log("endpoint set to", data.backend);
+    config.endpoint = data.backend;
     this.authen.tryLogin(data.token, data => {
       if (data.isLogged === true) {
         this.setState({ redirectToReferrer: true });
@@ -55,7 +60,8 @@ class Login extends React.Component {
               <h1>Login</h1>
               <Formik
                 initialValues={{
-                  token: ""
+                  token: "",
+                  backend: config.available_endpoints[0]
                 }}
                 validate={validate}
                 onSubmit={values => {
@@ -65,6 +71,12 @@ class Login extends React.Component {
                 render={({ values, errors, touched }) => (
                   <Form>
                     <div className="form-group">
+                      <label htmlFor="backend">Select service</label>
+                      <Field component="select" name="backend" className="form-control">
+                      {config.available_endpoints.map((value, index) => {
+                          return <option key={index} value={value}>{value}</option>
+                      })}
+                      </Field>
                       <label htmlFor="token">Access Token</label>
                       <Field name="token" className="form-control" />
                       <small className="field-error form-text text-danger">
@@ -74,6 +86,7 @@ class Login extends React.Component {
                     <button type="submit" className="btn btn-success">
                       Login
                     </button>
+                    
                   </Form>
                 )}
               />

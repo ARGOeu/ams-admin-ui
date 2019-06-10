@@ -99,7 +99,8 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    this.authen = new Authen(config.endpoint);
+    
+    this.authen = new Authen();
     this.authen.tryLogin(this.authen.getToken());
 
     this.state = {
@@ -111,7 +112,7 @@ class App extends Component {
 
     this.toggle = this.toggle.bind(this);
     this.toggle2 = this.toggle2.bind(this);
-    window.DM = new DataManager(config.endpoint, this.authen.getToken())
+    window.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken())
   }
 
   toggle() {
@@ -131,17 +132,29 @@ class App extends Component {
     // Create a navigation bar with links to different routes
     // Create a BrowserRouter Wrapper above App
     // Use Switch with two Routers to render two views: UserManager and About
+
+    // create a service backend label if logged 
+    var backendLabel=null;
+    let barColor = "#6E8DC4";
+
+    if (this.authen.isLogged()) {
+      backendLabel =  <span>: [ <code style={{fontWeight:"bold",color:"white",fontSize:"1em"}}>{this.authen.getEndpoint()}</code> ]</span>
+      barColor = config.endpoint_colors[this.authen.getEndpoint()];
+    }
+
+
+
     return (
       <BrowserRouter>
         <div className="App">
-          <Navbar id="argo-nav" expand="md">
+          <Navbar id="argo-nav" expand="md" style={{backgroundColor:barColor}}>
             <NavbarBrand className="text-light">
               <img
                 alt="argo admin ui"
                 className="logo img-responsive"
                 src={argologo}
               />
-              <strong>ARGO</strong> Admin UI
+              <strong>ARGO</strong> Admin UI {backendLabel}
             </NavbarBrand>
             <NavbarToggler onClick={this.toggle} />
             <Collapse isOpen={this.state.isOpen} navbar>
@@ -164,7 +177,7 @@ class App extends Component {
                       >
                         <PopoverHeader>Services</PopoverHeader>
                         <PopoverBody>
-                          <strong>{config.service}</strong>{": " + config.endpoint}
+                          <strong>{config.service}</strong>{": " + this.authen.getEndpoint()}
                         </PopoverBody>
                       </Popover>
                       </Link>

@@ -25,8 +25,8 @@ function getProjectColorIcon(projectName) {
 class CreateTopic extends Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.authen = new Authen();
+    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
     this.state = { projects: [], topics: [], value: "" };
     if (this.authen.isLogged()) {
       this.state = {
@@ -123,9 +123,13 @@ class CreateTopic extends Component {
     this.DM.topicGet(project).then(r => {
       if (r.done) {
         let listOfTopics = [];
-        for (let itemTopic of r.data.topics) {
-          listOfTopics.push(itemTopic.name.split("/")[4]);
+        // Failsafe for ams version that returns empty resposne
+        if ("topics" in r.data) {
+          for (let itemTopic of r.data.topics) {
+            listOfTopics.push(itemTopic.name.split("/")[4]);
+          }
         }
+        
 
         this.setState({ topics: listOfTopics });
       }

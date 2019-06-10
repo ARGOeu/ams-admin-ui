@@ -4,7 +4,7 @@ import {
   NotificationContainer,
   NotificationManager
 } from "react-notifications";
-import config from "./config";
+
 import Authen from "./Authen";
 import {Button, Card} from "reactstrap"
 import DataManager from "./DataManager";
@@ -36,8 +36,8 @@ function validate(values, other) {
 class CreateProject extends Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.authen = new Authen();
+    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
     this.doCreateProject.bind(this);
 
     if (this.props.action === "create") {
@@ -63,7 +63,7 @@ class CreateProject extends Component {
       };
     }
 
-    this.apiGetProjects(this.authen.getToken(), config.endpoint);
+    this.apiGetProjects(this.authen.getToken(), this.authen.getEndpoint());
   }
 
   apiGetData(projectname) {

@@ -49,14 +49,14 @@ const colors = [
 class UserTable extends React.Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken())
+    this.authen = new Authen();
+    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken())
     this.projectColors = {}
     this.state = { users: [] };
 
     if (this.authen.isLogged()) {
       this.state = {
-        users: this.apiGetData(this.authen.getToken(), config.endpoint)
+        users: this.apiGetData()
       };
     } 
   }

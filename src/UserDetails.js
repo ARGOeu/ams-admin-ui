@@ -1,6 +1,5 @@
 import React from "react";
 import Authen from "./Authen";
-import config from "./config";
 import DataManager from "./DataManager"
 import {
   Col,
@@ -45,8 +44,8 @@ function clip() {
 class UserDetails extends React.Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken())
+    this.authen = new Authen();
+    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken())
     this.state = { user: null, popoverOpen: false };
 
     this.apiGetData = this.apiGetData.bind(this);
