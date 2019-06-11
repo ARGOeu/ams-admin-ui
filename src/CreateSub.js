@@ -27,12 +27,12 @@ function getProjectColorIcon(projectName) {
 class CreateSub extends Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.authen = new Authen();
+    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
     this.state = { projects: [], subs: [], topics: [], value: "" };
     if (this.authen.isLogged()) {
       this.state = {
-        projects: this.apiGetProjects(this.authen.getToken(), config.endpoint),
+        projects: this.apiGetProjects(this.authen.getToken(), this.authen.getEndpoint()),
         value: window.location.hash.substring(1),
         error: {sub:"",topic:"",project:""},
         sub: "",
@@ -177,9 +177,13 @@ class CreateSub extends Component {
     this.DM.subGet(project).then(r=>{
       if (r.done){
         let listOfSubs = [];
-        for (let itemSub of r.data.subscriptions) {
-          listOfSubs.push(itemSub.name.split("/")[4]);
+        // Failsafe for ams version that returns empty response
+        if ("subscriptions" in r.data) {
+          for (let itemSub of r.data.subscriptions) {
+            listOfSubs.push(itemSub.name.split("/")[4]);
+          }
         }
+       
         
         this.setState({ subs: listOfSubs});
       }

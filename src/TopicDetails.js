@@ -61,8 +61,8 @@ function getProjectColorIcon(projectName) {
 class TopicDetails extends React.Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.authen = new Authen();
+    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
     this.state = { topics: null, acl: null };
 
     this.apiGetData.bind(this);
@@ -281,7 +281,7 @@ class TopicDetails extends React.Component {
             <Button color="danger" className="mr-2" onClick={() => {
                 this.apiDelete(
                   this.authen.getToken(),
-                  config.endpoint,
+                  this.authen.getEndpoint(),
                   this.props.match.params.projectname,
                   this.props.match.params.topicname
                 );

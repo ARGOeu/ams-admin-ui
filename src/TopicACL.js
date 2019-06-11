@@ -3,7 +3,7 @@ import {
   NotificationContainer,
   NotificationManager
 } from "react-notifications";
-import config from "./config";
+
 import Authen from "./Authen";
 import { CardBody, Card } from "reactstrap";
 import DataManager from "./DataManager";
@@ -12,8 +12,8 @@ import DataManager from "./DataManager";
 class TopicACL extends Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.authen = new Authen();
+    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
     this.state = {  project: "",
     topic: "",
     user:"",

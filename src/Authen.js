@@ -1,5 +1,7 @@
 class Authen {
-  constructor(endpoint) {
+  
+
+  setEndpoint(endpoint) {
     localStorage.setItem("auth_endpoint", endpoint);
   }
 
@@ -49,12 +51,17 @@ class Authen {
 
   isLogged() {
     let logged =  JSON.parse(localStorage.getItem("auth_logged"));
+    
     if (logged === null) return false;
     return logged;
   }
 
   getToken() {
     return localStorage.getItem("auth_token");
+  }
+
+  getEndpoint() {
+    return localStorage.getItem("auth_endpoint");
   }
 
   getUsername() {

@@ -66,8 +66,8 @@ function getProjectColorIcon(projectName) {
 class SubDetails extends React.Component {
   constructor(props) {
     super(props);
-    this.authen = new Authen(config.endpoint);
-    this.DM = new DataManager(config.endpoint, this.authen.getToken());
+    this.authen = new Authen();
+    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
     this.state = { sub: null, acl: null, offsets: {min:0, current:0, max:0} };
 
     this.apiGetData.bind(this);
