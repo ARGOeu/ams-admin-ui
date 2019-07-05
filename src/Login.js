@@ -25,7 +25,7 @@ class Login extends React.Component {
     super(props);
     // add first available endpoint as default
     this.authen = new Authen();
-    this.authen.setEndpoint(config.endpoint);
+    
     this.state = {
       redirectToReferrer: this.authen.isLogged()
     };

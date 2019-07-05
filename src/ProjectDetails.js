@@ -64,6 +64,16 @@ class ProjectDetails extends React.Component {
     }
   }
 
+  componentWillReceiveProps(props) {
+    this.setState({
+        toDelete: this.props.toDelete,
+        project: this.apiGetData(this.props.match.params.projectname),
+        topics: this.apiGetTopics(this.props.match.params.projectname),
+        subs: this.apiGetSubs(this.props.match.params.projectname),
+        metrics: this.apiGetMetrics(this.props.match.params.projectname)
+      });
+  }
+
   apiGetMetrics(projectName) {
     this.DM.projectGetMetrics(projectName).then(r => {
       if (r.done) {
