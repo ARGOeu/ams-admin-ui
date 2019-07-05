@@ -173,7 +173,7 @@ class App extends Component {
         let user_roles = null;
 
         // check eligible actions
-        const allowUsers = this.state.isServiceAdmin;
+        const allowUsers = this.state.isServiceAdmin || this.state.isProjectAdmin;
         const allowProjects =
             this.state.isServiceAdmin || this.state.isProjectAdmin;
         const allowTopics =
