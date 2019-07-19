@@ -139,6 +139,7 @@ class UserTable extends React.Component {
   // based on service role return an appropriate fa icon
   beautifyServiceRoles(serviceRoles) {
     
+    if (!serviceRoles) return null
 
     if (serviceRoles.includes("service_admin")) {
       return (<FontAwesomeIcon className="service-crown" icon="crown" />);
@@ -275,6 +276,12 @@ class UserTable extends React.Component {
             columns={columns}
             className="-striped -highlight"
             defaultPageSize={20}
+            defaultFilterMethod = {
+                (filter, row, column) => {
+                    const id = filter.pivotId || filter.id
+                    return row[id] !== undefined ? String(row[id]).includes(filter.value) : true
+                }
+            }
           />
         </div>
       </div>

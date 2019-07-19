@@ -112,7 +112,7 @@ class TopicTable extends React.Component {
           </Link>
         ),
         minWidth: 20,
-
+        filterable: true,
         headerClassName: "list-header"
       },
       {
@@ -124,7 +124,7 @@ class TopicTable extends React.Component {
           </Link>
         ),
         minWidth: 80,
-
+        
         headerClassName: "list-header"
       },
       {
@@ -249,6 +249,12 @@ class TopicTable extends React.Component {
             columns={columns}
             className="-striped -highlight"
             defaultPageSize={20}
+            defaultFilterMethod = {
+                (filter, row, column) => {
+                    const id = filter.pivotId || filter.id
+                    return row[id] !== undefined ? String(row[id]).includes(filter.value) : true
+                }
+            }
           />
         </div>
       </div>

@@ -92,7 +92,8 @@ class ProjectTable extends React.Component {
         Cell: props => (
           <span>{props.value}</span>
         ),
-        headerClassName: "list-header"
+        headerClassName: "list-header",
+        filterable: true,
       },
       {
         Header: "Actions",
@@ -162,6 +163,12 @@ class ProjectTable extends React.Component {
             columns={columns}
             className="-striped -highlight"
             defaultPageSize={20}
+            defaultFilterMethod = {
+                (filter, row, column) => {
+                    const id = filter.pivotId || filter.id
+                    return row[id] !== undefined ? String(row[id]).includes(filter.value) : true
+                }
+            }
           />
         </div>
       </div>
