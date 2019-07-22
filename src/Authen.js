@@ -98,7 +98,15 @@ class Authen {
     }
 
     isServiceAdmin(){
-        return "service_admin" in this.getServiceRoles()
+        return this.getServiceRoles().indexOf("service_admin") > -1
+    }
+
+    isPublisher(){
+        return "publisher" in this.getProjectsPerRole()
+    }
+
+    isConsumer(){
+        return "consumer" in this.getProjectsPerRole()
     }
 
     isProjectAdmin() {
