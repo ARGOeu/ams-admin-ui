@@ -57,7 +57,7 @@ import {
   faEnvelopeOpen,
   faUsersCog,
   faUserAstronaut,
-  faUser
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 
 import config from './config';
@@ -137,12 +137,43 @@ class App extends Component {
     var backendLabel=null;
     let barColor = "#6E8DC4";
 
+
+
     if (this.authen.isLogged()) {
       backendLabel =  <span>: [ <code style={{fontWeight:"bold",color:"white",fontSize:"1em"}}>{this.authen.getEndpoint()}</code> ]</span>
       barColor = config.endpoint_colors[this.authen.getEndpoint()];
     }
 
+    let user_roles = null
 
+
+    // check user roles 
+  
+    let servRoles = this.authen.getServiceRoles() 
+    if (servRoles.length > 0){
+        if (servRoles[0] === "service_admin"){
+            user_roles = <span><FontAwesomeIcon
+            icon="crown"
+          /> {servRoles[0]}<br/></span>
+        }
+        
+    } else {
+        let roleList = []
+        let roles = this.authen.getProjectsPerRole()
+        for (let key in roles) {
+            let projectList = []
+            let projects = Array.from(roles[key])
+            for (let project of projects) {
+                projectList.push( <Link className="badge blue-badge mr-2 p-2 mb-2 text-white" to={"/projects/details/" + project}>
+                {project}
+              </Link>)
+            }
+            roleList.push(<li key={key}><strong><FontAwesomeIcon
+                icon="shield-alt"
+              /> {key}:</strong><br/>{projectList}</li>)
+        }
+        user_roles = <ul style={{listStyle:"none",padding:0}}>{roleList}</ul>
+    }
 
     return (
       <BrowserRouter>
@@ -211,6 +242,7 @@ class App extends Component {
                       >
                         <PopoverHeader>{this.authen.getUsername()}</PopoverHeader>
                         <PopoverBody>
+                          {user_roles}
                           <button onClick={()=>{this.authen.setLogout(); this.setState({isLogged:false}); this.toggle();}}>logout</button>
                         </PopoverBody>
                       </Popover>
@@ -256,7 +288,9 @@ class App extends Component {
                         Subscriptions
                       </Link>
                     </NavItem>
+                    
                     <NavItem>
+                      
                       <Link to="/users">
                         <FontAwesomeIcon
                           className="side-ico"
@@ -265,6 +299,7 @@ class App extends Component {
                         Users
                       </Link>
                     </NavItem>
+                    
                   </Nav>
                 </div>
               </Col>
