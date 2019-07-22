@@ -29,7 +29,7 @@ class CreateSub extends Component {
     super(props);
     this.authen = new Authen();
     this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
-    this.state = { projects: [], subs: [], topics: [], value: "" };
+    this.state = { projects: [], subs: [], topics: [], value: "", isServiceAdmin: this.authen.isServiceAdmin(), isProjectAdmin: this.authen.isProjectAdmin() };
     if (this.authen.isLogged()) {
       this.state = {
         projects: this.apiGetProjects(this.authen.getToken(), this.authen.getEndpoint()),
@@ -128,6 +128,17 @@ class CreateSub extends Component {
 
   // get project data
   apiGetProjects() {
+    
+    if (this.state.isServiceAdmin === false && this.state.isProjectAdmin === true){
+        // get project list from allowed projects
+        let allowedProjects = this.authen.getProjectsPerRole()["project_admin"]
+        let results = []
+        for (let project of allowedProjects)
+        results.push({"name":project, "created_on":"", "modified_on":""})
+        return results
+        
+    }
+
     this.DM.projectGet().then(r=>{
       if (r.done){
         this.setState({projects: r.data.projects})

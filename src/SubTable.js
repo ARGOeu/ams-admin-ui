@@ -30,7 +30,7 @@ class SubTable extends React.Component {
     this.authen = new Authen();
     this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
     this.projectColors = {};
-    this.state = { projects: [], subs: [], value: "" };
+    this.state = { projects: [], subs: [], value: "", isServiceAdmin: this.authen.isServiceAdmin(), isProjectAdmin: this.authen.isProjectAdmin() };
 
   
 
@@ -71,6 +71,17 @@ class SubTable extends React.Component {
 
   // get project data
   apiGetProjects() {
+    
+    if (this.state.isServiceAdmin === false && this.state.isProjectAdmin === true){
+        // get project list from allowed projects
+        let allowedProjects = this.authen.getProjectsPerRole()["project_admin"]
+        let results = []
+        for (let project of allowedProjects)
+        results.push({"name":project, "created_on":"", "modified_on":""})
+        return results
+        
+    }
+
     this.DM.projectGet().then(r=>{
       if (r.done){
         this.setState({projects:r.data.projects})

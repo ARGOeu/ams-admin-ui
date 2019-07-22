@@ -148,7 +148,7 @@ class App extends Component {
 
 
     // check user roles 
-  
+    let isServiceAdmin = false
     let servRoles = this.authen.getServiceRoles() 
     if (servRoles.length > 0){
         if (servRoles[0] === "service_admin"){
@@ -156,6 +156,7 @@ class App extends Component {
             icon="crown"
           /> {servRoles[0]}<br/></span>
         }
+        isServiceAdmin = true
         
     } else {
         let roleList = []
@@ -164,7 +165,7 @@ class App extends Component {
             let projectList = []
             let projects = Array.from(roles[key])
             for (let project of projects) {
-                projectList.push( <Link className="badge blue-badge mr-2 p-2 mb-2 text-white" to={"/projects/details/" + project}>
+                projectList.push( <Link key={project} className="badge blue-badge mr-2 p-2 mb-2 text-white" to={"/projects/details/" + project}>
                 {project}
               </Link>)
             }
@@ -288,7 +289,7 @@ class App extends Component {
                         Subscriptions
                       </Link>
                     </NavItem>
-                    
+                    { isServiceAdmin && 
                     <NavItem>
                       
                       <Link to="/users">
@@ -299,7 +300,7 @@ class App extends Component {
                         Users
                       </Link>
                     </NavItem>
-                    
+                    }
                   </Nav>
                 </div>
               </Col>
@@ -419,38 +420,38 @@ class App extends Component {
                     <ProtectedRoute exact auth={this.authen.isLogged()} path="/" component={Welcome} />
                     <ProtectedRoute
                       exact
-                      auth={this.authen.isLogged()}
+                      auth={this.authen.isLogged() && isServiceAdmin}
                       path="/users/delete/:username"
                       component={UserDetails}
                       toDelete={true}
                     />
                     <ProtectedRoute
                       exact
-                      auth={this.authen.isLogged()}
+                      auth={this.authen.isLogged() && isServiceAdmin}
                       path="/users/details/:username"
                       component={UserDetails}
                       toDelete={false}
                     />
                     <ProtectedRoute exact
-                      auth={this.authen.isLogged()}
+                      auth={this.authen.isLogged() && isServiceAdmin}
                       path="/users/update/:username"
                       component={CreateUser}
                       action="update"
                     />
                     <ProtectedRoute exact
-                      auth={this.authen.isLogged()}
+                      auth={this.authen.isLogged() && isServiceAdmin}
                       path="/users/create"
                       component={CreateUser}
                       action="create"
                     />
                     <ProtectedRoute
                       exact
-                      auth={this.authen.isLogged()}
+                      auth={this.authen.isLogged() && isServiceAdmin}
                       path="/users"
                       component={UserTable}
                     />
-                    
                     <ProtectedRoute auth={this.authen.isLogged()} exact path="/about" component={About} />
+                    <Redirect to="/" />
                   </Switch>
                 </main>
               </Col>

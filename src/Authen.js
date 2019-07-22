@@ -97,6 +97,14 @@ class Authen {
         return [];
     }
 
+    isServiceAdmin(){
+        return "service_admin" in this.getServiceRoles()
+    }
+
+    isProjectAdmin() {
+        return "project_admin" in this.getProjectsPerRole()
+    }
+
     getProjects() {
         let strProjects = localStorage.getItem("auth_projects");
         if (strProjects) {
