@@ -28,11 +28,15 @@ class Authen {
             })
             .then(json => {
                 if (json.error === undefined) {
+                    let serviceRoles = ""
+                    if (json.service_roles) {
+                        serviceRoles = json.service_roles
+                    }
                     this.setLogin(
                         json.name,
                         token,
                         json.projects,
-                        json.service_roles
+                        serviceRoles
                     );
                     if (callback !== undefined) {
                         return callback({
@@ -91,9 +95,15 @@ class Authen {
 
     getServiceRoles() {
         let strServiceRoles = localStorage.getItem("auth_service_roles");
-        if (strServiceRoles) {
-            return JSON.parse(strServiceRoles);
+        try {
+            if (strServiceRoles) {
+                return JSON.parse(strServiceRoles);
+            }
         }
+        catch(err){
+            console.log(err)
+        }
+        
         return [];
     }
 

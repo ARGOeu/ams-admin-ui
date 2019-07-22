@@ -55,6 +55,16 @@ class DataManager {
     return this.doPost(url);
   }
 
+  projectMembersGet(project){
+    if (!this.token || !this.endpoint) return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" + this.endpoint + "/v1/projects/" + project +  "/members?key=" + this.token;
+   
+    return this.doGet(url, "users");
+  }
+
   userGet(userName) {
     if (!this.token || !this.endpoint) return Promise.resolve({ done: false });
     let user = "";
@@ -63,6 +73,7 @@ class DataManager {
     // quickly construct request url
     let url =
       "https://" + this.endpoint + "/v1/users" + user + "?key=" + this.token;
+   
     return this.doGet(url, "users");
   }
 
