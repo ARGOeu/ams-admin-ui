@@ -152,14 +152,13 @@ class SubDetails extends React.Component {
     }
 
     apiGetAcl(projectName, subName) {
-        if (this.state.isPublisher || this.state.isServiceAdmin) {
-            this.DM.subGetACL(projectName, subName).then(r => {
-                if (r.done) {
-                    this.setState({ acl: r.data });
-                }
-            });
-        }
-        return null;
+       
+        this.DM.subGetACL(projectName, subName).then(r => {
+            if (r.done) {
+                this.setState({ acl: r.data });
+            }
+        });
+    
     }
 
     render() {
