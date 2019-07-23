@@ -58,11 +58,11 @@ class UpdateSub extends Component {
                 let pushRetryPolicy = "";
                 let pushRetryInterval = "";
                 if (r.data.pushConfig.retryPolicy.hasOwnProperty("type")) {
-                    pushRetryPolicy = r.data.pushConfig.pushRetryPolicy.type;
+                    pushRetryPolicy = r.data.pushConfig.retryPolicy.type;
                 }
-                if (r.data.pushConfig.retryPolicy.hasOwnProperty("interval")) {
+                if (r.data.pushConfig.retryPolicy.hasOwnProperty("period")) {
                     pushRetryInterval =
-                        r.data.pushConfig.pushRetryPolicy.interval;
+                        r.data.pushConfig.retryPolicy.period;
                 }
 
                 this.setState({
@@ -119,7 +119,7 @@ class UpdateSub extends Component {
 
     validatePushEndpoint(value) {
         let errors = this.state.errors;
-        if (
+        if ( value !== "" &&
             !/^((https):\/\/)([w|W]{3}\.)?[a-zA-Z0-9\-.]{3,}\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/i.test(
                 value
             )
@@ -174,6 +174,7 @@ class UpdateSub extends Component {
     doModPushConfig(project, sub) {
         let retryPolicy = {};
         if (
+            this.state.pushEndpoint !== "" &&
             this.state.pushRetryPolicy !== "" &&
             this.state.pushRetryInterval !== ""
         ) {
@@ -181,12 +182,16 @@ class UpdateSub extends Component {
             retryPolicy["interval"] = parseInt(this.state.pushRetryInterval);
         }
 
+        
+
         let pushConfig = {
             pushConfig: {
                 pushEndpoint: this.state.pushEndpoint,
                 retryPolicy: retryPolicy
             }
         };
+
+        
 
         this.DM.subModPushConfig(project, sub, pushConfig).then(done => {
             if (done) {

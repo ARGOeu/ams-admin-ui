@@ -68,7 +68,7 @@ class UserTable extends React.Component {
             this.authen.getToken()
         );
         this.projectColors = {};
-        if (this.authen.isLogged()){
+        if (!this.authen.isLogged()){
             this.state = {
                 allProjects: true,
                 users: [],
