@@ -132,14 +132,14 @@ class TopicDetails extends React.Component {
     }
 
     apiGetAcl(projectName, topicName) {
-        if (this.state.isPublisher || this.state.isServiceAdmin){
-            this.DM.topicGetACL(projectName, topicName).then(r => {
+        
+        this.DM.topicGetACL(projectName, topicName).then(r => {
                 if (r.done) {
                     this.setState({ acl: r.data });
                 }
             });
-        } 
-        return null;
+         
+        
         
     }
 

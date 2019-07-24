@@ -10,7 +10,11 @@ import {
     CardBody,
     CardHeader,
     CardFooter,
-    Row
+    Row,
+    Popover,
+    PopoverBody,
+    PopoverHeader
+
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -28,6 +32,7 @@ import {
     faPaperPlane,
     faSlidersH,
     faInfoCircle
+    
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
 library.add(
@@ -39,6 +44,7 @@ library.add(
     faPaperPlane,
     faSlidersH,
     faInfoCircle
+  
 );
 
 function getShortName(fullName) {
@@ -74,6 +80,7 @@ class SubDetails extends React.Component {
             this.authen.getToken()
         );
         this.state = {
+            popoverOpen: false,
             sub: null,
             acl: null,
             offsets: { min: 0, current: 0, max: 0 }
@@ -105,8 +112,33 @@ class SubDetails extends React.Component {
                 isConsumer: this.authen.isConsumer()
             };
         } else {
-            this.state = { sub: null };
+            this.state = { sub: null, popoverOpen: false };
         }
+    }
+
+
+    toggle() {
+      if (this.state){
+        this.setState({
+            popoverOpen: !this.state.popoverOpen
+          });
+      } 
+    }
+
+    apiDoVerify() {
+        /* To be implemented */
+    }
+
+    apiClearPushConfig() {
+        this.DM.subModPushConfig( this.props.match.params.projectname, 
+            this.props.match.params.subname, {}).then(done => {
+            if (done) {
+                this.apiGetData(
+                    this.props.match.params.projectname,
+                    this.props.match.params.subname
+                )
+            }
+        });
     }
 
     apiDelete(project, sub) {
@@ -152,14 +184,13 @@ class SubDetails extends React.Component {
     }
 
     apiGetAcl(projectName, subName) {
-        if (this.state.isPublisher || this.state.isServiceAdmin) {
-            this.DM.subGetACL(projectName, subName).then(r => {
-                if (r.done) {
-                    this.setState({ acl: r.data });
-                }
-            });
-        }
-        return null;
+       
+        this.DM.subGetACL(projectName, subName).then(r => {
+            if (r.done) {
+                this.setState({ acl: r.data });
+            }
+        });
+    
     }
 
     render() {
@@ -176,7 +207,76 @@ class SubDetails extends React.Component {
         let willBack = null;
 
         let acl = null;
+        let push = null;
         let metrics = null;
+
+        if (this.state.sub && this.state.sub.pushConfig && this.state.sub.pushConfig.pushEndpoint !== "") {
+            push = (<ul className="text-left list-group">
+                <li key="push_header" className="list-group-item list-group-item-success text-center">
+                <FontAwesomeIcon icon="paper-plane" /> push mode enabled
+                <button
+                    id="disable-push"
+                    onClick={() => {
+                      this.toggle();
+                    }}
+                    className="ml-2 btn btn-sm btn-danger"
+                  >
+                    Disable
+                  </button>
+                <Popover
+                    placement="bottom"
+                    isOpen={this.state.popoverOpen}
+                    target="disable-push"
+                    toggle={this.toggle}
+                  >
+                    <PopoverHeader>Are you sure ?</PopoverHeader>
+                    <PopoverBody>
+                      <button
+                        id="confirm-disable-push"
+                        onClick={() => {
+                          this.apiClearPushConfig();
+                          this.toggle();
+                        }}
+                        className="ml-2 btn btn-sm btn-dark"
+                      >
+                        Confirm
+                      </button>
+                    </PopoverBody>
+                  </Popover>
+                </li>
+                <li key="push_info" className="list-group-item py-2 ">
+                    <strong>push to: </strong> <a target="_blank" rel="noopener noreferrer" href={this.state.sub.pushConfig.pushEndpoint}><code>{this.state.sub.pushConfig.pushEndpoint}</code></a>
+                </li>
+                <li key="push_policy" className="list-group-item py-2 ">
+                <strong>retry policy:</strong><br/>
+                <span>  - type:</span><code>{this.state.sub.pushConfig.retryPolicy.type}</code><br/>
+                <span>  - period:</span><code>{this.state.sub.pushConfig.retryPolicy.period}</code>
+                </li>
+                { this.state.sub.pushConfig.verify && 
+                 <li className="list-group-item py-2 ">
+                     Push endpoint <strong style={{color:"green"}}>verified!</strong><br/>
+                     <strong>Status</strong>{this.state.sub.pushConfig.status}
+
+                 </li>
+                }
+                { !this.state.sub.pushConfig.verify && 
+                 <li className="list-group-item py-2 ">
+                     Push endpoint <strong style={{color:"red"}}>unverified!</strong><br/>
+                     <p style={{fontWeight:"lighter"}}>
+                         Please verify remote endpoint: <strong>{this.state.sub.pushConfig.pushEndpoint}</strong><span> using the following verification hash: </span>
+                         <code>{this.state.sub.pushConfig.verification_hash}</code>  
+                     </p>
+                     <p className="text-center">
+                     <button className="btn btn-secondary btn-sm">Verify Endpoint</button>
+                     </p>
+                     
+
+                 </li>
+                }  
+
+
+            </ul>)
+        }
 
         if (this.state.acl && this.state.acl.authorized_users.length > 0) {
             let aclUsers = [];
@@ -546,26 +646,14 @@ class SubDetails extends React.Component {
                                                 </code>
                                             </span>
                                         </li>
-                                        {this.state.sub.pushConfig
-                                            .pushEndpoint !== "" && (
-                                            <li className="list-group-item">
-                                                <span>
-                                                    <strong>
-                                                        push endpoint:
-                                                    </strong>{" "}
-                                                    <code>
-                                                        {
-                                                            this.state.sub
-                                                                .pushConfig
-                                                                .pushEndpoint
-                                                        }
-                                                    </code>
-                                                </span>
-                                            </li>
-                                        )}
+                                        
                                     </ul>
-
+                                    
+                                    {push}
+                                    <br/>
                                     {acl}
+
+                                    
                                 </CardBody>
                             </Card>
                         </div>
