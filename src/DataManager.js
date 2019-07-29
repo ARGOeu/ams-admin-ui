@@ -417,6 +417,18 @@ class DataManager {
     return this.doSimplePost(url, data)
   }
 
+  subVerifyEndpoint(project, sub) {
+    if (!project || !sub  || !this.token || !this.endpoint)
+        return Promise.resolve({ done: false });
+    
+    // quickly construct the request url 
+    let url = "https://" + this.endpoint + "/v1/projects/" +
+    project + "/subscriptions/" + sub + ":verifyPushEndpoint?key=" + 
+    this.token;
+
+    return this.doSimplePost(url, {})
+  }
+
   topicDelete(project, topic) {
     if (!project || !topic || !this.token || !this.endpoint)
       return Promise.resolve({ done: false });
