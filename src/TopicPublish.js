@@ -137,7 +137,11 @@ class TopicPublish extends Component {
                     1000
                 );
             } else {
+<<<<<<< HEAD
                 NotificationManager.error("Message publish Failed...", null, 1000);
+=======
+                NotificationManager.error("User Update Failed...", null, 1000);
+>>>>>>> ARGO-1887 Allow publishing of messages
             }
         });
     }
