@@ -370,8 +370,17 @@ class TopicDetails extends React.Component {
                     <Col>
                         <h2>Topic Details</h2>
                     </Col>
-                    { (!onlyPublisher) &&
+                    
+                    
                     <Col className="text-right">
+                        <Link
+                            className="btn btn-info  ml-1 mr-1"
+                            to={"/topics/publish" + this.state.topic.name}
+                        >
+                            <FontAwesomeIcon icon="envelope" /> Publish Messages
+                        </Link>
+                        { (!onlyPublisher) &&
+                        <>
                         <Link
                             className="btn btn-info  ml-1 mr-1"
                             to={"/topics/mod-acl" + this.state.topic.name}
@@ -384,8 +393,10 @@ class TopicDetails extends React.Component {
                         >
                             <FontAwesomeIcon icon="times" /> Delete Topic
                         </a>
+                        </>
+                        }
                     </Col>
-                    }
+                    
                 </Row>
 
                 <div>

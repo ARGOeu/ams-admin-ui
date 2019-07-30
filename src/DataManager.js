@@ -311,6 +311,27 @@ class DataManager {
     return this.doSimplePost(url, data)
   }
 
+  topicPublish(project,topic,msg){
+    
+    if (!project || !topic || !this.token || !this.endpoint){
+        return Promise.resolve({ done: false });
+    }
+
+    let data = {"messages":[msg]}
+
+    // quickly construct request url
+    let url =
+    "https://" +
+    this.endpoint +
+    "/v1/projects/" +
+    project + "/topics/" + topic +
+    ":publish?key=" +
+    this.token;
+
+    return this.doPost(url,data)
+
+  }
+
   userCreate(username, data) {
     if (!username || !this.token || !this.endpoint)
       return Promise.resolve({ done: false });

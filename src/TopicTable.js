@@ -197,6 +197,12 @@ class TopicTable extends React.Component {
                         >
                             <FontAwesomeIcon icon="list" />
                         </Link>
+                        <Link
+                            className="btn btn-light btn-sm ml-1 mr-1"
+                            to={"/topics/publish" + props.value}
+                        >
+                            <FontAwesomeIcon icon="envelope" />
+                        </Link>
                         { !onlyPublisher && 
                         <Link
                             className="btn btn-light btn-sm ml-1 mr-1"
@@ -215,7 +221,7 @@ class TopicTable extends React.Component {
                         }
                     </div>
                 ),
-                width: 130,
+                width: 180,
                 headerClassName: "list-header",
                 className: "text-center"
             }

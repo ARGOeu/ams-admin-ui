@@ -21,6 +21,7 @@ import Login from "./Login";
 import TopicDetails from "./TopicDetails";
 import CreateTopic from "./CreateTopic";
 import TopicACL from "./TopicACL";
+import TopicPublish from "./TopicPublish";
 import SubTable from "./SubTable";
 import SubDetails from "./SubDetails";
 import CreateSub from "./CreateSub";
@@ -553,6 +554,15 @@ class App extends Component {
                                             }
                                             path="/topics/mod-acl/projects/:projectname/topics/:topicname"
                                             component={TopicACL}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowTopics
+                                            }
+                                            path="/topics/publish/projects/:projectname/topics/:topicname"
+                                            component={TopicPublish}
                                         />
                                         <ProtectedRoute
                                             exact
