@@ -137,7 +137,7 @@ class TopicPublish extends Component {
                     1000
                 );
             } else {
-                NotificationManager.error("User Update Failed...", null, 1000);
+                NotificationManager.error("Message publish Failed...", null, 1000);
             }
         });
     }
