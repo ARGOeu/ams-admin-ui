@@ -246,6 +246,12 @@ class SubTable extends React.Component {
                         >
                             <FontAwesomeIcon icon="list" />
                         </Link>
+                        <Link
+                            className="btn btn-light btn-sm ml-1 mr-1"
+                            to={"/subs/pull" + props.value}
+                        >
+                            <FontAwesomeIcon icon="envelope-open" />
+                        </Link>
                         {  !(onlyConsumer) && 
                         <Link
                             className="btn btn-light btn-sm ml-1 mr-1"
@@ -276,7 +282,7 @@ class SubTable extends React.Component {
                         }
                     </div>
                 ),
-                width: 210,
+                width: 260,
                 headerClassName: "list-header",
                 className: "text-center"
             }

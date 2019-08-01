@@ -27,6 +27,7 @@ import SubDetails from "./SubDetails";
 import CreateSub from "./CreateSub";
 import UpdateSub from "./UpdateSub";
 import SubACL from "./SubACL";
+import SubPull from "./SubPull"
 import SubModOffset from "./SubModOffset";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -478,6 +479,15 @@ class App extends Component {
                                             }
                                             path="/subs/mod-offset/projects/:projectname/subscriptions/:subname"
                                             component={SubModOffset}
+                                        />
+                                         <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowTopics
+                                            }
+                                            path="/subs/pull/projects/:projectname/subscriptions/:subname"
+                                            component={SubPull}
                                         />
                                         <ProtectedRoute
                                             exact

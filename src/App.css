@@ -185,6 +185,7 @@ footer {
   bottom: 0px;
 }
 
+
 #sidebar nav a {
   display: inline-block;
   padding: .5rem 1rem;
@@ -256,9 +257,40 @@ header {
 
 #curlcode {
     display: block;
-    white-space: pre-wrap   
+    white-space: pre-line;
 }
 
+ul.list-group.list-group-striped li:nth-of-type(odd){
+    background: rgb(255, 255, 255);
+}
+ul.list-group.list-group-striped li:nth-of-type(even){
+    background: rgb(245, 245, 245);
+}
+ul.list-group.list-group-hover li:hover{
+    background: rgb(240, 240, 240);
+}
+
+.attr {
+    color: #3b3b3b;
+}
+
+.attr strong {
+    display: inline-block;
+    padding:2px;
+    background-color: #cfcece;
+    color: #5a5959;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+}
+
+.attr em {
+    display: inline-block;
+    padding:2px;
+    background-color: #dddddd;
+    
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
 
 
 header img{

@@ -15,8 +15,7 @@ library.add(faKeyboard, faEnvelope);
 
 function clip() {
     let copyText = document.getElementById("curl-snip");
-    console.log(copyText);
-    console.log(copyText.select());
+    copyText.select();
     document.execCommand("copy");
     NotificationManager.info("snippet copied to clipboard", null, 1000);
 }
@@ -42,6 +41,7 @@ function genCurlSnippet(endpoint, project, topic, token, msgBody) {
 }
 
 function composeMsgBody(msg, attrs, defineAttr) {
+    
     let attrD = {};
     let payload = "";
     if (attrs && attrs.length > 0) {
@@ -49,13 +49,17 @@ function composeMsgBody(msg, attrs, defineAttr) {
             attrD[attr.name] = attr.value;
         }
     }
+    
     if (msg) {
         payload = btoa(msg);
     }
 
-    if (attrs && attrs.length > 0 && defineAttr)
-        return { messages: [{ data: payload, attributes: attrD }] };
-    return { messages: [{ data: payload }] };
+   
+  
+    if (attrs && attrs.length > 0 && defineAttr) {
+        return { data: payload, attributes: attrD };
+    }
+    return { data: payload };
 }
 
 function validate(values, other) {
@@ -125,7 +129,8 @@ class TopicPublish extends Component {
     }
 
     doPublish(project, topic, values) {
-        let data = composeMsgBody(values.message, values.attributes);
+        let data = composeMsgBody(values.message, values.attributes, values.defineAttr);
+        
         this.DM.topicPublish(project, topic, data).then(r => {
             if (r.done) {
                 // get msg id
@@ -137,11 +142,9 @@ class TopicPublish extends Component {
                     1000
                 );
             } else {
-<<<<<<< HEAD
-                NotificationManager.error("Message publish Failed...", null, 1000);
-=======
-                NotificationManager.error("User Update Failed...", null, 1000);
->>>>>>> ARGO-1887 Allow publishing of messages
+
+                NotificationManager.error("Message Publish Failed...", null, 1000);
+
             }
         });
     }

@@ -165,7 +165,7 @@ class SubACL extends Component {
                 <NotificationContainer />
                 <div className="row mb-2">
                     <div className="col-2">
-                        <h2>Modify Topic ACL</h2>
+                        <h2>Modify Subscription ACL</h2>
                     </div>
                 </div>
                 <Card className="mb-2">

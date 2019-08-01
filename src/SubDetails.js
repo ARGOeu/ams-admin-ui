@@ -518,15 +518,21 @@ class SubDetails extends React.Component {
                         <h2>Subscription Details</h2>
                     </Col>
                     <Col className="text-right">
+                      <Link
+                            className="btn btn-info  ml-1 mr-1 mt-1"
+                            to={"/subs/pull" + this.state.sub.name}
+                        >
+                            <FontAwesomeIcon icon="envelope-open" /> Pull Messages
+                        </Link>
                         <Link
-                            className="btn btn-info  ml-1 mr-1"
+                            className="btn btn-info  ml-1 mr-1  mt-1"
                             to={"/subs/update" + this.state.sub.name}
                         >
                             <FontAwesomeIcon icon="pen" /> Modify Subscription
                         </Link>
                         {!onlyConsumer && (
                             <Link
-                                className="btn btn-info  ml-1 mr-1"
+                                className="btn btn-info  ml-1 mr-1  mt-1"
                                 to={"/subs/mod-acl" + this.state.sub.name}
                             >
                                 <FontAwesomeIcon icon="user-lock" /> Modify ACL
@@ -534,14 +540,14 @@ class SubDetails extends React.Component {
                         )}
 
                         <Link
-                            className="btn btn-info  ml-1 mr-1"
+                            className="btn btn-info  ml-1 mr-1  mt-1"
                             to={"/subs/mod-offset" + this.state.sub.name}
                         >
                             <FontAwesomeIcon icon="sliders-h" /> Modify Offset
                         </Link>
                         {!onlyConsumer && (
                             <a
-                                className="btn btn-danger  ml-1 mr-1"
+                                className="btn btn-danger  ml-1 mr-1  mt-1"
                                 href={"/subs/delete" + this.state.sub.name}
                             >
                                 <FontAwesomeIcon icon="times" /> Delete Sub
