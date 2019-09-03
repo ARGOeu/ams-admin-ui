@@ -284,7 +284,7 @@ class UserTable extends React.Component {
                         return (
                             <Link
                         className="item-link"
-                        to={"/topics/details" + props.value}
+                        to={"/users/details/" + props.value}
                     >
                         {props.value}
                     </Link>
