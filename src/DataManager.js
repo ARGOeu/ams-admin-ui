@@ -311,6 +311,48 @@ class DataManager {
     return this.doSimplePost(url, data)
   }
 
+
+  subAck(project,sub,ackId){
+    if (!project || !sub || !this.token || !this.endpoint){
+        return Promise.resolve({ done: false });
+    }
+   
+    let data = {"ackIds":[ackId]}
+    
+    // quickly construct request url
+    let url =
+    "https://" +
+    this.endpoint +
+    "/v1/projects/" +
+    project + "/subscriptions/" + sub +
+    ":acknowledge?key=" +
+    this.token;
+    
+    return this.doPost(url,data)
+  }
+
+
+  subPull(project,sub,max,retImm){
+    
+    if (!project || !sub || !this.token || !this.endpoint){
+        return Promise.resolve({ done: false });
+    }
+   
+    let data = {"maxMessages":Number(max).toString(), "returnImmediately": Boolean(retImm).toString()}
+    
+    // quickly construct request url
+    let url =
+    "https://" +
+    this.endpoint +
+    "/v1/projects/" +
+    project + "/subscriptions/" + sub +
+    ":pull?key=" +
+    this.token;
+    
+    return this.doPost(url,data)
+
+  }
+
   topicPublish(project,topic,msg){
     
     if (!project || !topic || !this.token || !this.endpoint){
