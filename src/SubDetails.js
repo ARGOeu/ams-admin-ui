@@ -86,7 +86,8 @@ class SubDetails extends React.Component {
             offsets: { min: 0, current: 0, max: 0 }
         };
 
-        this.apiGetData.bind(this);
+        this.apiGetData = this.apiGetData.bind(this);
+        this.apiDoVerify = this.apiDoVerify.bind(this);
 
         if (this.authen.isLogged()) {
             this.state = {
@@ -126,25 +127,41 @@ class SubDetails extends React.Component {
     }
 
     apiDoVerify() {
-        /* To be implemented */
-    }
-
-    apiClearPushConfig() {
-        this.DM.subModPushConfig( this.props.match.params.projectname, 
-            this.props.match.params.subname, {}).then(done => {
-            if (done) {
+       this.DM.subVerifyEndpoint(this.props.match.params.projectname, this.props.match.params.subname).then(r =>{
+       
+            if (r.done) {
+                
                 this.apiGetData(
                     this.props.match.params.projectname,
                     this.props.match.params.subname
                 )
+            } else {
+                
+                NotificationManager.error(
+                    "Error during endpoint verification",
+                    null,
+                    1000
+                );
             }
+       })
+    }
+
+    apiClearPushConfig() {
+        this.DM.subModPushConfig( this.props.match.params.projectname, 
+            this.props.match.params.subname, {}).then(r => {
+            if (r.done) {
+                this.apiGetData(
+                    this.props.match.params.projectname,
+                    this.props.match.params.subname
+               )
+            } 
         });
     }
 
     apiDelete(project, sub) {
         let comp = this;
-        this.DM.subDelete(project, sub).then(done => {
-            if (done) {
+        this.DM.subDelete(project, sub).then(r => {
+            if (r.done) {
                 NotificationManager.info("Subscription Deleted", null, 1000);
                 setTimeout(function() {
                     comp.props.history.push("/subs#" + project);
@@ -262,12 +279,19 @@ class SubDetails extends React.Component {
                 { !this.state.sub.pushConfig.verify && 
                  <li className="list-group-item py-2 ">
                      Push endpoint <strong style={{color:"red"}}>unverified!</strong><br/>
-                     <p style={{fontWeight:"lighter"}}>
-                         Please verify remote endpoint: <strong>{this.state.sub.pushConfig.pushEndpoint}</strong><span> using the following verification hash: </span>
-                         <code>{this.state.sub.pushConfig.verification_hash}</code>  
+                     
+                     <p className="font-weight-normal">
+                         Please configure the remote endpoint so that:
+                         <code className="border rounded d-block font-weight-bold p-2">
+                             <a className="text-dark" href={this.state.sub.pushConfig.pushEndpoint+"/ams_verification_hash"}>{this.state.sub.pushConfig.pushEndpoint}/ams_verification_hash</a>
+                        </code>
+                         responds with the following text:
+                         <code className="border text-dark rounded d-block font-weight-bold p-2">
+                         {this.state.sub.pushConfig.verification_hash}
+                         </code>
                      </p>
                      <p className="text-center">
-                     <button className="btn btn-secondary btn-sm">Verify Endpoint</button>
+                     <button className="btn btn-secondary btn-sm" onClick={e=>this.apiDoVerify()}>Verify Endpoint</button>
                      </p>
                      
 

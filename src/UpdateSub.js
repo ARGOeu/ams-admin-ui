@@ -21,10 +21,10 @@ class UpdateSub extends Component {
             pushRetryPolicy: "",
             pushRetryInterval: "",
             errors: {
-                pushEndpoint: "",
-                ack: "",
-                retryInterval: "",
-                retryPolicy: ""
+                pushEndpoint: null,
+                ack: null,
+                retryInterval: null,
+                retryPolicy: null
             }
         };
 
@@ -36,7 +36,12 @@ class UpdateSub extends Component {
                 pushEndpoint: "",
                 pushRetryPolicy: "",
                 pushRetryInterval: "",
-                errors: { pushEndpoint: "", ack: "" }
+                errors: {
+                    pushEndpoint: null,
+                    ack: null,
+                    retryInterval: null,
+                    retryPolicy: null
+                }
             };
             // update sub
             this.apiGetData(this.state.project, this.state.subname);
@@ -63,6 +68,8 @@ class UpdateSub extends Component {
                 if (r.data.pushConfig.retryPolicy.hasOwnProperty("period")) {
                     pushRetryInterval =
                         r.data.pushConfig.retryPolicy.period;
+                } else {
+                    pushRetryInterval = 300
                 }
 
                 this.setState({
@@ -86,17 +93,22 @@ class UpdateSub extends Component {
     }
 
     validateRetryInterval(value) {
+       
         let errors = this.state.errors;
         if (value !== "") {
-            if (isNaN(value) || parseInt(value) < 300) {
+            
+            if (isNaN(value)) {
+                errors.retryInterval = "Please enter an integer value (>300)"
+            } else if(parseInt(value) < 300) {
                 errors.retryInterval =
                     "Please enter a numeric value larger than 300";
             } else {
-                errors.retryInterval = "";
+                errors.retryInterval = null;
             }
         } else {
-            errors.retryInterval = "";
+            errors.retryInterval = null;
         }
+        
         this.setState({ errors });
     }
 
@@ -109,10 +121,10 @@ class UpdateSub extends Component {
             ) {
                 errors.ack = "Please enter a numeric value between 0 and 600";
             } else {
-                errors.ack = "";
+                errors.ack = null;
             }
         } else {
-            errors.ack = "";
+            errors.ack = null;
         }
         this.setState({ errors });
     }
@@ -126,7 +138,7 @@ class UpdateSub extends Component {
         ) {
             errors.pushEndpoint = "Please enter a valid https url";
         } else {
-            errors.pushEndpoint = "";
+            errors.pushEndpoint = null;
         }
         this.setState({ errors });
     }
@@ -146,6 +158,7 @@ class UpdateSub extends Component {
     }
 
     handlePushRetryInterval(e) {
+        this.validateRetryInterval(e.target.value)
         this.setState({ pushRetryInterval: e.target.value });
     }
 
@@ -159,6 +172,12 @@ class UpdateSub extends Component {
     }
 
     doUpdate() {
+        
+        if (this.state.errors.retryInterval !== null ||
+            this.state.errors.pushEndpoint !== null
+        ) {
+            return;
+        }
         this.doModAck(this.state.project, this.state.subname);
         this.doModPushConfig(this.state.project, this.state.subname);
     }
@@ -167,7 +186,7 @@ class UpdateSub extends Component {
         this.DM.subModAck(project, sub, {
             ackDeadlineSeconds: parseInt(this.state.ackDeadlineSeconds)
         }).then(done => {
-            console.log("ack updated");
+            
         });
     }
 
@@ -179,7 +198,7 @@ class UpdateSub extends Component {
             this.state.pushRetryInterval !== ""
         ) {
             retryPolicy["type"] = this.state.pushRetryPolicy;
-            retryPolicy["interval"] = parseInt(this.state.pushRetryInterval);
+            retryPolicy["period"] = parseInt(this.state.pushRetryInterval);
         }
 
         
@@ -289,10 +308,11 @@ class UpdateSub extends Component {
                                                 {this.state.errors.pushEndpoint}
                                             </label>
                                         </div>
-
+                                        { this.state.pushEndpoint && 
+                                        <>
                                         <div className="form-control-group">
                                             <label>Push Retry Policy:</label>
-                                            <input
+                                            <select
                                                 id="inp-push-endpoint"
                                                 className="form-control"
                                                 onChange={
@@ -301,7 +321,9 @@ class UpdateSub extends Component {
                                                 value={
                                                     this.state.pushRetryPolicy
                                                 }
-                                            />
+                                            >
+                                                <option value="linear">linear</option>
+                                            </select>
                                         </div>
 
                                         <div className="form-control-group">
@@ -318,7 +340,12 @@ class UpdateSub extends Component {
                                                     this.state.pushRetryInterval
                                                 }
                                             />
+                                            <label className="text-danger">
+                                                {this.state.errors.retryInterval}
+                                            </label>
                                         </div>
+                                        </>
+                                        }
                                     </div>
                                     }
 
