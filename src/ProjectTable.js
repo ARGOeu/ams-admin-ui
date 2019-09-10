@@ -143,7 +143,7 @@ class ProjectTable extends React.Component {
           <h2>Projects</h2>
         </div>
         <div className="col">
-          { this.state.isServiceAdmin &&
+          { this.authen.isServiceAdmin() &&
           <Link className="btn btn-light" to="/projects/create">
             <FontAwesomeIcon className="mr-2" icon="plus" size="lg" /> Create
             Project

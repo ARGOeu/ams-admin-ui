@@ -64,9 +64,13 @@ class SubACL extends Component {
                 if (r.done) {
                     let result = [];
                     for (let user of r.data.users) {
-                        if (user.projects[0].roles.includes("consumer")) {
-                            result.push(user.name);
+                        for (let i=0; i < user.projects.length; i++){
+                            if (user.projects[i].roles.includes("consumer")) {
+                                result.push(user.name);
+                                break;
+                            }
                         }
+                        
                     }
                     this.setState({ users: result });
                 }

@@ -73,6 +73,7 @@ class UserTable extends React.Component {
                 allProjects: true,
                 users: [],
                 projects: [],
+                value:"",
                 isServiceAdmin: false,
                 isProjectAdmin: false
             };
@@ -81,6 +82,7 @@ class UserTable extends React.Component {
                 allProjects: true,
                 users: [],
                 projects: [],
+                value:"",
                 isServiceAdmin: this.authen.isServiceAdmin(),
                 isProjectAdmin: this.authen.isProjectAdmin()
             }
@@ -90,12 +92,17 @@ class UserTable extends React.Component {
     componentDidMount(){
         if (this.authen.isLogged()) {
             this.setState({
+                value: "",
                 allProjects: true,
                 users: [],
                 projects: this.apiGetProjects()
             });
             this.apiGetData();
         }
+    }
+
+    matchProjects(state, value) {
+        return state.name.toLowerCase().indexOf(value.toLowerCase()) !== -1;
     }
 
     getProjects() {
