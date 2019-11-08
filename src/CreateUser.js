@@ -53,7 +53,25 @@ function validate(values, other) {
       if (!(window.valid_projects.indexOf(project.project) > -1)) {
         pErrors.project = "Project " + project.project + " doesn't exist";
       }
+
+      // check if project is already declared in roles list
+      let prCount = 0;
+      for (let projectItem of values.projects){          
+          
+          if (projectItem.project == project.project) {
+            prCount++;
+          }
+          if (prCount > 1) {
+            pErrors.project = "Project " + project.project + " duplicate declaration";
+            break;
+          }
+
+      }
+    
     }
+
+  
+    
 
     if (project.roles) {
       // check each role validity
@@ -62,7 +80,7 @@ function validate(values, other) {
       let errorRoles = [];
 
       for (let role of roles) {
-        if (!(["project_admin", "consumer", "publisher"].indexOf(role) > -1)) {
+        if (!(["project_admin", "consumer", "publisher"].indexOf(role.trim()) > -1)) {
           errorRoles.push(role);
         }
       }
@@ -129,7 +147,7 @@ class CreateUser extends Component {
   apiGetData(username) {
     this.DM.userGet(username).then(r => {
       if (r.done){
-        console.log(r.data)
+        
         let sa_value = false;
         if (r.data.service_roles.length > 0) sa_value = true; 
 
@@ -182,9 +200,10 @@ class CreateUser extends Component {
     } else {
       let projects = [];
       for (let project of data.projects) {
+        
         projects.push({
           project: project.project,
-          roles: project.roles.split(",")
+          roles: project.roles.replace(/\s/g,"").split(",")
         });
       }
       body["projects"] = projects;
