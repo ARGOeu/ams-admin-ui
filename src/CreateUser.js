@@ -58,7 +58,7 @@ function validate(values, other) {
       let prCount = 0;
       for (let projectItem of values.projects){          
           
-          if (projectItem.project == project.project) {
+          if (projectItem.project === project.project) {
             prCount++;
           }
           if (prCount > 1) {
