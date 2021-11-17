@@ -59,6 +59,9 @@ class ProjectRoles extends React.Component {
     // pare projects json and produce a list of html span elements to represent project/role assignment
     beautifyProjects(projects, projectColors) {
       let prList = [];
+      if (!projects){
+        return prList;
+      }
       for (let project of projects) {
         let rolesList = [];
         for (let role of project.roles) {
