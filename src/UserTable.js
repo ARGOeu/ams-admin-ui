@@ -67,7 +67,6 @@ class UserTable extends React.Component {
             this.authen.getEndpoint(),
             this.authen.getToken()
         );
-        this.projectColors = {};
         if (!this.authen.isLogged()){
             this.state = {
                 allProjects: true,
@@ -138,24 +137,9 @@ class UserTable extends React.Component {
         return [];
     }
 
-    // Assign colors to unique projects found in users
-    getProjectColors(uniqueProjects) {
-        let projectColors = {};
-        for (let pIndex in uniqueProjects) {
-            let project = uniqueProjects[pIndex];
-            if (project in config.project_colors) {
-                projectColors[project] = config.project_colors[project];
-            } else {
-                projectColors[project] = colors[pIndex % colors.length];
-            }
-        }
-
-        return projectColors;
-    }
-
     // Get unique project list from user project assignments
     getDistinctProjects(users) {
-        if (users === undefined) {
+        if (!users) {
             return [];
         }
         let uniqueProjects = new Set();
@@ -221,34 +205,6 @@ class UserTable extends React.Component {
         return null;
     }
 
-    // pare projects json and produce a list of html span elements to represent project/role assignment
-    beautifyProjects(projects, projectColors) {
-        let prList = [];
-        for (let project of projects) {
-            let rolesList = [];
-            for (let role of project.roles) {
-                rolesList.push(this.getRoleIcon(role));
-            }
-            prList.push(
-                <span
-                    key={project.project}
-                    className="mr-2 badge badge-dark"
-                    style={{ backgroundColor: projectColors[project.project] }}
-                >
-                    <Link
-                        style={{ color: "white" }}
-                        to={"/projects/details/" + project.project}
-                    >
-                        {project.project}
-                    </Link>
-                    <span className="ml-1">{rolesList}</span>
-                </span>
-            );
-        }
-
-        return prList;
-    }
-
     // based on service role return an appropriate fa icon
     beautifyServiceRoles(serviceRoles) {
         if (serviceRoles){
@@ -265,9 +221,6 @@ class UserTable extends React.Component {
     }
 
     render() {
-        const projectColors = this.getProjectColors(
-            this.getDistinctProjects(this.state.users)
-        );
 
         
         const columns = [
@@ -326,18 +279,7 @@ class UserTable extends React.Component {
                 ),
                 width: 100,
                 headerClassName: "list-header"
-            },
-            {
-                Header: "Projects",
-                accessor: "projects",
-                Cell: props => (
-                    <span className="projects">
-                        {this.beautifyProjects(props.value, projectColors)}
-                    </span>
-                ),
-                headerClassName: "list-header"
-            },
-            
+            }
         ];
         
         if (this.state.isServiceAdmin){
