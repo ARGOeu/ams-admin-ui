@@ -38,16 +38,16 @@ library.add(
     faStar
 );
 
-const colors = [
-    "#A6ACAF",
-    "#616A6B",
-    "#717D7E",
-    "#616A6B",
-    "#884EA0",
-    "#7D3C98",
-    "#283747",
-    "#212F3D"
-];
+// const colors = [
+//     "#A6ACAF",
+//     "#616A6B",
+//     "#717D7E",
+//     "#616A6B",
+//     "#884EA0",
+//     "#7D3C98",
+//     "#283747",
+//     "#212F3D"
+// ];
 
 
 function getProjectColorIcon(projectName) {

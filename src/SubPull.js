@@ -30,11 +30,11 @@ function genCurlSnippet(endpoint, project, sub, token, max, returnImm) {
         project +
         "/subscriptions/" +
         sub +
-        ":pull?key=" +
-        token +
+        ":pull"+
         "' \\\n" +
         "-H 'Accept: application/json' \\\n" +
         "-H 'Content-Type: application/json' \\\n" +
+        "-H 'X-Api-Key: "+ token +"' \\\n" +
         "-d '" +
         JSON.stringify({"maxMessages":Number(max).toString(),"returnImmediately":Boolean(returnImm).toString()}) +
         "'"

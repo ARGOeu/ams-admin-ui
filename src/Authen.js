@@ -11,11 +11,12 @@ class Authen {
             return { error: "invalid credentials" };
         }
         // quickly construct request url
-        let url = "https://" + endpoint + "/v1/users/profile?key=" + token;
+        let url = "https://" + endpoint + "/v1/users/profile";
         // setup the required headers
         let headers = {
             "Content-Type": "application/json",
-            Accept: "application/json"
+            Accept: "application/json",
+            "X-Api-Key": token
         };
         // fetch the data and if succesfull change the component state - which will trigger a re-render
         fetch(url, { headers: headers })
