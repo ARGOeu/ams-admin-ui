@@ -269,14 +269,14 @@ class SubDetails extends React.Component {
                 <span>  - type:</span><code>{this.state.sub.pushConfig.retryPolicy.type}</code><br/>
                 <span>  - period:</span><code>{this.state.sub.pushConfig.retryPolicy.period}</code>
                 </li>
-                { this.state.sub.pushConfig.verify && 
+                { this.state.sub.pushConfig.verified &&
                  <li className="list-group-item py-2 ">
                      Push endpoint <strong style={{color:"green"}}>verified!</strong><br/>
                      <strong>Status</strong>{this.state.sub.pushConfig.status}
 
                  </li>
                 }
-                { !this.state.sub.pushConfig.verify && 
+                { !this.state.sub.pushConfig.verified &&
                  <li className="list-group-item py-2 ">
                      Push endpoint <strong style={{color:"red"}}>unverified!</strong><br/>
                      
