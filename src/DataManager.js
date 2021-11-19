@@ -3,12 +3,14 @@ class DataManager {
   token = "";
   headers = {
     "Content-Type": "application/json",
-    Accept: "application/json"
+    Accept: "application/json",
+    "x-api-key": ""
   };
 
   constructor(endpoint, token) {
     this.endpoint = endpoint;
     this.token = token;
+    this.headers["x-api-key"] = token;
   }
 
   projectGetMetrics(project) {
@@ -21,8 +23,7 @@ class DataManager {
       this.endpoint +
       "/v1/projects/" +
       project +
-      ":metrics?key=" +
-      this.token;
+      ":metrics"
     return this.doGet(url, "metrics");
   }
 
@@ -35,9 +36,7 @@ class DataManager {
       "https://" +
       this.endpoint +
       "/v1/projects" +
-      project +
-      "?key=" +
-      this.token;
+      project
     return this.doGet(url, "projects");
   }
 
@@ -50,8 +49,7 @@ class DataManager {
       this.endpoint +
       "/v1/users/" +
       username +
-      ":refreshToken?key=" +
-      this.token;
+      ":refreshToken"
     return this.doPost(url);
   }
 
@@ -60,7 +58,7 @@ class DataManager {
 
     // quickly construct request url
     let url =
-      "https://" + this.endpoint + "/v1/projects/" + project +  "/members?key=" + this.token;
+      "https://" + this.endpoint + "/v1/projects/" + project +  "/members";
    
     return this.doGet(url, "users");
   }
@@ -72,7 +70,7 @@ class DataManager {
 
     // quickly construct request url
     let url =
-      "https://" + this.endpoint + "/v1/users" + user + "?key=" + this.token;
+      "https://" + this.endpoint + "/v1/users" + user ;
    
     return this.doGet(url, "users");
   }
@@ -90,9 +88,7 @@ class DataManager {
       "/v1/projects/" +
       project +
       "/topics" +
-      topic +
-      "?key=" +
-      this.token;
+      topic
     return this.doGet(url, "topics");
   }
 
@@ -108,8 +104,7 @@ class DataManager {
       project +
       "/topics/" +
       topic +
-      ":metrics?key=" +
-      this.token;
+      ":metrics"
     return this.doGet(url, "metrics");
   }
 
@@ -121,9 +116,7 @@ class DataManager {
       "https://" +
       this.endpoint +
       "/v1/projects/" +
-      project + "/topics/" + topic +
-      "?key=" +
-      this.token;
+      project + "/topics/" + topic
 
     return this.doPut(url, {});
   }
@@ -140,8 +133,7 @@ class DataManager {
       project +
       "/topics/" +
       topic +
-      ":acl?key=" +
-      this.token;
+      ":acl"
     return this.doGet(url, "authorized_users");
   }
 
@@ -158,9 +150,7 @@ class DataManager {
       "/v1/projects/" +
       project +
       "/subscriptions" +
-      sub +
-      "?key=" +
-      this.token;
+      sub
     return this.doGet(url, "subscriptions");
   }
 
@@ -176,8 +166,7 @@ class DataManager {
       project +
       "/subscriptions/" +
       sub +
-      ":metrics?key=" +
-      this.token;
+      ":metrics"
     return this.doGet(url, "metrics");
   }
 
@@ -193,8 +182,7 @@ class DataManager {
       project +
       "/subscriptions/" +
       sub +
-      ":offsets?key=" +
-      this.token;
+      ":offsets"
     return this.doGet(url, "offsets");
   }
 
@@ -210,8 +198,7 @@ class DataManager {
       project +
       "/subscriptions/" +
       sub +
-      ":acl?key=" +
-      this.token;
+      ":acl"
     return this.doGet(url, "authorized_users");
   }
 
@@ -225,9 +212,7 @@ class DataManager {
       "/v1/projects/" +
       project +
       "/subscriptions/" +
-      sub +
-      "?key=" +
-      this.token;
+      sub
 
     return this.doDelete(url);
   }
@@ -242,8 +227,7 @@ class DataManager {
     this.endpoint +
     "/v1/projects/" +
     project + "/subscriptions/" + sub +
-    ":modifyOffset?key=" +
-    this.token;
+    ":modifyOffset"
 
     return this.doSimplePost(url, data)
   }
@@ -258,8 +242,7 @@ class DataManager {
     this.endpoint +
     "/v1/projects/" +
     project + "/subscriptions/" + sub +
-    ":modifyAckDeadline?key=" +
-    this.token;
+    ":modifyAckDeadline"
 
     return this.doSimplePost(url, data)
   }
@@ -274,8 +257,7 @@ class DataManager {
     this.endpoint +
     "/v1/projects/" +
     project + "/subscriptions/" + sub +
-    ":modifyPushConfig?key=" +
-    this.token;
+    ":modifyPushConfig"
 
     return this.doSimplePost(url, data)
   }
@@ -288,9 +270,7 @@ class DataManager {
       "https://" +
       this.endpoint +
       "/v1/projects/" +
-      project + "/subscriptions/" + sub +
-      "?key=" +
-      this.token;
+      project + "/subscriptions/" + sub
 
     return this.doPut(url, data);
   }
@@ -305,8 +285,7 @@ class DataManager {
     this.endpoint +
     "/v1/projects/" +
     project + "/subscriptions/" + sub +
-    ":modifyAcl?key=" +
-    this.token;
+    ":modifyAcl"
 
     return this.doSimplePost(url, data)
   }
@@ -325,8 +304,7 @@ class DataManager {
     this.endpoint +
     "/v1/projects/" +
     project + "/subscriptions/" + sub +
-    ":acknowledge?key=" +
-    this.token;
+    ":acknowledge"
     
     return this.doPost(url,data)
   }
@@ -346,8 +324,7 @@ class DataManager {
     this.endpoint +
     "/v1/projects/" +
     project + "/subscriptions/" + sub +
-    ":pull?key=" +
-    this.token;
+    ":pull"
     
     return this.doPost(url,data)
 
@@ -367,8 +344,7 @@ class DataManager {
     this.endpoint +
     "/v1/projects/" +
     project + "/topics/" + topic +
-    ":publish?key=" +
-    this.token;
+    ":publish"
 
     return this.doPost(url,data)
 
@@ -382,9 +358,7 @@ class DataManager {
       "https://" +
       this.endpoint +
       "/v1/users/" +
-      username +
-      "?key=" +
-      this.token;
+      username
 
     return this.doPost(url, data);
   }
@@ -397,9 +371,7 @@ class DataManager {
       "https://" +
       this.endpoint +
       "/v1/projects/" +
-      project +
-      "?key=" +
-      this.token;
+      project
 
     return this.doPost(url, data);
   }
@@ -412,9 +384,7 @@ class DataManager {
       "https://" +
       this.endpoint +
       "/v1/projects/" +
-      project +
-      "?key=" +
-      this.token;
+      project
 
     return this.doPut(url, data);
   }
@@ -427,9 +397,7 @@ class DataManager {
       "https://" +
       this.endpoint +
       "/v1/users/" +
-      username +
-      "?key=" +
-      this.token;
+      username
 
     return this.doPut(url, data);
   }
@@ -442,9 +410,7 @@ class DataManager {
       "https://" +
       this.endpoint +
       "/v1/users/" +
-      username +
-      "?key=" +
-      this.token;
+      username
 
     return this.doDelete(url);
   }
@@ -457,9 +423,7 @@ class DataManager {
       "https://" +
       this.endpoint +
       "/v1/projects/" +
-      project +
-      "?key=" +
-      this.token;
+      project
 
     return this.doDelete(url);
   }
@@ -474,8 +438,7 @@ class DataManager {
     this.endpoint +
     "/v1/projects/" +
     project + "/topics/" + topic +
-    ":modifyAcl?key=" +
-    this.token;
+    ":modifyAcl"
 
     return this.doSimplePost(url, data)
   }
@@ -486,8 +449,7 @@ class DataManager {
     
     // quickly construct the request url 
     let url = "https://" + this.endpoint + "/v1/projects/" +
-    project + "/subscriptions/" + sub + ":verifyPushEndpoint?key=" + 
-    this.token;
+    project + "/subscriptions/" + sub + ":verifyPushEndpoint";
 
     return this.doSimplePost(url, {})
   }
@@ -502,9 +464,7 @@ class DataManager {
       "/v1/projects/" +
       project +
       "/topics/" +
-      topic +
-      "?key=" +
-      this.token;
+      topic
 
     return this.doDelete(url);
   }

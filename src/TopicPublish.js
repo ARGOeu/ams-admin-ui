@@ -29,14 +29,11 @@ function genCurlSnippet(endpoint, project, topic, token, msgBody) {
         project +
         "/topics/" +
         topic +
-        ":publish?key=" +
-        token +
-        "' \\\n" +
+        ":publish' \\\n" +
         "-H 'Accept: application/json' \\\n" +
         "-H 'Content-Type: application/json' \\\n" +
-        "-d '" +
-        JSON.stringify(msgBody) +
-        "'"
+        "-H 'X-Api-Key: "+ token +"' \\\n" +
+        "-d '{\"messages\":["+JSON.stringify(msgBody)+"]}'"
     );
 }
 
