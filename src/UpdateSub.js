@@ -132,7 +132,7 @@ class UpdateSub extends Component {
     validatePushEndpoint(value) {
         let errors = this.state.errors;
         if ( value !== "" &&
-            !/^((https):\/\/)([w|W]{3}\.)?[a-zA-Z0-9\-.]{3,}\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?$/i.test(
+            !/^((https):\/\/)([w|W]{3}\.)?[a-zA-Z0-9\-.]{3,}\.[a-zA-Z]{2,}(\.[a-zA-Z]{2,})?(\:[0-9]{2,})?(\/[a-zA-Z0-9\-\.]{1,})*$/i.test(
                 value
             )
         ) {
