@@ -160,8 +160,8 @@ class SubDetails extends React.Component {
 
     apiDelete(project, sub) {
         let comp = this;
-        this.DM.subDelete(project, sub).then(r => {
-            if (r.done) {
+        this.DM.subDelete(project, sub).then(done => {
+            if (done) {
                 NotificationManager.info("Subscription Deleted", null, 1000);
                 setTimeout(function() {
                     comp.props.history.push("/subs#" + project);
