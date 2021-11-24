@@ -58,7 +58,7 @@ class DataManager {
 
     // quickly construct request url
     let url =
-      "https://" + this.endpoint + "/v1/projects/" + project +  "/members";
+      "https://" + this.endpoint + "/v1/projects/" + project +  "/members?details=true";
    
     return this.doGet(url, "users");
   }
