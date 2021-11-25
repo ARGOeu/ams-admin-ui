@@ -16,11 +16,15 @@ pipeline {
             }
             steps {
                 echo 'Build ams-admin-ui'
-                sh '''
-                    cd $WORKSPACE/$PROJECT_DIR
-                    npm install
-                    npm run build
-                '''
+                withCredentials([file(credentialsId: 'ams-admin-ui-conf', variable: 'AMS_ADMIN_CONF')]) {
+                    sh '''
+                        cd $WORKSPACE/$PROJECT_DIR
+                        rm ./src/config.js
+                        cp $AMS_ADMIN_CONF ./src/
+                        npm install
+                        npm run build
+                    '''
+                }
                 script {
                     if ( env.BRANCH_NAME == 'devel' ) {
                         sshagent (credentials: ['newgrnetci-ams-ui']) {
