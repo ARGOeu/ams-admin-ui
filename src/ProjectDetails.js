@@ -432,20 +432,24 @@ class ProjectDetails extends React.Component {
                   </span>
                 </CardBody>
                 <CardFooter>
-                  <small>
+                   <small>
                     <strong>created:</strong>
                   </small>
-                  <small> {this.state.project.created_on}</small>
+                  <small> {this.state.project.created_on}</small> 
                   <br />
                   <small>
                     <strong>updated:</strong>
                   </small>
                   <small> {this.state.project.modified_on}</small>
-                  <small>
-                    <br />
-                    <strong>created by:</strong>
-                  </small>
-                  <small> {this.state.project.created_by}</small>
+                  {this.state.project.created_by?
+                  <React.Fragment>
+                    <small>
+                      <br />
+                      <strong>created by:</strong>
+                    </small>
+                    <small> {this.state.project.created_by}</small>
+                  </React.Fragment>
+                  :null}
                 </CardFooter>
               </Card>
             </div>
