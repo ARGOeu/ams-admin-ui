@@ -170,6 +170,42 @@ class DataManager {
     return this.doGet(url, "metrics");
   }
 
+  operationalGetMetrics() {
+    if (!this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/metrics"
+    return this.doGet(url, "metrics");
+  }
+
+  projectOperationalGetMetrics(start_date, end_date, projects) {
+    if (!this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/metrics/va_metrics?";
+    if (start_date) {
+      let s = "&start_date=" + start_date;
+      url += s;
+    }
+    if (end_date) {
+      let s = "&end_date=" + end_date;
+      url += s;
+    }
+    if (projects) {
+      let s = projects.map( (p, i) => `${p}`).join(',');
+      url += "&projects=" + s;
+    }
+    return this.doGet(url, "metrics");
+  }
+
   subGetOffsets(project, sub) {
     if (!project || !sub || !this.token || !this.endpoint)
       return Promise.resolve({ done: false });
