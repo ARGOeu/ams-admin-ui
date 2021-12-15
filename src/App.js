@@ -484,7 +484,7 @@ class App extends Component {
                                             exact
                                             auth={
                                                 this.authen.isLogged() &&
-                                                allowTopics
+                                                allowSubs
                                             }
                                             path="/subs/pull/projects/:projectname/subscriptions/:subname"
                                             component={SubPull}

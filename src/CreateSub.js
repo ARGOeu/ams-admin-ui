@@ -59,7 +59,7 @@ class CreateSub extends Component {
     } else if (!/^[A-Z0-9_-]+$/i.test(e.target.value)) {
       error.sub =
         "Invalid name (use only letters, numbers, underscores and dashes)";
-    }  else if (this.state.subs.indexOf(e.target.value) > -1) {
+    }  else if (!!this.state.subs && this.state.subs.indexOf(e.target.value) > -1) {
       
       error.sub = "Sub with the same name already exists"
       
