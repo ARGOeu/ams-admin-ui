@@ -29,14 +29,18 @@ class Authen {
             })
             .then(json => {
                 if (json.error === undefined) {
-                    let serviceRoles = ""
+                    let serviceRoles = []
+                    let projects = []
                     if (json.service_roles) {
                         serviceRoles = json.service_roles
+                    }
+                    if (json.projects) {
+                        projects = json.projects
                     }
                     this.setLogin(
                         json.name,
                         token,
-                        json.projects,
+                        projects,
                         serviceRoles
                     );
                     if (callback !== undefined) {
