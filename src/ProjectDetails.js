@@ -10,7 +10,8 @@ import {
   CardBody,
   CardHeader,
   CardFooter,
-  Row
+  Row,
+  Table
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -302,37 +303,27 @@ class ProjectDetails extends React.Component {
 
           if (item["resource_type"] === "project.user") {
             let metricItem = (
-              <Card
-                key={item.metric + "/" + item["resource_name"]}
-                className="col-4 p-2 rounded"
-              >
-                <CardBody className="text-center">
-                  <h3>
-                    <strong>
-                      <NumberFormat
-                        value={item.timeseries[0].value}
-                        displayType={"text"}
-                        thousandSeparator={true}
-                      />
-                    </strong>
-                  </h3>
-                  <br />
-                  <h6>
-                    <abbr title={item.description}>
-                      
-                      <strong>{item["resource_name"].split(".")[1]} 's </strong>{" "}
-                      {item.metric.split(".")[2]}{" "}
-                      <FontAwesomeIcon
-                        icon="info-circle"
-                        className="ml-2"
-                        style={{ color: "grey" }}
-                      />
-                    </abbr>
-                  </h6>
-                  <br />
-                </CardBody>
-              </Card>
-            );
+              <Table key="project-user-metrics" hover>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Metric</th>
+                        <th>Resource Name</th>
+                        <th>Description</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr key={item.metric + "/" + item["resource_name"]}>
+                        <th scope="row">{item["resource_name"].split(".")[1]}</th>
+                        <td>{item.metric}</td>
+                        <td>{item.metric.split(".")[2]}</td>
+                        <td>{item.description}</td>
+                        <td>{item.timeseries[0].value}</td>
+                    </tr>
+                </tbody>
+            </Table>
+            )
             userMetricList.push(metricItem);
           } else {
             let metricItem = (
