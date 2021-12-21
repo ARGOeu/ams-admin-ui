@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import "./App.css";
 import UserTable from "./UserTable";
+import OperationalMetricsTable from "./OperationalMetricsTable";
+import AverageProjectMetricsTable from "./AverageProjectMetricsTable";
 import {
     BrowserRouter,
     Route,
@@ -64,7 +66,8 @@ import {
     faEnvelopeOpen,
     faUsersCog,
     faUserAstronaut,
-    faUser
+    faUser,
+    faChartBar
 } from "@fortawesome/free-solid-svg-icons";
 
 import config from "./config";
@@ -79,7 +82,8 @@ library.add(
     faEnvelopeOpen,
     faUsersCog,
     faUserAstronaut,
-    faUser
+    faUser,
+    faChartBar
 );
 
 const ProtectedRoute = ({
@@ -186,6 +190,8 @@ class App extends Component {
             this.state.isServiceAdmin ||
             this.state.isProjectAdmin ||
             this.state.isConsumer;
+        const allowOperationalMetrics = this.state.isServiceAdmin
+        const allowAverageProjectMetrics = this.state.isServiceAdmin
 
       
 
@@ -454,6 +460,28 @@ class App extends Component {
                                                     </Link>
                                                 </NavItem>
                                             )}
+                                            {allowOperationalMetrics && (
+                                                <NavItem>
+                                                    <Link to="/operational_metrics">
+                                                        <FontAwesomeIcon
+                                                            className="side-ico"
+                                                            icon="chart-bar"
+                                                        />
+                                                        Operational Metrics
+                                                    </Link>
+                                                </NavItem>
+                                            )}
+                                            {allowAverageProjectMetrics && (
+                                                <NavItem>
+                                                    <Link to="/average_project_metrics">
+                                                        <FontAwesomeIcon
+                                                            className="side-ico"
+                                                            icon="chart-bar"
+                                                        />
+                                                        Average Project Metrics
+                                                    </Link>
+                                                </NavItem>
+                                            )}
                                         </Nav>
                                     </div>
                                 </Col>
@@ -712,6 +740,18 @@ class App extends Component {
                                             exact
                                             path="/about"
                                             component={About}
+                                        />
+                                        <ProtectedRoute
+                                            auth={this.authen.isLogged()}
+                                            exact
+                                            path="/operational_metrics"
+                                            component={OperationalMetricsTable}
+                                        />
+                                        <ProtectedRoute
+                                            auth={this.authen.isLogged()}
+                                            exact
+                                            path="/average_project_metrics"
+                                            component={AverageProjectMetricsTable}
                                         />
                                         <Redirect to="/" />
                                     </Switch>
