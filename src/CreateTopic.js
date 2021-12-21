@@ -52,7 +52,7 @@ class CreateTopic extends Component {
           "Invalid name (use only letters, numbers, underscores and dashes)"
       });
     }
-    if (this.state.topics.indexOf(e.target.value) > -1) {
+    if (!!this.state.topics && this.state.topics.indexOf(e.target.value) > -1) {
       this.setState({ error: "Topic with the same name already exists" });
     } else {
       this.setState({ error: "" });
