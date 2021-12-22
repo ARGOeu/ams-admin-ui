@@ -51,7 +51,11 @@ import {
     NavItem,
     Popover,
     PopoverBody,
-    PopoverHeader
+    PopoverHeader,
+    ListGroup,
+    ListGroupItem,
+    ListGroupItemHeading,
+    ListGroupItemText
 } from "reactstrap";
 
 import argologo from "./argologo_color.svg";
@@ -68,7 +72,8 @@ import {
     faUsersCog,
     faUserAstronaut,
     faUser,
-    faChartBar
+    faChartBar,
+    faCogs
 } from "@fortawesome/free-solid-svg-icons";
 
 import config from "./config";
@@ -84,7 +89,8 @@ library.add(
     faUsersCog,
     faUserAstronaut,
     faUser,
-    faChartBar
+    faChartBar,
+    faCogs
 );
 
 const ProtectedRoute = ({
@@ -123,6 +129,7 @@ class App extends Component {
             users: [],
             popoverOpen: false,
             popoverOpen2: false,
+            popoverOpen3: false,
             isLogged: this.authen.isLogged(),
             isServiceAdmin: this.authen.isServiceAdmin(),
             isProjectAdmin: this.authen.isProjectAdmin(),
@@ -132,6 +139,7 @@ class App extends Component {
 
         this.toggle = this.toggle.bind(this);
         this.toggle2 = this.toggle2.bind(this);
+        this.toggle3 = this.toggle3.bind(this);
         window.DM = new DataManager(
             this.authen.getEndpoint(),
             this.authen.getToken()
@@ -147,6 +155,12 @@ class App extends Component {
     toggle2() {
         this.setState({
             popoverOpen2: !this.state.popoverOpen2
+        });
+    }
+
+    toggle3() {
+        this.setState({
+            popoverOpen3: !this.state.popoverOpen3
         });
     }
 
@@ -293,7 +307,7 @@ class App extends Component {
                         expand="md"
                         style={{ backgroundColor: barColor }}
                     >
-                        <NavbarBrand className="text-light">
+                        <NavbarBrand className="text-light" href="/">
                             <img
                                 alt="argo admin ui"
                                 className="logo img-responsive"
@@ -306,14 +320,6 @@ class App extends Component {
                             <Nav navbar className="ml-auto" id="userbar">
                                 {this.state.isLogged && (
                                     <React.Fragment>
-                                        <NavItem className="non-user-nav">
-                                            <Link to="#">
-                                                <FontAwesomeIcon
-                                                    className="ico-nav"
-                                                    icon="bell"
-                                                />
-                                            </Link>
-                                        </NavItem>
                                         <NavItem className="non-user-nav">
                                             <Link
                                                 id="service-details"
@@ -348,11 +354,63 @@ class App extends Component {
                                     </React.Fragment>
                                 )}
                                 <NavItem className="non-user-nav">
-                                    <Link to="#">
+                                    <Link
+                                        id="help-details"
+                                        to="#"
+                                        onClick={this.toggle3}
+                                    >
                                         <FontAwesomeIcon
                                             className="ico-nav"
                                             icon="question-circle"
                                         />
+                                        <Popover
+                                            placement="bottom"
+                                            isOpen={
+                                                this.state.popoverOpen3
+                                            }
+                                            target="help-details"
+                                            toggle={this.toggle3}
+                                        >
+                                            <PopoverHeader>
+                                                Help
+                                            </PopoverHeader>
+                                            <PopoverBody>
+                                                <ListGroup>
+                                                    <ListGroupItem
+                                                        action
+                                                        href="http://argoeu.github.io/guides/messaging"
+                                                        tag="a"
+                                                    >
+                                                        <ListGroupItemHeading>
+                                                            <FontAwesomeIcon
+                                                                className="side-ico"
+                                                                icon="envelope-open"
+                                                            />
+                                                            Documentation
+                                                        </ListGroupItemHeading>
+                                                        <ListGroupItemText>
+                                                            ARGO Messaging service v1 documentation.
+                                                        </ListGroupItemText>
+                                                    </ListGroupItem>
+                                                    <ListGroupItem
+                                                        action
+                                                        href="https://api-doc.argo.grnet.gr/argo-messaging"
+                                                        tag="a"
+                                                    >
+                                                        <ListGroupItemHeading>
+                                                            <FontAwesomeIcon
+                                                                className="side-ico"
+                                                                icon="cogs"
+                                                            />
+                                                            API
+                                                        </ListGroupItemHeading>
+                                                        <ListGroupItemText>
+                                                            ARGO Messaging service v1 API.
+                                                        </ListGroupItemText>
+                                                    </ListGroupItem>
+                                                </ListGroup>
+                                            </PopoverBody>
+                                        </Popover>
                                     </Link>
                                 </NavItem>
                                 {this.state.isLogged && (
@@ -366,6 +424,11 @@ class App extends Component {
                                                 <FontAwesomeIcon
                                                     className="ico-nav"
                                                     icon="ellipsis-v"
+                                                />
+                                                <span>&nbsp;</span>
+                                                <FontAwesomeIcon
+                                                    className="ico-user"
+                                                    icon="user-astronaut"
                                                 />
                                             </Link>
                                             <Popover
@@ -392,12 +455,6 @@ class App extends Component {
                                                     </button>
                                                 </PopoverBody>
                                             </Popover>
-                                        </NavItem>
-                                        <NavItem>
-                                            <FontAwesomeIcon
-                                                className="ico-user"
-                                                icon="user-astronaut"
-                                            />
                                         </NavItem>
                                     </React.Fragment>
                                 )}
