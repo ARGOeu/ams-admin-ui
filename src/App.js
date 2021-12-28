@@ -31,6 +31,10 @@ import UpdateSub from "./UpdateSub";
 import SubACL from "./SubACL";
 import SubPull from "./SubPull"
 import SubModOffset from "./SubModOffset";
+import SchemaDetails from "./SchemaDetails";
+import SchemaUpdate from "./SchemaUpdate";
+import SchemaCreate from "./SchemaCreate";
+import SchemaValidate from "./SchemaValidate";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DataManager from "./DataManager";
@@ -89,6 +93,7 @@ library.add(
 const ProtectedRoute = ({
     action,
     toDelete,
+    restrictPublish,
     auth: isAuth,
     component: Component,
     ...rest
@@ -97,7 +102,7 @@ const ProtectedRoute = ({
         {...rest}
         render={props =>
             isAuth === true ? (
-                <Component {...props} toDelete={toDelete} action={action} />
+                <Component {...props} toDelete={toDelete} restrictPublish={restrictPublish} action={action} />
             ) : (
                 <Redirect
                     to={{
@@ -192,6 +197,7 @@ class App extends Component {
             this.state.isConsumer;
         const allowOperationalMetrics = this.state.isServiceAdmin
         const allowAverageProjectMetrics = this.state.isServiceAdmin
+        const allowSchema = this.state.isServiceAdmin || this.state.isProjectAdmin;
 
       
 
@@ -752,6 +758,54 @@ class App extends Component {
                                             exact
                                             path="/average_project_metrics"
                                             component={AverageProjectMetricsTable}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowProjects
+                                            }
+                                            path="/projects/:projectname/schemas/create"
+                                            component={SchemaCreate}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowSchema
+                                            }
+                                            path="/projects/:projectname/schemas/:schemaname"
+                                            component={SchemaDetails}
+                                            toDelete={false}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowProjects
+                                            }
+                                            path="/projects/:projectname/schemas/delete/:schemaname"
+                                            component={SchemaDetails}
+                                            toDelete={true}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowProjects
+                                            }
+                                            path="/projects/:projectname/schemas/update/:schemaname"
+                                            component={SchemaUpdate}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowProjects
+                                            }
+                                            path="/projects/:projectname/schemas/validate/:schemaname"
+                                            component={SchemaValidate}
+                                            restrictPublish={true}
                                         />
                                         <Redirect to="/" />
                                     </Switch>

@@ -2,6 +2,8 @@ import React from "react";
 import Authen from "./Authen";
 import config from "./config";
 import NumberFormat from "react-number-format";
+import ReactTable from "react-table";
+import "react-table/react-table.css";
 import { BarChart, CartesianGrid, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import {
   Col,
@@ -24,10 +26,14 @@ import {
   faDiceD6,
   faEnvelope,
   faEnvelopeOpen,
-  faInfoCircle
+  faInfoCircle,
+  faEdit,
+  faTrashAlt,
+  faPlay
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
-library.add(faDiceD6, faEnvelope, faEnvelopeOpen, faInfoCircle);
+library.add(faDiceD6, faEnvelope, faEnvelopeOpen, faInfoCircle, faEdit,
+            faTrashAlt, faPlay);
 
 function getShortName(fullName) {
   let tokens = fullName.split("/");
@@ -48,11 +54,14 @@ class ProjectDetails extends React.Component {
     super(props);
     this.authen = new Authen();
     this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
-    this.state = { project: null, topics: null, subs: null, metrics: [] };
+    this.state = { project: null, topics: null, subs: null, metrics: [], modalCreate: false,
+      modalEdit: false, newSchemaName: "", newSchemaData: "", selectedSchemaName: ""};
 
     this.apiGetData.bind(this);
     this.apiGetTopics.bind(this);
     this.apiGetSubs.bind(this);
+    this.toggleModal.bind(this);
+    this.handleCloseModal.bind(this);
 
     if (this.authen.isLogged()) {
       this.state = {
@@ -60,7 +69,13 @@ class ProjectDetails extends React.Component {
         project: this.apiGetData(this.props.match.params.projectname),
         topics: this.apiGetTopics(this.props.match.params.projectname),
         subs: this.apiGetSubs(this.props.match.params.projectname),
-        metrics: this.apiGetMetrics(this.props.match.params.projectname)
+        metrics: this.apiGetMetrics(this.props.match.params.projectname),
+        schemas: this.apiGetSchemas(this.props.match.params.projectname),
+        modalCreate: false,
+        modalEdit: false,
+        newSchemaName: "",
+        newSchemaData: "",
+        selectedSchemaName: ""
       };
     }
   }
@@ -71,7 +86,13 @@ class ProjectDetails extends React.Component {
         project: this.apiGetData(this.props.match.params.projectname),
         topics: this.apiGetTopics(this.props.match.params.projectname),
         subs: this.apiGetSubs(this.props.match.params.projectname),
-        metrics: this.apiGetMetrics(this.props.match.params.projectname)
+        metrics: this.apiGetMetrics(this.props.match.params.projectname),
+        schemas: this.apiGetSchemas(this.props.match.params.projectname),
+        modalCreate: false,
+        modalEdit: false,
+        newSchemaName: "",
+        newSchemaData: "",
+        selectedSchemaName: ""
       });
   }
 
@@ -81,6 +102,47 @@ class ProjectDetails extends React.Component {
         this.setState({ metrics: r.data });
       }
     });
+  }
+
+  apiGetSchemas(projectName) {
+    this.DM.projectGetSchemas(projectName).then(r => {
+      if (r.done) {
+        this.setState({ schemas: r.data });
+      }
+    });
+  }
+
+  apiEditSchema(projectName, schemaName, schema) {
+    this.DM.projectEditSchema(projectName, schemaName, schema).then(r => {
+      if (r.done) {
+        this.apiGetSchemas(projectName);
+      }
+    });
+  }
+
+  apiDeleteSchema(projectName, schemaName) {
+    this.DM.projectDeleteSchema(projectName, schemaName).then(r => {
+      if (r) {
+        this.apiGetSchemas(projectName);
+      }
+    });
+  }
+
+  handleEditSchema(projectName, schemaName, schemaData) {
+    this.apiEditSchema(projectName, schemaName, schemaData);
+  }
+
+  handleDeleteSchema(projectName, schemaName) {
+    this.apiDeleteSchema(projectName, schemaName);
+  }
+
+  handleCloseModal(modalName) {
+    this.setState({
+      newSchemaName: "",
+      newSchemaData: "",
+      selectedSchemaName: ""
+    });
+    this.toggleModal(modalName);
   }
 
   apiDelete(projectname) {
@@ -121,6 +183,26 @@ class ProjectDetails extends React.Component {
     });
   }
 
+  toggleModal(modalName, schemaName) {
+    if (this.state !== undefined) {
+      if (modalName === "modalCreate") {
+        this.setState({
+          modalCreate: !this.state.modalCreate,
+          newSchemaData: "",
+          newSchemaName: ""
+        });
+      }
+      else if (modalName === "modalEdit") {
+        this.setState({
+          modalEdit: !this.state.modalEdit,
+          selectedSchemaName: schemaName,
+          newSchemaName: schemaName,
+          newSchemaData: "",
+        });
+      }
+    }
+  }
+
   render() {
     if (this.state.project === undefined) {
       return <h3>loading</h3>;
@@ -130,8 +212,61 @@ class ProjectDetails extends React.Component {
     let willBack = null;
 
     let topicList = null;
+    let schemaList = null;
     let subList = null;
     let metrics = null;
+
+    const columns = [
+      {
+        Header: "#",
+        accessor: "name",
+        Cell: props => (<FontAwesomeIcon icon="dice-d6" style={{ color: "#616A6B" }} size="1x" />),
+        width: 40,
+        headerClassName: "list-header",
+        className: "text-center"
+      },
+      {
+        Header: "Name",
+        accessor: "name",
+        Cell: props => (
+          <Link className="item-link" to={"/" + props.value}>
+            {getShortName(props.value)}
+          </Link>
+        ),
+        minWidth: 55,
+        filterable: true,
+        headerClassName: "list-header"
+      },
+      {
+        Header: "Actions",
+        accessor: "name",
+        Cell: props => (
+          <div className="edit-buttons">
+            <Link
+              className="btn btn-light btn-sm ml-1 mr-1"
+              to={"/" + props.value}
+            >
+              <FontAwesomeIcon icon="list" />
+            </Link>
+            <Link
+              className="btn btn-light btn-sm ml-1 mr-1"
+              to={"/projects/"+this.state.project.name+"/schemas/update/"+getShortName(props.value)}
+            >
+              <FontAwesomeIcon icon="pen" />
+            </Link>
+            <Link
+              className="btn btn-light btn-sm ml-1 mr-1"
+              to={"/projects/"+this.state.project.name+"/schemas/delete/"+getShortName(props.value)}
+            >
+              <FontAwesomeIcon icon="times" />
+            </Link>
+          </div>
+        ),
+        width: 130,
+        headerClassName: "list-header",
+        className: "text-center"
+      }
+    ];
 
     if (this.state.topics !== null && this.state.topics !== undefined) {
       let topics = [];
@@ -146,6 +281,48 @@ class ProjectDetails extends React.Component {
         );
       }
       topicList = <div>{topics}</div>;
+    }
+
+    if (this.state.schemas !== undefined && this.state.schemas.schemas.length > 0) {
+      let schemas = [];
+      this.state.schemas.schemas.forEach((schema,i) => {
+        schemas.push(
+          <div key={"schema-control-buttons-"+i}>
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group mr-2 mt-2" role="group" aria-label="First group">
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  id={"scheme-run-"+schema.name} key={"scheme-run-"+schema.name}
+                  onClick={() => {}}>
+                    <FontAwesomeIcon icon="play"></FontAwesomeIcon>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-warning"
+                  id={"scheme-edit-"+schema.name} key={"scheme-edit-"+schema.name}
+                  onClick={() => {this.toggleModal("modalEdit", getShortName(schema.name))}}>
+                    <FontAwesomeIcon icon="edit"/>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  id={"scheme-delete-"+schema.name} key={"scheme-delete-"+schema.name}
+                  onClick={() => {this.handleDeleteSchema(this.state.project.name, getShortName(schema.name))}}>
+                    <FontAwesomeIcon icon="trash-alt"></FontAwesomeIcon>
+                </button>
+                <button
+                  style={{"pointer-events": "none"}}
+                  type="button"
+                  class="btn btn-secondary disabled">
+                    {getShortName(schema.name)}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      });
+      schemaList = <div>{schemas}</div>;
     }
 
     if (this.state.subs !== null && this.state.subs !== undefined) {
@@ -442,6 +619,36 @@ class ProjectDetails extends React.Component {
                   </React.Fragment>
                   :null}
                 </CardFooter>
+              </Card>
+              <Card className="mt-3">
+                <CardHeader>
+                  <strong>Schemas</strong>
+                    <Link
+                      style={{ borderColor: "grey" }}
+                      className="btn btn-light btn-sm ml-4"
+                      to={"/projects/"+this.state.project.name+"/schemas/create"}
+                    >
+                      + Create a new Schema
+                    </Link>
+                </CardHeader>
+                { this.state.schemas !== undefined &&
+                this.state.schemas.schemas.length > 0 &&
+                <CardBody>
+                  {/* {schemaList} */}
+                  <ReactTable
+                    data={this.state.schemas.schemas}
+                    columns={columns}
+                    className="-striped -highlight"
+                    defaultPageSize={20}
+                    defaultFilterMethod = {
+                        (filter, row, column) => {
+                            const id = filter.pivotId || filter.id
+                            return row[id] !== undefined ? String(row[id]).includes(filter.value) : true
+                        }
+                    }
+                  />
+                </CardBody>
+                }
               </Card>
             </div>
             <div className="col-md-8 col-sm-12 col-xs-12">

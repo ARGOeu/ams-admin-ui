@@ -27,6 +27,87 @@ class DataManager {
     return this.doGet(url, "metrics");
   }
 
+  projectGetSchemas(project) {
+    if (!project || !this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project +
+      "/schemas"
+    return this.doGet(url, "schemas");
+  }
+
+  projectCreateSchema(project, name, data){
+    if (!project || !this.token || !this.endpoint){
+        return Promise.resolve({ done: false });
+    }
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project +
+      "/schemas/" +
+      name;
+
+    return this.doPost(url,JSON.parse(data))
+  }
+
+  projectEditSchema(project, name, data){
+    if (!project || !this.token || !this.endpoint){
+        return Promise.resolve({ done: false });
+    }
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project +
+      "/schemas/" +
+      name;
+
+    return this.doPut(url,JSON.parse(data))
+  }
+
+  projectDeleteSchema(project, name){
+    if (!project || !this.token || !this.endpoint){
+        return Promise.resolve({ done: false });
+    }
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project +
+      "/schemas/" +
+      name;
+
+    return this.doDelete(url)
+  }
+
+  projectValidateSchema(project, name, data){
+    if (!project || !this.token || !this.endpoint){
+        return Promise.resolve({ done: false });
+    }
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project +
+      "/schemas/" +
+      name + ":validate";
+    return this.doPost(url,JSON.parse(data))
+  }
+
   projectGet(projectName) {
     if (!this.token || !this.endpoint) return Promise.resolve({ done: false });
     let project = "";
