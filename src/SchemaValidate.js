@@ -176,7 +176,6 @@ class SchemaValidate extends Component {
     }
 
     apiValidateSchema(projectName, schemaName, schema) {
-        let comp = this;
         this.DM.projectValidateSchema(projectName, schemaName, schema).then(r => {
           if (r.done) {
             NotificationManager.info("Schema is valid", null, 1000);
@@ -205,7 +204,6 @@ class SchemaValidate extends Component {
     }
 
     render() {
-        let restrictPublish = null;
         let header = null;
         let dispPost = "d-none";
         let dispForm = "d-block p-4";
