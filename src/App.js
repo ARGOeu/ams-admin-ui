@@ -378,7 +378,8 @@ class App extends Component {
                                                 <ListGroup>
                                                     <ListGroupItem
                                                         action
-                                                        href="http://argoeu.github.io/guides/messaging"
+                                                        href="https://argoeu.github.io/argo-messaging/"
+                                                        target= "_blank"
                                                         tag="a"
                                                     >
                                                         <ListGroupItemHeading>
@@ -396,6 +397,7 @@ class App extends Component {
                                                         action
                                                         href="https://api-doc.argo.grnet.gr/argo-messaging"
                                                         tag="a"
+                                                        target= "_blank"
                                                     >
                                                         <ListGroupItemHeading>
                                                             <FontAwesomeIcon
