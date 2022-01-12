@@ -31,6 +31,7 @@ import UpdateSub from "./UpdateSub";
 import SubACL from "./SubACL";
 import SubPull from "./SubPull"
 import SubModOffset from "./SubModOffset";
+import SchemaCreate from "./SchemaCreate";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DataManager from "./DataManager";
@@ -89,6 +90,7 @@ library.add(
 const ProtectedRoute = ({
     action,
     toDelete,
+    restrictPublish,
     auth: isAuth,
     component: Component,
     ...rest
@@ -97,7 +99,7 @@ const ProtectedRoute = ({
         {...rest}
         render={props =>
             isAuth === true ? (
-                <Component {...props} toDelete={toDelete} action={action} />
+                <Component {...props} toDelete={toDelete} restrictPublish={restrictPublish} action={action} />
             ) : (
                 <Redirect
                     to={{
@@ -752,6 +754,15 @@ class App extends Component {
                                             exact
                                             path="/average_project_metrics"
                                             component={AverageProjectMetricsTable}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowProjects
+                                            }
+                                            path="/projects/:projectname/schemas/create"
+                                            component={SchemaCreate}
                                         />
                                         <Redirect to="/" />
                                     </Switch>
