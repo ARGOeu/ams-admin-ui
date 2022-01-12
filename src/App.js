@@ -32,6 +32,7 @@ import SubACL from "./SubACL";
 import SubPull from "./SubPull"
 import SubModOffset from "./SubModOffset";
 import SchemaDetails from "./SchemaDetails";
+import SchemaUpdate from "./SchemaUpdate";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DataManager from "./DataManager";
@@ -834,6 +835,35 @@ class App extends Component {
                                             path="/projects/:projectname/schemas/delete/:schemaname"
                                             component={SchemaDetails}
                                             toDelete={true}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowSchema
+                                            }
+                                            path="/projects/:projectname/schemas/:schemaname"
+                                            component={SchemaDetails}
+                                            toDelete={false}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowProjects
+                                            }
+                                            path="/projects/:projectname/schemas/delete/:schemaname"
+                                            component={SchemaDetails}
+                                            toDelete={true}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowProjects
+                                            }
+                                            path="/projects/:projectname/schemas/update/:schemaname"
+                                            component={SchemaUpdate}
                                         />
                                         <Redirect to="/" />
                                     </Switch>
