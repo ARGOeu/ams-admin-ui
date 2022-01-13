@@ -323,6 +323,7 @@ class ProjectDetails extends React.Component {
       });
     }
 
+
     if (this.state.subs !== null && this.state.subs !== undefined) {
       let topicSubs = {};
       for (let sub of this.state.subs) {
@@ -645,6 +646,7 @@ class ProjectDetails extends React.Component {
                     }
                   />
                 </CardBody>
+                }
                 }
               </Card>
             </div>

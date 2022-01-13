@@ -31,7 +31,7 @@ import UpdateSub from "./UpdateSub";
 import SubACL from "./SubACL";
 import SubPull from "./SubPull"
 import SubModOffset from "./SubModOffset";
-import SchemaCreate from "./SchemaCreate";
+import SchemaDetails from "./SchemaDetails";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DataManager from "./DataManager";
@@ -208,6 +208,7 @@ class App extends Component {
             this.state.isConsumer;
         const allowOperationalMetrics = this.state.isServiceAdmin
         const allowAverageProjectMetrics = this.state.isServiceAdmin
+        const allowSchema = this.state.isServiceAdmin || this.state.isProjectAdmin;
 
       
 
@@ -818,10 +819,21 @@ class App extends Component {
                                             exact
                                             auth={
                                                 this.authen.isLogged() &&
+                                                allowSchema
+                                            }
+                                            path="/projects/:projectname/schemas/:schemaname"
+                                            component={SchemaDetails}
+                                            toDelete={false}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
                                                 allowProjects
                                             }
-                                            path="/projects/:projectname/schemas/create"
-                                            component={SchemaCreate}
+                                            path="/projects/:projectname/schemas/delete/:schemaname"
+                                            component={SchemaDetails}
+                                            toDelete={true}
                                         />
                                         <Redirect to="/" />
                                     </Switch>
