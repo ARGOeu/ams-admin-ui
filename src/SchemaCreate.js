@@ -354,7 +354,15 @@ class SchemaCreate extends React.Component {
                     </div>
                     <div className="col-md-8">
                       <Card>
-                        <CardHeader>Schema</CardHeader>
+                        <CardHeader>
+                          <Row>
+                            <div className="col-md-7">
+                              Schema
+                            </div>
+                            <div className="col-md-5">
+                            </div>
+                          </Row>
+                        </CardHeader>
                         <CardBody>
                           <FormGroup>
                             <Input

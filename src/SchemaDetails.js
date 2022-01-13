@@ -316,25 +316,18 @@ class SchemaDetails extends React.Component {
                         getShortName(this.state.schema.name)}
                     </h4>
                   </span>
-                  <hr/>
-                  <div>
-                    <pre>
-                      <code className="prettyprint"> 
-                      {JSON.stringify(this.state.schema.schema, null, 4)}
-                      </code>
-                    </pre>
-                  </div>
-                </CardBody>
-                <CardFooter>
-                   <small>
-                    <strong>uuid:</strong>
-                  </small>
-                  <small> {this.state.schema && this.state.schema.uuid}</small> 
                   <br />
                   <small>
                     <strong>type:</strong>
                   </small>
-                  <small> {this.state.schema && this.state.schema.type}</small>
+                  <small>
+                    {this.state.schema && this.state.schema.type.toUpperCase()}
+                  </small>
+                  <br />
+                  <small>
+                    <strong>uuid:</strong>
+                  </small>
+                  <small> {this.state.schema && this.state.schema.uuid}</small> 
                   {this.state.project?
                   <React.Fragment>
                     <small>
@@ -344,7 +337,19 @@ class SchemaDetails extends React.Component {
                     <small> {this.state.project.name}</small>
                   </React.Fragment>
                   :null}
-                </CardFooter>
+                  <br/><br/>
+                  <div>
+                    <Card>
+                      <CardBody>
+                      <pre>
+                        <code className="prettyprint"> 
+                        {JSON.stringify(this.state.schema.schema, null, 4)}
+                        </code>
+                      </pre>
+                      </CardBody>
+                    </Card>
+                  </div>
+                </CardBody>
               </Card>
             </div>
           </Row>
