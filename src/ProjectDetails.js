@@ -13,14 +13,15 @@ import {
   CardHeader,
   CardFooter,
   Row,
-  Table
+  Table,
+  Badge,
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   NotificationContainer,
-  NotificationManager
+  NotificationManager,
 } from "react-notifications";
 import {
   faDiceD6,
@@ -29,11 +30,18 @@ import {
   faInfoCircle,
   faEdit,
   faTrashAlt,
-  faPlay
+  faPlay,
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
-library.add(faDiceD6, faEnvelope, faEnvelopeOpen, faInfoCircle, faEdit,
-            faTrashAlt, faPlay);
+library.add(
+  faDiceD6,
+  faEnvelope,
+  faEnvelopeOpen,
+  faInfoCircle,
+  faEdit,
+  faTrashAlt,
+  faPlay
+);
 
 function getShortName(fullName) {
   let tokens = fullName.split("/");
@@ -53,9 +61,21 @@ class ProjectDetails extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen();
-    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
-    this.state = { project: null, topics: null, subs: null, metrics: [], modalCreate: false,
-      modalEdit: false, newSchemaName: "", newSchemaData: "", selectedSchemaName: ""};
+    this.DM = new DataManager(
+      this.authen.getEndpoint(),
+      this.authen.getToken()
+    );
+    this.state = {
+      project: null,
+      topics: null,
+      subs: null,
+      metrics: [],
+      modalCreate: false,
+      modalEdit: false,
+      newSchemaName: "",
+      newSchemaData: "",
+      selectedSchemaName: "",
+    };
 
     this.apiGetData.bind(this);
     this.apiGetTopics.bind(this);
@@ -75,29 +95,29 @@ class ProjectDetails extends React.Component {
         modalEdit: false,
         newSchemaName: "",
         newSchemaData: "",
-        selectedSchemaName: ""
+        selectedSchemaName: "",
       };
     }
   }
 
   componentWillReceiveProps(props) {
     this.setState({
-        toDelete: this.props.toDelete,
-        project: this.apiGetData(this.props.match.params.projectname),
-        topics: this.apiGetTopics(this.props.match.params.projectname),
-        subs: this.apiGetSubs(this.props.match.params.projectname),
-        metrics: this.apiGetMetrics(this.props.match.params.projectname),
-        schemas: this.apiGetSchemas(this.props.match.params.projectname),
-        modalCreate: false,
-        modalEdit: false,
-        newSchemaName: "",
-        newSchemaData: "",
-        selectedSchemaName: ""
-      });
+      toDelete: this.props.toDelete,
+      project: this.apiGetData(this.props.match.params.projectname),
+      topics: this.apiGetTopics(this.props.match.params.projectname),
+      subs: this.apiGetSubs(this.props.match.params.projectname),
+      metrics: this.apiGetMetrics(this.props.match.params.projectname),
+      schemas: this.apiGetSchemas(this.props.match.params.projectname),
+      modalCreate: false,
+      modalEdit: false,
+      newSchemaName: "",
+      newSchemaData: "",
+      selectedSchemaName: "",
+    });
   }
 
   apiGetMetrics(projectName) {
-    this.DM.projectGetMetrics(projectName).then(r => {
+    this.DM.projectGetMetrics(projectName).then((r) => {
       if (r.done) {
         this.setState({ metrics: r.data });
       }
@@ -105,7 +125,7 @@ class ProjectDetails extends React.Component {
   }
 
   apiGetSchemas(projectName) {
-    this.DM.projectGetSchemas(projectName).then(r => {
+    this.DM.projectGetSchemas(projectName).then((r) => {
       if (r.done) {
         this.setState({ schemas: r.data });
       }
@@ -113,7 +133,7 @@ class ProjectDetails extends React.Component {
   }
 
   apiEditSchema(projectName, schemaName, schema) {
-    this.DM.projectEditSchema(projectName, schemaName, schema).then(r => {
+    this.DM.projectEditSchema(projectName, schemaName, schema).then((r) => {
       if (r.done) {
         this.apiGetSchemas(projectName);
       }
@@ -121,7 +141,7 @@ class ProjectDetails extends React.Component {
   }
 
   apiDeleteSchema(projectName, schemaName) {
-    this.DM.projectDeleteSchema(projectName, schemaName).then(r => {
+    this.DM.projectDeleteSchema(projectName, schemaName).then((r) => {
       if (r) {
         this.apiGetSchemas(projectName);
       }
@@ -140,17 +160,17 @@ class ProjectDetails extends React.Component {
     this.setState({
       newSchemaName: "",
       newSchemaData: "",
-      selectedSchemaName: ""
+      selectedSchemaName: "",
     });
     this.toggleModal(modalName);
   }
 
   apiDelete(projectname) {
     let comp = this;
-    this.DM.projectDelete(projectname).then(done => {
+    this.DM.projectDelete(projectname).then((done) => {
       if (done) {
         NotificationManager.info("Project Deleted", null, 1000);
-        setTimeout(function() {
+        setTimeout(function () {
           comp.props.history.push("/projects");
         }, 1000);
       } else {
@@ -160,7 +180,7 @@ class ProjectDetails extends React.Component {
   }
 
   apiGetData(projectName) {
-    this.DM.projectGet(projectName).then(r => {
+    this.DM.projectGet(projectName).then((r) => {
       if (r.done) {
         this.setState({ project: r.data });
       }
@@ -168,7 +188,7 @@ class ProjectDetails extends React.Component {
   }
 
   apiGetTopics(projectName) {
-    this.DM.topicGet(projectName).then(r => {
+    this.DM.topicGet(projectName).then((r) => {
       if (r.done) {
         this.setState({ topics: r.data.topics });
       }
@@ -176,7 +196,7 @@ class ProjectDetails extends React.Component {
   }
 
   apiGetSubs(projectName) {
-    this.DM.subGet(projectName).then(r => {
+    this.DM.subGet(projectName).then((r) => {
       if (r.done) {
         this.setState({ subs: r.data.subscriptions });
       }
@@ -189,10 +209,9 @@ class ProjectDetails extends React.Component {
         this.setState({
           modalCreate: !this.state.modalCreate,
           newSchemaData: "",
-          newSchemaName: ""
+          newSchemaName: "",
         });
-      }
-      else if (modalName === "modalEdit") {
+      } else if (modalName === "modalEdit") {
         this.setState({
           modalEdit: !this.state.modalEdit,
           selectedSchemaName: schemaName,
@@ -218,28 +237,30 @@ class ProjectDetails extends React.Component {
     const columns = [
       {
         Header: "#",
-        accessor: "name",
-        Cell: props => (<FontAwesomeIcon icon="dice-d6" style={{ color: "#616A6B" }} size="1x" />),
-        width: 40,
+        accessor: "type",
+        Cell: (props) => {
+          return <Badge color="info">{props.value.toUpperCase()}</Badge>;
+        },
+        width: 60,
         headerClassName: "list-header",
-        className: "text-center"
+        className: "text-center",
       },
       {
         Header: "Name",
         accessor: "name",
-        Cell: props => (
+        Cell: (props) => (
           <Link className="item-link" to={"/" + props.value}>
             {getShortName(props.value)}
           </Link>
         ),
         minWidth: 55,
         filterable: true,
-        headerClassName: "list-header"
+        headerClassName: "list-header",
       },
       {
         Header: "Actions",
         accessor: "name",
-        Cell: props => (
+        Cell: (props) => (
           <div className="edit-buttons">
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
@@ -249,13 +270,23 @@ class ProjectDetails extends React.Component {
             </Link>
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
-              to={"/projects/"+this.state.project.name+"/schemas/update/"+getShortName(props.value)}
+              to={
+                "/projects/" +
+                this.state.project.name +
+                "/schemas/update/" +
+                getShortName(props.value)
+              }
             >
               <FontAwesomeIcon icon="pen" />
             </Link>
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
-              to={"/projects/"+this.state.project.name+"/schemas/delete/"+getShortName(props.value)}
+              to={
+                "/projects/" +
+                this.state.project.name +
+                "/schemas/delete/" +
+                getShortName(props.value)
+              }
             >
               <FontAwesomeIcon icon="times" />
             </Link>
@@ -263,8 +294,8 @@ class ProjectDetails extends React.Component {
         ),
         width: 130,
         headerClassName: "list-header",
-        className: "text-center"
-      }
+        className: "text-center",
+      },
     ];
 
     if (this.state.topics !== null && this.state.topics !== undefined) {
@@ -282,39 +313,60 @@ class ProjectDetails extends React.Component {
       topicList = <div>{topics}</div>;
     }
 
-    if (this.state.schemas !== undefined && this.state.schemas.schemas.length > 0) {
+    if (
+      this.state.schemas !== undefined &&
+      this.state.schemas.schemas.length > 0
+    ) {
       let schemas = [];
-      this.state.schemas.schemas.forEach((schema,i) => {
+      this.state.schemas.schemas.forEach((schema, i) => {
         schemas.push(
-          <div key={"schema-control-buttons-"+i}>
+          <div key={"schema-control-buttons-" + i}>
             <div class="btn-toolbar" role="toolbar">
-              <div class="btn-group mr-2 mt-2" role="group" aria-label="First group">
+              <div
+                class="btn-group mr-2 mt-2"
+                role="group"
+                aria-label="First group"
+              >
                 <button
                   type="button"
                   class="btn btn-success"
-                  id={"scheme-run-"+schema.name} key={"scheme-run-"+schema.name}
-                  onClick={() => {}}>
-                    <FontAwesomeIcon icon="play"></FontAwesomeIcon>
+                  id={"scheme-run-" + schema.name}
+                  key={"scheme-run-" + schema.name}
+                  onClick={() => {}}
+                >
+                  <FontAwesomeIcon icon="play"></FontAwesomeIcon>
                 </button>
                 <button
                   type="button"
                   class="btn btn-warning"
-                  id={"scheme-edit-"+schema.name} key={"scheme-edit-"+schema.name}
-                  onClick={() => {this.toggleModal("modalEdit", getShortName(schema.name))}}>
-                    <FontAwesomeIcon icon="edit"/>
+                  id={"scheme-edit-" + schema.name}
+                  key={"scheme-edit-" + schema.name}
+                  onClick={() => {
+                    this.toggleModal("modalEdit", getShortName(schema.name));
+                  }}
+                >
+                  <FontAwesomeIcon icon="edit" />
                 </button>
                 <button
                   type="button"
                   class="btn btn-danger"
-                  id={"scheme-delete-"+schema.name} key={"scheme-delete-"+schema.name}
-                  onClick={() => {this.handleDeleteSchema(this.state.project.name, getShortName(schema.name))}}>
-                    <FontAwesomeIcon icon="trash-alt"></FontAwesomeIcon>
+                  id={"scheme-delete-" + schema.name}
+                  key={"scheme-delete-" + schema.name}
+                  onClick={() => {
+                    this.handleDeleteSchema(
+                      this.state.project.name,
+                      getShortName(schema.name)
+                    );
+                  }}
+                >
+                  <FontAwesomeIcon icon="trash-alt"></FontAwesomeIcon>
                 </button>
                 <button
-                  style={{"pointer-events": "none"}}
+                  style={{ "pointer-events": "none" }}
                   type="button"
-                  class="btn btn-secondary disabled">
-                    {getShortName(schema.name)}
+                  class="btn btn-secondary disabled"
+                >
+                  {getShortName(schema.name)}
                 </button>
               </div>
             </div>
@@ -322,7 +374,6 @@ class ProjectDetails extends React.Component {
         );
       });
     }
-
 
     if (this.state.subs !== null && this.state.subs !== undefined) {
       let topicSubs = {};
@@ -481,25 +532,25 @@ class ProjectDetails extends React.Component {
             let metricItem = (
               <Table key="project-user-metrics" hover>
                 <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Metric</th>
-                        <th>Resource Name</th>
-                        <th>Description</th>
-                        <th>Value</th>
-                    </tr>
+                  <tr>
+                    <th>User</th>
+                    <th>Metric</th>
+                    <th>Resource Name</th>
+                    <th>Description</th>
+                    <th>Value</th>
+                  </tr>
                 </thead>
                 <tbody>
-                    <tr key={item.metric + "/" + item["resource_name"]}>
-                        <th scope="row">{item["resource_name"].split(".")[1]}</th>
-                        <td>{item.metric}</td>
-                        <td>{item.metric.split(".")[2]}</td>
-                        <td>{item.description}</td>
-                        <td>{item.timeseries[0].value}</td>
-                    </tr>
+                  <tr key={item.metric + "/" + item["resource_name"]}>
+                    <th scope="row">{item["resource_name"].split(".")[1]}</th>
+                    <td>{item.metric}</td>
+                    <td>{item.metric.split(".")[2]}</td>
+                    <td>{item.description}</td>
+                    <td>{item.timeseries[0].value}</td>
+                  </tr>
                 </tbody>
-            </Table>
-            )
+              </Table>
+            );
             userMetricList.push(metricItem);
           } else {
             let metricItem = (
@@ -599,55 +650,56 @@ class ProjectDetails extends React.Component {
                   </span>
                 </CardBody>
                 <CardFooter>
-                   <small>
+                  <small>
                     <strong>created:</strong>
                   </small>
-                  <small> {this.state.project.created_on}</small> 
+                  <small> {this.state.project.created_on}</small>
                   <br />
                   <small>
                     <strong>updated:</strong>
                   </small>
                   <small> {this.state.project.modified_on}</small>
-                  {this.state.project.created_by?
-                  <React.Fragment>
-                    <small>
-                      <br />
-                      <strong>created by:</strong>
-                    </small>
-                    <small> {this.state.project.created_by}</small>
-                  </React.Fragment>
-                  :null}
+                  {this.state.project.created_by ? (
+                    <React.Fragment>
+                      <small>
+                        <br />
+                        <strong>created by:</strong>
+                      </small>
+                      <small> {this.state.project.created_by}</small>
+                    </React.Fragment>
+                  ) : null}
                 </CardFooter>
               </Card>
               <Card className="mt-3">
                 <CardHeader>
                   <strong>Schemas</strong>
-                    <Link
-                      style={{ borderColor: "grey" }}
-                      className="btn btn-light btn-sm ml-4"
-                      to={"/projects/"+this.state.project.name+"/schemas/create"}
-                    >
-                      + Create a new Schema
-                    </Link>
-                </CardHeader>
-                { this.state.schemas !== undefined &&
-                this.state.schemas.schemas.length > 0 &&
-                <CardBody>
-                  <ReactTable
-                    data={this.state.schemas.schemas}
-                    columns={columns}
-                    className="-striped -highlight"
-                    defaultPageSize={20}
-                    defaultFilterMethod = {
-                        (filter, row, column) => {
-                            const id = filter.pivotId || filter.id
-                            return row[id] !== undefined ? String(row[id]).includes(filter.value) : true
-                        }
+                  <Link
+                    style={{ borderColor: "grey" }}
+                    className="btn btn-light btn-sm ml-4"
+                    to={
+                      "/projects/" + this.state.project.name + "/schemas/create"
                     }
-                  />
-                </CardBody>
-                }
-                }
+                  >
+                    + Create a new Schema
+                  </Link>
+                </CardHeader>
+                {this.state.schemas !== undefined &&
+                  this.state.schemas.schemas.length > 0 && (
+                    <CardBody>
+                      <ReactTable
+                        data={this.state.schemas.schemas}
+                        columns={columns}
+                        className="-striped -highlight"
+                        defaultPageSize={20}
+                        defaultFilterMethod={(filter, row, column) => {
+                          const id = filter.pivotId || filter.id;
+                          return row[id] !== undefined
+                            ? String(row[id]).includes(filter.value)
+                            : true;
+                        }}
+                      />
+                    </CardBody>
+                  )}
               </Card>
             </div>
             <div className="col-md-8 col-sm-12 col-xs-12">

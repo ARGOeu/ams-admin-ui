@@ -33,6 +33,7 @@ import SubPull from "./SubPull"
 import SubModOffset from "./SubModOffset";
 import SchemaDetails from "./SchemaDetails";
 import SchemaUpdate from "./SchemaUpdate";
+import SchemaCreate from "./SchemaCreate";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DataManager from "./DataManager";
@@ -815,6 +816,15 @@ class App extends Component {
                                             exact
                                             path="/average_project_metrics"
                                             component={AverageProjectMetricsTable}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowProjects
+                                            }
+                                            path="/projects/:projectname/schemas/create"
+                                            component={SchemaCreate}
                                         />
                                         <ProtectedRoute
                                             exact
