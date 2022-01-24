@@ -660,13 +660,9 @@ class DataManager {
       body: JSON.stringify(data)
     })
       .then(r => {
-        if (r.ok) {
-          return r.json().then(json => {
-            return { data: json, done: true };
-          });
-        } else {
-          return { data: {}, done: false };
-        }
+        return r.json().then(json => {
+          return { data: json, done: r.ok };
+        });
       })
       .catch(error => console.log(error));
   }
