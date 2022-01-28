@@ -12,7 +12,7 @@ import {
   Input,
   FormGroup,
   Label,
-  Alert
+  Alert,
 } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -28,6 +28,7 @@ import {
   faEdit,
   faTrashAlt,
   faPlay,
+  faExternalLinkAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
 library.add(
@@ -37,7 +38,8 @@ library.add(
   faInfoCircle,
   faEdit,
   faTrashAlt,
-  faPlay
+  faPlay,
+  faExternalLinkAlt
 );
 
 function getShortName(fullName) {
@@ -77,7 +79,7 @@ class SchemaCreate extends React.Component {
         schemas: this.apiGetSchemas(this.props.match.params.projectname),
         schema: "",
         schemaType: "JSON",
-        schemaFieldError: ""
+        schemaFieldError: "",
       };
     }
   }
@@ -139,12 +141,10 @@ class SchemaCreate extends React.Component {
         body["type"] = this.state.schemaType.toLowerCase();
         try {
           body["schema"] = JSON.parse(this.state.schemaProperties);
-        }
-        catch {}
+        } catch {}
         return body;
       }
-    }
-    else if (this.state.schemaType === "AVRO") {
+    } else if (this.state.schemaType === "AVRO") {
       let body = {};
       body["type"] = this.state.schemaType.toLowerCase();
       body["schema"] = JSON.parse(this.state.schemaProperties);
@@ -162,95 +162,106 @@ class SchemaCreate extends React.Component {
     }
 
     let willBack = null;
+    let schemaSpecText = "";
+    let schemaSpecLink = "";
+
+    if (this.state.schemaType === "JSON") {
+      schemaSpecText = "JSON schema specification";
+      schemaSpecLink = "https://json-schema.org/specification.html";
+    } else if (this.state.schemaType === "AVRO") {
+      schemaSpecText = "AVRO schema specification";
+      schemaSpecLink = "https://avro.apache.org/docs/current/spec.html";
+    }
+
     let JSONHint = {
-        "type": "object",
-        "properties": {
-          "name":        { "type": "string" },
-          "email":        { "type": "string" },
-          "address":    { "type": "string" },
-          "telephone": { "type": "string" }
-        },
-        "required": ["name", "email"]
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        email: { type: "string" },
+        address: { type: "string" },
+        telephone: { type: "string" },
+      },
+      required: ["name", "email"],
     };
 
     let AVROHint = {
-      "name": "MyClass",
-      "type": "record",
-      "namespace": "com.acme.avro",
-      "fields": [
+      name: "MyClass",
+      type: "record",
+      namespace: "com.acme.avro",
+      fields: [
         {
-          "name": "type",
-          "type": "string"
+          name: "type",
+          type: "string",
         },
         {
-          "name": "properties",
-          "type": {
-            "name": "properties",
-            "type": "record",
-            "fields": [
+          name: "properties",
+          type: {
+            name: "properties",
+            type: "record",
+            fields: [
               {
-                "name": "name",
-                "type": {
-                  "name": "name",
-                  "type": "record",
-                  "fields": [
+                name: "name",
+                type: {
+                  name: "name",
+                  type: "record",
+                  fields: [
                     {
-                      "name": "type",
-                      "type": "string"
-                    }
-                  ]
-                }
+                      name: "type",
+                      type: "string",
+                    },
+                  ],
+                },
               },
               {
-                "name": "email",
-                "type": {
-                  "name": "email",
-                  "type": "record",
-                  "fields": [
+                name: "email",
+                type: {
+                  name: "email",
+                  type: "record",
+                  fields: [
                     {
-                      "name": "type",
-                      "type": "string"
-                    }
-                  ]
-                }
+                      name: "type",
+                      type: "string",
+                    },
+                  ],
+                },
               },
               {
-                "name": "address",
-                "type": {
-                  "name": "address",
-                  "type": "record",
-                  "fields": [
+                name: "address",
+                type: {
+                  name: "address",
+                  type: "record",
+                  fields: [
                     {
-                      "name": "type",
-                      "type": "string"
-                    }
-                  ]
-                }
+                      name: "type",
+                      type: "string",
+                    },
+                  ],
+                },
               },
               {
-                "name": "telephone",
-                "type": {
-                  "name": "telephone",
-                  "type": "record",
-                  "fields": [
+                name: "telephone",
+                type: {
+                  name: "telephone",
+                  type: "record",
+                  fields: [
                     {
-                      "name": "type",
-                      "type": "string"
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+                      name: "type",
+                      type: "string",
+                    },
+                  ],
+                },
+              },
+            ],
+          },
         },
         {
-          "name": "required",
-          "type": {
-            "type": "array",
-            "items": "string"
-          }
-        }
-      ]
+          name: "required",
+          type: {
+            type: "array",
+            items: "string",
+          },
+        },
+      ],
     };
 
     willBack = (
@@ -328,25 +339,32 @@ class SchemaCreate extends React.Component {
                               </FormGroup>
                             </div>
                             <div className="col-md-2">
-                            <Label for="schemaType">&#x200b;</Label>
-                            <Button
-                              type="submit"
-                              className="btn btn-info mr-2"
-                              onClick={() => {
-                                if (this.state.schemaType === "JSON") {
-                                  this.setState({
-                                    "schemaProperties": JSON.stringify(JSONHint, null, 4)
-                                  });
-                                }
-                                else if (this.state.schemaType === "AVRO") {
-                                  this.setState({
-                                    "schemaProperties": JSON.stringify(AVROHint, null, 4)
-                                  });
-                                }
-                              }}
-                            >
-                              Hint
-                            </Button>
+                              <Label for="schemaType">&#x200b;</Label>
+                              <Button
+                                type="submit"
+                                className="btn btn-info mr-2"
+                                onClick={() => {
+                                  if (this.state.schemaType === "JSON") {
+                                    this.setState({
+                                      schemaProperties: JSON.stringify(
+                                        JSONHint,
+                                        null,
+                                        4
+                                      ),
+                                    });
+                                  } else if (this.state.schemaType === "AVRO") {
+                                    this.setState({
+                                      schemaProperties: JSON.stringify(
+                                        AVROHint,
+                                        null,
+                                        4
+                                      ),
+                                    });
+                                  }
+                                }}
+                              >
+                                Hint
+                              </Button>
                             </div>
                           </Row>
                         </CardBody>
@@ -356,11 +374,27 @@ class SchemaCreate extends React.Component {
                       <Card>
                         <CardHeader>
                           <Row>
-                            <div className="col-md-7">
-                              Schema
+                            <div className="col-md-7">Schema</div>
+                            {this.state.schemaType? 
+                            <div
+                              className="col-md-5"
+                              style={{ textAlign: "end" }}
+                            >
+                              <a
+                                href={schemaSpecLink}
+                                class="btn btn-info"
+                                role="button"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {schemaSpecText} &#8203;
+                                <FontAwesomeIcon
+                                  className="side-ico"
+                                  icon="external-link-alt"
+                                />
+                              </a>
                             </div>
-                            <div className="col-md-5">
-                            </div>
+                            :null}
                           </Row>
                         </CardHeader>
                         <CardBody>
@@ -378,8 +412,7 @@ class SchemaCreate extends React.Component {
                                     this.setState({
                                       schemaFieldError: "",
                                     });
-                                  }
-                                  else {
+                                  } else {
                                     this.setState({
                                       schemaFieldError: "",
                                     });
@@ -395,11 +428,11 @@ class SchemaCreate extends React.Component {
                               }}
                             />
                           </FormGroup>
-                          {this.state.schemaFieldError ?
-                          <Alert color="danger">
-                            {this.state.schemaFieldError}
-                          </Alert>
-                          :null}
+                          {this.state.schemaFieldError ? (
+                            <Alert color="danger">
+                              {this.state.schemaFieldError}
+                            </Alert>
+                          ) : null}
                         </CardBody>
                       </Card>
                     </div>
