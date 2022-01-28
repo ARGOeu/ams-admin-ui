@@ -398,6 +398,7 @@ class SchemaCreate extends React.Component {
                                   icon="external-link-alt"
                                 />
                               </a>
+                            </div>
                             :null}
                           </Row>
                         </CardHeader>
