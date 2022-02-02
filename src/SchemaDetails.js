@@ -2,6 +2,11 @@ import React from "react";
 import Authen from "./Authen";
 import config from "./config";
 import "react-table/react-table.css";
+import Editor from "react-simple-code-editor";
+import { highlight, languages } from "prismjs/components/prism-core";
+import "prismjs/components/prism-clike";
+import "prismjs/components/prism-json";
+import "prismjs/themes/prism-coy.css";
 import {
   Col,
   Button,
@@ -9,14 +14,14 @@ import {
   CardBody,
   CardHeader,
   CardFooter,
-  Row
+  Row,
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   NotificationContainer,
-  NotificationManager
+  NotificationManager,
 } from "react-notifications";
 import {
   faDiceD6,
@@ -25,11 +30,18 @@ import {
   faInfoCircle,
   faEdit,
   faTrashAlt,
-  faPlay
+  faPlay,
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
-library.add(faDiceD6, faEnvelope, faEnvelopeOpen, faInfoCircle, faEdit,
-            faTrashAlt, faPlay);
+library.add(
+  faDiceD6,
+  faEnvelope,
+  faEnvelopeOpen,
+  faInfoCircle,
+  faEdit,
+  faTrashAlt,
+  faPlay
+);
 
 function getShortName(fullName) {
   let tokens = fullName.split("/");
@@ -49,9 +61,21 @@ class SchemaDetails extends React.Component {
   constructor(props) {
     super(props);
     this.authen = new Authen();
-    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
-    this.state = { project: null, topics: null, subs: null, metrics: [], modalCreate: false,
-      modalEdit: false, newSchemaName: "", newSchemaData: "", selectedSchemaName: ""};
+    this.DM = new DataManager(
+      this.authen.getEndpoint(),
+      this.authen.getToken()
+    );
+    this.state = {
+      project: null,
+      topics: null,
+      subs: null,
+      metrics: [],
+      modalCreate: false,
+      modalEdit: false,
+      newSchemaName: "",
+      newSchemaData: "",
+      selectedSchemaName: "",
+    };
 
     this.apiGetData.bind(this);
     this.apiGetTopics.bind(this);
@@ -73,30 +97,30 @@ class SchemaDetails extends React.Component {
         modalEdit: false,
         newSchemaName: "",
         newSchemaData: "",
-        selectedSchemaName: ""
+        selectedSchemaName: "",
       };
     }
   }
 
   componentWillReceiveProps(props) {
     this.setState({
-        toDelete: this.props.toDelete,
-        project: this.apiGetData(this.props.match.params.projectname),
-        topics: this.apiGetTopics(this.props.match.params.projectname),
-        subs: this.apiGetSubs(this.props.match.params.projectname),
-        metrics: this.apiGetMetrics(this.props.match.params.projectname),
-        schemas: this.apiGetSchemas(this.props.match.params.projectname),
-        schema: "",
-        modalCreate: false,
-        modalEdit: false,
-        newSchemaName: "",
-        newSchemaData: "",
-        selectedSchemaName: ""
-      });
+      toDelete: this.props.toDelete,
+      project: this.apiGetData(this.props.match.params.projectname),
+      topics: this.apiGetTopics(this.props.match.params.projectname),
+      subs: this.apiGetSubs(this.props.match.params.projectname),
+      metrics: this.apiGetMetrics(this.props.match.params.projectname),
+      schemas: this.apiGetSchemas(this.props.match.params.projectname),
+      schema: "",
+      modalCreate: false,
+      modalEdit: false,
+      newSchemaName: "",
+      newSchemaData: "",
+      selectedSchemaName: "",
+    });
   }
 
   apiGetMetrics(projectName) {
-    this.DM.projectGetMetrics(projectName).then(r => {
+    this.DM.projectGetMetrics(projectName).then((r) => {
       if (r.done) {
         this.setState({ metrics: r.data });
       }
@@ -104,9 +128,9 @@ class SchemaDetails extends React.Component {
   }
 
   apiGetSchemas(projectName) {
-    this.DM.projectGetSchemas(projectName).then(r => {
+    this.DM.projectGetSchemas(projectName).then((r) => {
       if (r.done) {
-        r.data.schemas.forEach((item,i) => {
+        r.data.schemas.forEach((item, i) => {
           if (getShortName(item.name) === this.props.match.params.schemaname) {
             this.setState({ schema: item });
           }
@@ -116,7 +140,7 @@ class SchemaDetails extends React.Component {
   }
 
   apiCreateSchema(projectName, schemaName, schema) {
-    this.DM.projectCreateSchema(projectName, schemaName, schema).then(r => {
+    this.DM.projectCreateSchema(projectName, schemaName, schema).then((r) => {
       if (r.done) {
         this.apiGetSchemas(projectName);
       }
@@ -124,7 +148,7 @@ class SchemaDetails extends React.Component {
   }
 
   apiEditSchema(projectName, schemaName, schema) {
-    this.DM.projectEditSchema(projectName, schemaName, schema).then(r => {
+    this.DM.projectEditSchema(projectName, schemaName, schema).then((r) => {
       if (r.done) {
         this.apiGetSchemas(projectName);
       }
@@ -133,11 +157,11 @@ class SchemaDetails extends React.Component {
 
   apiDeleteSchema(projectName, schemaName) {
     let comp = this;
-    this.DM.projectDeleteSchema(projectName, schemaName).then(r => {
+    this.DM.projectDeleteSchema(projectName, schemaName).then((r) => {
       if (r) {
         NotificationManager.info("Schema Deleted", null, 1000);
-        setTimeout(function() {
-          comp.props.history.push("/projects/details/"+projectName);
+        setTimeout(function () {
+          comp.props.history.push("/projects/details/" + projectName);
         }, 1000);
       } else {
         NotificationManager.error("Error during schema deletion", null, 1000);
@@ -161,17 +185,17 @@ class SchemaDetails extends React.Component {
     this.setState({
       newSchemaName: "",
       newSchemaData: "",
-      selectedSchemaName: ""
+      selectedSchemaName: "",
     });
     this.toggleModal(modalName);
   }
 
   apiDelete(projectname) {
     let comp = this;
-    this.DM.projectDelete(projectname).then(done => {
+    this.DM.projectDelete(projectname).then((done) => {
       if (done) {
         NotificationManager.info("Project Deleted", null, 1000);
-        setTimeout(function() {
+        setTimeout(function () {
           comp.props.history.push("/projects");
         }, 1000);
       } else {
@@ -181,7 +205,7 @@ class SchemaDetails extends React.Component {
   }
 
   apiGetData(projectName) {
-    this.DM.projectGet(projectName).then(r => {
+    this.DM.projectGet(projectName).then((r) => {
       if (r.done) {
         this.setState({ project: r.data });
       }
@@ -189,7 +213,7 @@ class SchemaDetails extends React.Component {
   }
 
   apiGetTopics(projectName) {
-    this.DM.topicGet(projectName).then(r => {
+    this.DM.topicGet(projectName).then((r) => {
       if (r.done) {
         this.setState({ topics: r.data.topics });
       }
@@ -197,7 +221,7 @@ class SchemaDetails extends React.Component {
   }
 
   apiGetSubs(projectName) {
-    this.DM.subGet(projectName).then(r => {
+    this.DM.subGet(projectName).then((r) => {
       if (r.done) {
         this.setState({ subs: r.data.subscriptions });
       }
@@ -210,10 +234,9 @@ class SchemaDetails extends React.Component {
         this.setState({
           modalCreate: !this.state.modalCreate,
           newSchemaData: "",
-          newSchemaName: ""
+          newSchemaName: "",
         });
-      }
-      else if (modalName === "modalEdit") {
+      } else if (modalName === "modalEdit") {
         this.setState({
           modalEdit: !this.state.modalEdit,
           selectedSchemaName: schemaName,
@@ -242,7 +265,9 @@ class SchemaDetails extends React.Component {
           </CardHeader>
           <CardBody className="border-danger text-center">
             Are you sure you want to delete schema:{" "}
-            <strong>{this.state.schema.name && getShortName(this.state.schema.name)}</strong>
+            <strong>
+              {this.state.schema.name && getShortName(this.state.schema.name)}
+            </strong>
           </CardBody>
           <CardFooter className="border-danger text-danger text-center">
             <Button
@@ -251,7 +276,8 @@ class SchemaDetails extends React.Component {
               onClick={() => {
                 this.handleDeleteSchema(
                   this.state.project.name,
-                  getShortName(this.state.schema.name));
+                  getShortName(this.state.schema.name)
+                );
               }}
             >
               Delete
@@ -279,19 +305,37 @@ class SchemaDetails extends React.Component {
           <Col className="text-right">
             <Link
               className="btn btn-success  ml-1 mr-1"
-              to={this.state.schema && "/projects/"+this.state.project.name+"/schemas/validate/"+getShortName(this.state.schema.name)}
+              to={
+                this.state.schema &&
+                "/projects/" +
+                  this.state.project.name +
+                  "/schemas/validate/" +
+                  getShortName(this.state.schema.name)
+              }
             >
               <FontAwesomeIcon icon="play" /> Validate
             </Link>
             <Link
               className="btn btn-info  ml-1 mr-1"
-              to={this.state.schema && "/projects/"+this.state.project.name+"/schemas/update/"+getShortName(this.state.schema.name)}
+              to={
+                this.state.schema &&
+                "/projects/" +
+                  this.state.project.name +
+                  "/schemas/update/" +
+                  getShortName(this.state.schema.name)
+              }
             >
               <FontAwesomeIcon icon="pen" /> Modify
             </Link>
             <a
               className="btn btn-danger  ml-1 mr-1"
-              href={this.state.schema && "/projects/"+this.state.project.name+"/schemas/delete/"+getShortName(this.state.schema.name)}
+              href={
+                this.state.schema &&
+                "/projects/" +
+                  this.state.project.name +
+                  "/schemas/delete/" +
+                  getShortName(this.state.schema.name)
+              }
             >
               <FontAwesomeIcon icon="times" /> Delete
             </a>
@@ -312,7 +356,7 @@ class SchemaDetails extends React.Component {
                   <br />
                   <span className="text-center">
                     <h4>
-                      { this.state.schema &&
+                      {this.state.schema &&
                         getShortName(this.state.schema.name)}
                     </h4>
                   </span>
@@ -327,25 +371,34 @@ class SchemaDetails extends React.Component {
                   <small>
                     <strong>uuid:</strong>
                   </small>
-                  <small> {this.state.schema && this.state.schema.uuid}</small> 
-                  {this.state.project?
-                  <React.Fragment>
-                    <small>
-                      <br />
-                      <strong>parent project:</strong>
-                    </small>
-                    <small> {this.state.project.name}</small>
-                  </React.Fragment>
-                  :null}
-                  <br/><br/>
+                  <small> {this.state.schema && this.state.schema.uuid}</small>
+                  {this.state.project ? (
+                    <React.Fragment>
+                      <small>
+                        <br />
+                        <strong>parent project:</strong>
+                      </small>
+                      <small> {this.state.project.name}</small>
+                    </React.Fragment>
+                  ) : null}
+                  <br />
+                  <br />
                   <div>
                     <Card>
                       <CardBody>
-                      <pre>
-                        <code className="prettyprint"> 
-                        {JSON.stringify(this.state.schema.schema, null, 4)}
-                        </code>
-                      </pre>
+                        <Editor
+                          value={
+                            JSON.stringify(this.state.schema.schema, null, 4) ||
+                            ""
+                          }
+                          disabled
+                          highlight={(code) => highlight(code, languages.json)}
+                          padding={10}
+                          style={{
+                            fontFamily: '"Fira code", "Fira Mono", monospace',
+                            fontSize: 12,
+                          }}
+                        />
                       </CardBody>
                     </Card>
                   </div>

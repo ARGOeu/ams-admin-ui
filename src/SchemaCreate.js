@@ -2,6 +2,11 @@ import React from "react";
 import Authen from "./Authen";
 import config from "./config";
 import "react-table/react-table.css";
+import Editor from "react-simple-code-editor";
+import { highlight, languages } from "prismjs/components/prism-core";
+import "prismjs/components/prism-clike";
+import "prismjs/components/prism-json";
+import "prismjs/themes/prism-coy.css";
 import {
   Button,
   Card,
@@ -398,41 +403,53 @@ class SchemaCreate extends React.Component {
                           </Row>
                         </CardHeader>
                         <CardBody>
-                          <FormGroup>
-                            <Input
-                              id="exampleText"
-                              name="text"
-                              type="textarea"
-                              style={{ height: "256px" }}
-                              value={this.renderSchema()}
-                              onChange={(e) => {
-                                try {
-                                  if (e.target.value !== "") {
-                                    JSON.parse(e.target.value);
-                                    this.setState({
-                                      schemaFieldError: "",
-                                    });
-                                  } else {
-                                    this.setState({
-                                      schemaFieldError: "",
-                                    });
-                                  }
-                                } catch (err) {
-                                  this.setState({
-                                    schemaFieldError: err.message,
-                                  });
-                                }
-                                this.setState({
-                                  schemaProperties: e.target.value,
-                                });
-                              }}
-                            />
-                          </FormGroup>
                           {this.state.schemaFieldError ? (
-                            <Alert color="danger">
+                            <Alert
+                              color="danger"
+                              style={{ marginBottom: "5px" }}
+                            >
                               {this.state.schemaFieldError}
                             </Alert>
                           ) : null}
+                          <Card>
+                            <CardBody>
+                              <FormGroup>
+                                <Editor
+                                  value={this.renderSchema() || ""}
+                                  onValueChange={(e) => {
+                                    try {
+                                      if (e !== "") {
+                                        JSON.parse(e);
+                                        this.setState({
+                                          schemaFieldError: "",
+                                        });
+                                      } else {
+                                        this.setState({
+                                          schemaFieldError: "",
+                                        });
+                                      }
+                                    } catch (err) {
+                                      this.setState({
+                                        schemaFieldError: err.message,
+                                      });
+                                    }
+                                    this.setState({
+                                      schemaProperties: e,
+                                    });
+                                  }}
+                                  highlight={(code) =>
+                                    highlight(code, languages.json)
+                                  }
+                                  padding={10}
+                                  style={{
+                                    fontFamily:
+                                      '"Fira code", "Fira Mono", monospace',
+                                    fontSize: 12,
+                                  }}
+                                />
+                              </FormGroup>
+                            </CardBody>
+                          </Card>
                         </CardBody>
                       </Card>
                     </div>
