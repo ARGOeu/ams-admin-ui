@@ -332,7 +332,7 @@ class ProjectDetails extends React.Component {
                   class="btn btn-success"
                   id={"scheme-run-" + schema.name}
                   key={"scheme-run-" + schema.name}
-                  onClick={() => {}}
+                  onClick={() => { }}
                 >
                   <FontAwesomeIcon icon="play"></FontAwesomeIcon>
                 </button>

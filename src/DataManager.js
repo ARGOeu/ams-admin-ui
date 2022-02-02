@@ -41,9 +41,9 @@ class DataManager {
     return this.doGet(url, "schemas");
   }
 
-  projectCreateSchema(project, name, data){
-    if (!project || !this.token || !this.endpoint){
-        return Promise.resolve({ done: false });
+  projectCreateSchema(project, name, data) {
+    if (!project || !this.token || !this.endpoint) {
+      return Promise.resolve({ done: false });
     }
 
     // quickly construct request url
@@ -55,12 +55,12 @@ class DataManager {
       "/schemas/" +
       name;
 
-    return this.doPost(url,JSON.parse(data))
+    return this.doPost(url, JSON.parse(data))
   }
 
-  projectEditSchema(project, name, data){
-    if (!project || !this.token || !this.endpoint){
-        return Promise.resolve({ done: false });
+  projectEditSchema(project, name, data) {
+    if (!project || !this.token || !this.endpoint) {
+      return Promise.resolve({ done: false });
     }
 
     // quickly construct request url
@@ -72,12 +72,12 @@ class DataManager {
       "/schemas/" +
       name;
 
-    return this.doPut(url,JSON.parse(data))
+    return this.doPut(url, JSON.parse(data))
   }
 
-  projectDeleteSchema(project, name){
-    if (!project || !this.token || !this.endpoint){
-        return Promise.resolve({ done: false });
+  projectDeleteSchema(project, name) {
+    if (!project || !this.token || !this.endpoint) {
+      return Promise.resolve({ done: false });
     }
 
     // quickly construct request url
@@ -92,9 +92,9 @@ class DataManager {
     return this.doDelete(url)
   }
 
-  projectValidateSchema(project, name, data){
-    if (!project || !this.token || !this.endpoint){
-        return Promise.resolve({ done: false });
+  projectValidateSchema(project, name, data) {
+    if (!project || !this.token || !this.endpoint) {
+      return Promise.resolve({ done: false });
     }
 
     // quickly construct request url
@@ -105,7 +105,7 @@ class DataManager {
       project +
       "/schemas/" +
       name + ":validate";
-    return this.doPost(url,JSON.parse(data))
+    return this.doPost(url, JSON.parse(data))
   }
 
   projectGet(projectName) {
@@ -134,13 +134,13 @@ class DataManager {
     return this.doPost(url);
   }
 
-  projectMembersGet(project){
+  projectMembersGet(project) {
     if (!this.token || !this.endpoint) return Promise.resolve({ done: false });
 
     // quickly construct request url
     let url =
-      "https://" + this.endpoint + "/v1/projects/" + project +  "/members?details=true";
-   
+      "https://" + this.endpoint + "/v1/projects/" + project + "/members?details=true";
+
     return this.doGet(url, "users");
   }
 
@@ -151,8 +151,8 @@ class DataManager {
 
     // quickly construct request url
     let url =
-      "https://" + this.endpoint + "/v1/users" + user ;
-   
+      "https://" + this.endpoint + "/v1/users" + user;
+
     return this.doGet(url, "users");
   }
 
@@ -189,7 +189,7 @@ class DataManager {
     return this.doGet(url, "metrics");
   }
 
-  topicCreate(project, topic) {
+  topicCreate(project, topic, schema) {
     if (!project || !topic || !this.token || !this.endpoint)
       return Promise.resolve({ done: false });
     // quickly construct request url
@@ -199,7 +199,7 @@ class DataManager {
       "/v1/projects/" +
       project + "/topics/" + topic
 
-    return this.doPut(url, {});
+    return this.doPut(url, { schema: schema });
   }
 
   topicGetACL(project, topic) {
@@ -281,7 +281,7 @@ class DataManager {
       url += s;
     }
     if (projects) {
-      let s = projects.map( (p, i) => `${p}`).join(',');
+      let s = projects.map((p, i) => `${p}`).join(',');
       url += "&projects=" + s;
     }
     return this.doGet(url, "metrics");
@@ -340,11 +340,11 @@ class DataManager {
 
     // quickly construct request url
     let url =
-    "https://" +
-    this.endpoint +
-    "/v1/projects/" +
-    project + "/subscriptions/" + sub +
-    ":modifyOffset"
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/subscriptions/" + sub +
+      ":modifyOffset"
 
     return this.doSimplePost(url, data)
   }
@@ -355,11 +355,11 @@ class DataManager {
 
     // quickly construct request url
     let url =
-    "https://" +
-    this.endpoint +
-    "/v1/projects/" +
-    project + "/subscriptions/" + sub +
-    ":modifyAckDeadline"
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/subscriptions/" + sub +
+      ":modifyAckDeadline"
 
     return this.doSimplePost(url, data)
   }
@@ -370,11 +370,11 @@ class DataManager {
 
     // quickly construct request url
     let url =
-    "https://" +
-    this.endpoint +
-    "/v1/projects/" +
-    project + "/subscriptions/" + sub +
-    ":modifyPushConfig"
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/subscriptions/" + sub +
+      ":modifyPushConfig"
 
     return this.doSimplePost(url, data)
   }
@@ -398,72 +398,72 @@ class DataManager {
 
     // quickly construct request url
     let url =
-    "https://" +
-    this.endpoint +
-    "/v1/projects/" +
-    project + "/subscriptions/" + sub +
-    ":modifyAcl"
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/subscriptions/" + sub +
+      ":modifyAcl"
 
     return this.doSimplePost(url, data)
   }
 
 
-  subAck(project,sub,ackId){
-    if (!project || !sub || !this.token || !this.endpoint){
-        return Promise.resolve({ done: false });
+  subAck(project, sub, ackId) {
+    if (!project || !sub || !this.token || !this.endpoint) {
+      return Promise.resolve({ done: false });
     }
-   
-    let data = {"ackIds":[ackId]}
-    
+
+    let data = { "ackIds": [ackId] }
+
     // quickly construct request url
     let url =
-    "https://" +
-    this.endpoint +
-    "/v1/projects/" +
-    project + "/subscriptions/" + sub +
-    ":acknowledge"
-    
-    return this.doPost(url,data)
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/subscriptions/" + sub +
+      ":acknowledge"
+
+    return this.doPost(url, data)
   }
 
 
-  subPull(project,sub,max,retImm){
-    
-    if (!project || !sub || !this.token || !this.endpoint){
-        return Promise.resolve({ done: false });
+  subPull(project, sub, max, retImm) {
+
+    if (!project || !sub || !this.token || !this.endpoint) {
+      return Promise.resolve({ done: false });
     }
-   
-    let data = {"maxMessages":Number(max).toString(), "returnImmediately": Boolean(retImm).toString()}
-    
+
+    let data = { "maxMessages": Number(max).toString(), "returnImmediately": Boolean(retImm).toString() }
+
     // quickly construct request url
     let url =
-    "https://" +
-    this.endpoint +
-    "/v1/projects/" +
-    project + "/subscriptions/" + sub +
-    ":pull"
-    
-    return this.doPost(url,data)
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/subscriptions/" + sub +
+      ":pull"
+
+    return this.doPost(url, data)
 
   }
 
-  topicPublish(project,topic,msg){
-    
-    if (!project || !topic || !this.token || !this.endpoint){
-        return Promise.resolve({ done: false });
+  topicPublish(project, topic, msg) {
+
+    if (!project || !topic || !this.token || !this.endpoint) {
+      return Promise.resolve({ done: false });
     }
 
-    let data = {"messages":[msg]}
+    let data = { "messages": [msg] }
 
     // quickly construct request url
     let url =
-    "https://" +
-    this.endpoint +
-    "/v1/projects/" +
-    project + "/topics/" + topic +
-    ":publish"
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/topics/" + topic +
+      ":publish"
 
-    return this.doPost(url,data)
+    return this.doPost(url, data)
 
   }
 
@@ -551,22 +551,22 @@ class DataManager {
 
     // quickly construct request url
     let url =
-    "https://" +
-    this.endpoint +
-    "/v1/projects/" +
-    project + "/topics/" + topic +
-    ":modifyAcl"
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/topics/" + topic +
+      ":modifyAcl"
 
     return this.doSimplePost(url, data)
   }
 
   subVerifyEndpoint(project, sub) {
-    if (!project || !sub  || !this.token || !this.endpoint)
-        return Promise.resolve({ done: false });
-    
+    if (!project || !sub || !this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+
     // quickly construct the request url 
     let url = "https://" + this.endpoint + "/v1/projects/" +
-    project + "/subscriptions/" + sub + ":verifyPushEndpoint";
+      project + "/subscriptions/" + sub + ":verifyPushEndpoint";
 
     return this.doSimplePost(url, {})
   }
@@ -603,7 +603,7 @@ class DataManager {
       .catch(error => console.log(error));
   }
 
-  doSimplePost(url = "", data = {}){
+  doSimplePost(url = "", data = {}) {
     return this.doSimpleSend("POST", url, data)
   }
 
@@ -630,7 +630,7 @@ class DataManager {
       .catch(error => console.log(error));
   }
 
-  doSimpleSend(method = "POST", url ="", data = {}){
+  doSimpleSend(method = "POST", url = "", data = {}) {
     return fetch(url, {
       method: method,
       mode: "cors",
@@ -641,14 +641,14 @@ class DataManager {
     })
       .then(r => {
         if (r.ok) {
-          return {done: true}
+          return { done: true }
         } else {
-          return {done: false};
+          return { done: false };
         }
       })
       .catch(error => console.log(error));
   }
-  
+
 
   doSend(method = "POST", url = "", data = {}) {
     return fetch(url, {

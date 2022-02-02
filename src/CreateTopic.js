@@ -22,6 +22,11 @@ function getProjectColorIcon(projectName) {
   return <FontAwesomeIcon icon="dice-d6" style={{ color: color }} />;
 }
 
+function getShortName(fullName) {
+  let tokens = fullName.split("/");
+  return tokens[tokens.length - 1];
+}
+
 class CreateTopic extends Component {
   constructor(props) {
     super(props);
@@ -32,9 +37,11 @@ class CreateTopic extends Component {
       this.state = {
         projects: this.apiGetProjects(),
         value: window.location.hash.substring(1),
+        schemas: this.apiGetSchemas(window.location.hash.substring(1)),
         error: "",
         topic: "",
-        topics: this.apiGetTopics(window.location.hash.substring(1))
+        topics: this.apiGetTopics(window.location.hash.substring(1)),
+        selectedSchema: ""
       };
     }
     this.handleTopicChange = this.handleTopicChange.bind(this);
@@ -62,7 +69,7 @@ class CreateTopic extends Component {
   handleSubmit(e) {
     e.preventDefault();
     if (this.state.error !== "") return;
-    this.doCreateTopic(this.state.value, this.state.topic);
+    this.doCreateTopic(this.state.value, this.state.topic, this.state.selectedSchema);
   }
 
   getProjects() {
@@ -70,30 +77,30 @@ class CreateTopic extends Component {
     return this.state.projects;
   }
 
-  // apiGetData(projectname) {
-  //   this.DM.projectGet(projectname).then(r=>{
-  //     if (r.done){
-  //       let initVal = {
-  //         project: ""
-  //       };
+  getSchemas() {
+    if (this.state.schemas === undefined) return [];
+    return this.state.schemas;
+  }
 
-  //       this.setState({ initialValues: initVal });
-  //     }
-  //   })
-
-  // }
+  apiGetSchemas(projectName) {
+    this.DM.projectGetSchemas(projectName).then((r) => {
+      if (r.done) {
+        this.setState({ schemas: r.data.schemas });
+      }
+    });
+  }
 
   // get project data
   apiGetProjects() {
-    
-    if (this.state.isServiceAdmin === false && this.state.isProjectAdmin === true){
-        // get project list from allowed projects
-        let allowedProjects = this.authen.getProjectsPerRole()["project_admin"]
-        let results = []
-        for (let project of allowedProjects)
-        results.push({"name":project, "created_on":"", "modified_on":""})
-        return results
-        
+
+    if (this.state.isServiceAdmin === false && this.state.isProjectAdmin === true) {
+      // get project list from allowed projects
+      let allowedProjects = this.authen.getProjectsPerRole()["project_admin"]
+      let results = []
+      for (let project of allowedProjects)
+        results.push({ "name": project, "created_on": "", "modified_on": "" })
+      return results
+
     }
 
     this.DM.projectGet().then(r => {
@@ -103,9 +110,9 @@ class CreateTopic extends Component {
     });
   }
 
-  doCreateTopic(project, topic) {
+  doCreateTopic(project, topic, schema) {
     let comp = this;
-    this.DM.topicCreate(project, topic).then(r => {
+    this.DM.topicCreate(project, topic, schema).then(r => {
       if (r.done) {
         NotificationManager.info("Topic Created!", null, 1000);
         setTimeout(() => {
@@ -117,7 +124,7 @@ class CreateTopic extends Component {
         NotificationManager.error("Error during topic creation!", null, 1000);
       }
     });
-   
+
   }
 
   loadProjectTopics(value) {
@@ -140,7 +147,7 @@ class CreateTopic extends Component {
             listOfTopics.push(itemTopic.name.split("/")[4]);
           }
         }
-        
+
 
         this.setState({ topics: listOfTopics });
       }
@@ -148,6 +155,10 @@ class CreateTopic extends Component {
   }
 
   matchProjects(state, value) {
+    return state.name.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+  }
+
+  matchSchemas(state, value) {
     return state.name.toLowerCase().indexOf(value.toLowerCase()) !== -1;
   }
 
@@ -162,6 +173,12 @@ class CreateTopic extends Component {
         </div>
         <Card className="mb-2">
           <CardBody>
+            <div className="row">
+              <div className="col-4 p-2">
+                Type a project name and a schema to bind a topic to:
+              </div>
+              <br></br>
+            </div>
             <div className="row">
               <div className="col-8">
                 <form onSubmit={this.handleSubmit}>
@@ -183,11 +200,18 @@ class CreateTopic extends Component {
                       getItemValue={item => item.name}
                       shouldItemRender={this.matchProjects}
                       onChange={(event, value) => {
-                        this.setState({ value });
-                        // this.loadProjectTopics(value);
+                        this.apiGetSchemas(value);
+                        this.setState({
+                          ...this.state,
+                          value
+                        });
                       }}
                       onSelect={value => {
-                        this.setState({ value });
+                        this.apiGetSchemas(value);
+                        this.setState({
+                          ...this.state,
+                          value
+                        });
                         this.loadProjectTopics(value);
                       }}
                       renderMenu={children => (
@@ -195,13 +219,50 @@ class CreateTopic extends Component {
                       )}
                       renderItem={(item, isHighlighted) => (
                         <div
-                          className={`item ${
-                            isHighlighted ? "item-highlighted" : ""
-                          }`}
+                          className={`item ${isHighlighted ? "item-highlighted" : ""
+                            }`}
                           key={item.name}
                         >
                           {getProjectColorIcon(item.name)}
                           <span className="ml-2">{item.name}</span>
+                        </div>
+                      )}
+                    />
+                  </div>
+                  <div className="input-group mb-2 mr-sm-2">
+                    <div className="input-group-prepend">
+                      <div className="input-group-text">Schema:</div>
+                    </div>
+                    <Autocomplete
+                      value={this.state.selectedSchema}
+                      inputProps={{
+                        id: "states-autocomplete",
+                        className: "form-control"
+                      }}
+                      wrapperProps={{
+                        className: "input-group-append"
+                      }}
+                      wrapperStyle={{ width: "75%" }}
+                      items={this.getSchemas()}
+                      getItemValue={item => item.name}
+                      shouldItemRender={this.matchSchemas}
+                      onChange={(event, value) => {
+                        this.setState({ selectedSchema: value });
+                      }}
+                      onSelect={value => {
+                        this.setState({ selectedSchema: value });
+                      }}
+                      renderMenu={children => (
+                        <div className="menu">{children}</div>
+                      )}
+                      renderItem={(item, isHighlighted) => (
+                        <div
+                          className={`item ${isHighlighted ? "item-highlighted" : ""
+                            }`}
+                          key={getShortName(item.name)}
+                        >
+                          {getProjectColorIcon(item.name)}
+                          <span className="ml-2">{getShortName(item.name)}</span>
                         </div>
                       )}
                     />
@@ -229,9 +290,6 @@ class CreateTopic extends Component {
                     Cancel
                   </button>
                 </form>
-              </div>
-              <div className="col-4 p-2">
-                Type a project name to create a topic to
               </div>
             </div>
           </CardBody>
