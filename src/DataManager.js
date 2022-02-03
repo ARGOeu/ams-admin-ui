@@ -218,6 +218,42 @@ class DataManager {
     return this.doGet(url, "authorized_users");
   }
 
+  topicDetachSchema(project, topicName = "") {
+    if (!project || !this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+    let topic = "";
+    if (topicName) topic = "/" + topicName;
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project +
+      "/topics" +
+      topic +
+      ":detachSchema"
+    return this.doPost(url, {});
+  }
+
+  topicAttachSchema(project, topicName, schema) {
+    if (!project || !this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+    let topic = "";
+    if (topicName) topic = "/" + topicName;
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project +
+      "/topics" +
+      topic +
+      ":attachSchema"
+    return this.doPost(url, { schema: schema });
+  }
+
   subGet(project, subName = "") {
     if (!project || !this.token || !this.endpoint)
       return Promise.resolve({ done: false });

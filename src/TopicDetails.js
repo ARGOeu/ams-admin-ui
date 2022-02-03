@@ -2,6 +2,7 @@ import React from "react";
 import Authen from "./Authen";
 import config from "./config";
 import NumberFormat from "react-number-format";
+import Autocomplete from "react-autocomplete";
 import { BarChart, CartesianGrid, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import {
     Col,
@@ -10,7 +11,10 @@ import {
     CardBody,
     CardHeader,
     CardFooter,
-    Row
+    Row,
+    InputGroup,
+    InputGroupAddon,
+    InputGroupText
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -25,7 +29,8 @@ import {
     faEnvelopeOpen,
     faUser,
     faUserLock,
-    faInfoCircle
+    faInfoCircle,
+    faExternalLinkAlt
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
 library.add(
@@ -34,7 +39,8 @@ library.add(
     faEnvelopeOpen,
     faUser,
     faUserLock,
-    faInfoCircle
+    faInfoCircle,
+    faExternalLinkAlt
 );
 
 function getShortName(fullName) {
@@ -69,7 +75,7 @@ class TopicDetails extends React.Component {
             this.authen.getEndpoint(),
             this.authen.getToken()
         );
-        this.state = { topics: null, acl: null };
+        this.state = { topic: {}, acl: null, selectedSchema: "" };
 
         this.apiGetData.bind(this);
 
@@ -88,13 +94,26 @@ class TopicDetails extends React.Component {
                     this.props.match.params.projectname,
                     this.props.match.params.topicname
                 ),
+                schemas: this.apiGetSchemas(this.props.match.params.projectname),
                 isServiceAdmin: this.authen.isServiceAdmin(),
                 isProjectAdmin: this.authen.isProjectAdmin(),
                 isPublisher: this.authen.isPublisher()
             };
         } else {
-            this.state = { topic: null };
+            this.state = { topic: {} };
         }
+        this.DM.topicGet(this.props.match.params.projectname, this.props.match.params.topicname).then(r => {
+            if (r.done) {
+                let selectedSchema = ""
+                if (r.data.schema) {
+                    selectedSchema = r.data.schema
+                }
+                this.setState({
+                    ...this.state,
+                    selectedSchema: selectedSchema
+                });
+            }
+        });
     }
 
     apiDelete(token, endpoint, project, topic) {
@@ -102,7 +121,7 @@ class TopicDetails extends React.Component {
         this.DM.topicDelete(project, topic).then(done => {
             if (done) {
                 NotificationManager.info("Topic Deleted", null, 1000);
-                setTimeout(function() {
+                setTimeout(function () {
                     comp.props.history.push("/topics#" + project);
                 }, 1000);
             } else {
@@ -132,15 +151,49 @@ class TopicDetails extends React.Component {
     }
 
     apiGetAcl(projectName, topicName) {
-        
+
         this.DM.topicGetACL(projectName, topicName).then(r => {
-                if (r.done) {
-                    this.setState({ acl: r.data });
-                }
+            if (r.done) {
+                this.setState({ acl: r.data });
+            }
+        });
+    }
+
+    getSchemas() {
+        if (this.state.schemas === undefined || this.state.selectedSchema !== "") return [];
+        return this.state.schemas;
+    }
+
+    apiGetSchemas(projectName) {
+        this.DM.projectGetSchemas(projectName).then((r) => {
+            if (r.done) {
+                this.setState({ schemas: r.data.schemas });
+            }
+        });
+    }
+
+    handleDetachSchema(projectName, topicName) {
+        this.DM.topicDetachSchema(projectName, getShortName(topicName)).then(() => {
+            this.setState({
+                ...this.state,
+                topic: this.apiGetData(this.props.match.params.projectname,
+                    this.props.match.params.topicname
+                ),
+                selectedSchema: ""
             });
-         
-        
-        
+        });
+    }
+
+    handleAttachSchema(projectName, topicName, schema) {
+        this.DM.topicAttachSchema(projectName, getShortName(topicName), schema).then(() => {
+            this.setState({
+                ...this.state,
+                topic: this.apiGetData(this.props.match.params.projectname,
+                    this.props.match.params.topicname
+                ),
+                selectedSchema: schema
+            });
+        });
     }
 
     render() {
@@ -148,7 +201,7 @@ class TopicDetails extends React.Component {
             this.state.isServiceAdmin === false &&
             this.state.isProjectAdmin === false &&
             this.state.isPublisher === true;
-        
+
         if (this.state.topic === undefined) {
             return <h3>loading</h3>;
         }
@@ -370,8 +423,8 @@ class TopicDetails extends React.Component {
                     <Col>
                         <h2>Topic Details</h2>
                     </Col>
-                    
-                    
+
+
                     <Col className="text-right">
                         <Link
                             className="btn btn-info  ml-1 mr-1"
@@ -379,24 +432,24 @@ class TopicDetails extends React.Component {
                         >
                             <FontAwesomeIcon icon="envelope" /> Publish Messages
                         </Link>
-                        { (!onlyPublisher) &&
-                        <>
-                        <Link
-                            className="btn btn-info  ml-1 mr-1"
-                            to={"/topics/mod-acl" + this.state.topic.name}
-                        >
-                            <FontAwesomeIcon icon="user-lock" /> Modify ACL
-                        </Link>
-                        <a
-                            className="btn btn-danger  ml-1 mr-1"
-                            href={"/topics/delete" + this.state.topic.name}
-                        >
-                            <FontAwesomeIcon icon="times" /> Delete Topic
-                        </a>
-                        </>
+                        {(!onlyPublisher) &&
+                            <>
+                                <Link
+                                    className="btn btn-info  ml-1 mr-1"
+                                    to={"/topics/mod-acl" + this.state.topic.name}
+                                >
+                                    <FontAwesomeIcon icon="user-lock" /> Modify ACL
+                                </Link>
+                                <a
+                                    className="btn btn-danger  ml-1 mr-1"
+                                    href={"/topics/delete" + this.state.topic.name}
+                                >
+                                    <FontAwesomeIcon icon="times" /> Delete Topic
+                                </a>
+                            </>
                         }
                     </Col>
-                    
+
                 </Row>
 
                 <div>
@@ -429,31 +482,114 @@ class TopicDetails extends React.Component {
                                                 this.state.topic.name
                                             )
                                         )}{" "}
-                                        { !onlyPublisher &&
-                                        <Link
-                                            style={{ color: "black" }}
-                                            to={
-                                                "/projects/details/" +
-                                                getProjectName(
+                                        {!onlyPublisher &&
+                                            <Link
+                                                style={{ color: "black" }}
+                                                to={
+                                                    "/projects/details/" +
+                                                    getProjectName(
+                                                        this.state.topic.name
+                                                    )
+                                                }
+                                            >
+                                                {getProjectName(
                                                     this.state.topic.name
-                                                )
-                                            }
-                                        >
-                                            {getProjectName(
-                                                this.state.topic.name
-                                            )}
-                                        </Link>}
-                                        { onlyPublisher &&  
+                                                )}
+                                            </Link>}
+                                        {onlyPublisher &&
 
                                             <span>{getProjectName(
                                                 this.state.topic.name
                                             )}</span>
                                         }
                                     </span>
-                                    <span className="text-center d-block">
+                                    <span className="text-center d-block" style={{ marginBottom: "5px" }}>
                                         <strong>full name:</strong>{" "}
                                         <code>{this.state.topic.name}</code>
                                     </span>
+                                    <InputGroup>
+                                        <InputGroupAddon addonType="prepend">
+                                            <InputGroupText>
+                                                {this.state.selectedSchema ?
+                                                    <Link
+                                                        style={{ color: "black", textDecoration: "none" }}
+                                                        to={
+                                                            "/projects/" +
+                                                            getProjectName(
+                                                                this.state.topic.name
+                                                            ) +
+                                                            "/schemas/" +
+                                                            getShortName(
+                                                                this.state.selectedSchema
+                                                            )
+                                                        }
+                                                    >
+                                                        <strong>
+                                                            Schema &nbsp;
+                                                        </strong>
+                                                        <FontAwesomeIcon icon="external-link-alt" size="1x" />
+                                                    </Link>
+                                                    :
+                                                    <strong>Schema</strong>
+                                                }
+                                            </InputGroupText>
+                                        </InputGroupAddon>
+                                        <Autocomplete
+                                            value={this.state.topic.schema || this.state.selectedSchema}
+                                            inputProps={{
+                                                id: "states-autocomplete",
+                                                className: "form-control"
+                                            }}
+                                            wrapperProps={{
+                                                className: "input-group-append"
+                                            }}
+                                            wrapperStyle={{ width: "58%" }}
+                                            items={this.getSchemas()}
+                                            getItemValue={item => item.name}
+                                            shouldItemRender={this.matchSchemas}
+                                            onChange={(event, value) => {
+                                                this.setState({ selectedSchema: value });
+                                            }}
+                                            onSelect={value => {
+                                                this.setState({ selectedSchema: value });
+                                            }}
+                                            renderMenu={children => (
+                                                <div className="menu">{children}</div>
+                                            )}
+                                            renderItem={(item, isHighlighted) => (
+                                                <div
+                                                    className={`item ${isHighlighted ? "item-highlighted" : ""
+                                                        }`}
+                                                    key={getShortName(item.name)}
+                                                >
+                                                    {getProjectColorIcon(item.name)}
+                                                    <span className="ml-2">{getShortName(item.name)}</span>
+                                                </div>
+                                            )}
+                                        />
+                                        {this.state.topic.schema ?
+                                            <InputGroupAddon addonType="append">
+                                                <Button
+                                                    color="danger"
+                                                    onClick={() => {
+                                                        this.handleDetachSchema(getProjectName(
+                                                            this.state.topic.name
+                                                        ), this.state.topic.name);
+                                                    }}>Detach</Button>
+                                            </InputGroupAddon>
+                                            :
+                                            <InputGroupAddon addonType="append">
+                                                <Button
+                                                    disabled={this.state.selectedSchema === "" ? true : false}
+                                                    color="success"
+                                                    onClick={() => {
+                                                        this.handleAttachSchema(getProjectName(
+                                                            this.state.topic.name
+                                                        ), this.state.topic.name, this.state.selectedSchema)
+                                                    }}>Attach</Button>
+                                            </InputGroupAddon>
+                                        }
+                                    </InputGroup>
                                     <hr />
                                     {acl}
                                 </CardBody>
