@@ -299,6 +299,42 @@ class DataManager {
     return this.doGet(url, "metrics");
   }
 
+  getRegistrations() {
+    if (!this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/registrations"
+    return this.doGet(url, "registrations");
+  }
+
+  acceptRegistration(uuid) {
+    if (!this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/registrations/" + uuid + ":accept"
+    return this.doPost(url, "");
+  }
+
+  declineRegistration(uuid, comment) {
+    if (!this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/registrations/" + uuid + ":decline"
+    return this.doPost(url, { "comment": comment });
+  }
+
   projectOperationalGetMetrics(start_date, end_date, projects) {
     if (!this.token || !this.endpoint)
       return Promise.resolve({ done: false });

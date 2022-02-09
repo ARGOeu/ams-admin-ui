@@ -35,6 +35,8 @@ import SchemaDetails from "./SchemaDetails";
 import SchemaUpdate from "./SchemaUpdate";
 import SchemaCreate from "./SchemaCreate";
 import SchemaValidate from "./SchemaValidate";
+import Registrations from "./Registrations";
+import RegistrationDetails from "./RegistrationDetails";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DataManager from "./DataManager";
@@ -76,7 +78,8 @@ import {
     faUserAstronaut,
     faUser,
     faChartBar,
-    faCogs
+    faCogs,
+    faList
 } from "@fortawesome/free-solid-svg-icons";
 
 import config from "./config";
@@ -93,7 +96,8 @@ library.add(
     faUserAstronaut,
     faUser,
     faChartBar,
-    faCogs
+    faCogs,
+    faList
 );
 
 const ProtectedRoute = ({
@@ -212,8 +216,8 @@ class App extends Component {
         const allowOperationalMetrics = this.state.isServiceAdmin
         const allowAverageProjectMetrics = this.state.isServiceAdmin
         const allowSchema = this.state.isServiceAdmin || this.state.isProjectAdmin;
+        const allowRegistrations = this.state.isServiceAdmin
 
-      
 
         let servRoles = this.authen.getServiceRoles();
         if (servRoles.length > 0) {
@@ -229,7 +233,7 @@ class App extends Component {
             let roleList = [];
             let roles = this.authen.getProjectsPerRole();
             for (let key in roles) {
-               
+
                 let projectList = [];
                 let projects = Array.from(roles[key]);
                 if (key === "project_admin") {
@@ -383,7 +387,7 @@ class App extends Component {
                                                     <ListGroupItem
                                                         action
                                                         href="https://argoeu.github.io/argo-messaging/"
-                                                        target= "_blank"
+                                                        target="_blank"
                                                         tag="a"
                                                     >
                                                         <ListGroupItemHeading>
@@ -401,7 +405,7 @@ class App extends Component {
                                                         action
                                                         href="https://api-doc.argo.grnet.gr/argo-messaging"
                                                         tag="a"
-                                                        target= "_blank"
+                                                        target="_blank"
                                                     >
                                                         <ListGroupItemHeading>
                                                             <FontAwesomeIcon
@@ -547,6 +551,17 @@ class App extends Component {
                                                     </Link>
                                                 </NavItem>
                                             )}
+                                            {allowRegistrations && (
+                                                <NavItem>
+                                                    <Link to="/registrations">
+                                                        <FontAwesomeIcon
+                                                            className="side-ico"
+                                                            icon="list"
+                                                        />
+                                                        Registrations
+                                                    </Link>
+                                                </NavItem>
+                                            )}
                                         </Nav>
                                     </div>
                                 </Col>
@@ -573,7 +588,7 @@ class App extends Component {
                                             path="/subs/mod-offset/projects/:projectname/subscriptions/:subname"
                                             component={SubModOffset}
                                         />
-                                         <ProtectedRoute
+                                        <ProtectedRoute
                                             exact
                                             auth={
                                                 this.authen.isLogged() &&
@@ -885,6 +900,31 @@ class App extends Component {
                                             path="/projects/:projectname/schemas/validate/:schemaname"
                                             component={SchemaValidate}
                                             restrictPublish={true}
+                                        />
+                                        <ProtectedRoute
+                                            auth={this.authen.isLogged()}
+                                            exact
+                                            path="/registrations"
+                                            component={Registrations}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowRegistrations
+                                            }
+                                            path="/registrations/:uuid"
+                                            component={RegistrationDetails}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowRegistrations
+                                            }
+                                            path="/registrations/decline/:uuid"
+                                            component={RegistrationDetails}
+                                            toDelete={true}
                                         />
                                         <Redirect to="/" />
                                     </Switch>
