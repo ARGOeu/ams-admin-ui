@@ -15,6 +15,11 @@ import {
   Row,
   Table,
   Badge,
+  Form,
+  FormGroup,
+  InputGroup,
+  InputGroupAddon,
+  Input
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -31,6 +36,7 @@ import {
   faEdit,
   faTrashAlt,
   faPlay,
+  faBan
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
 library.add(
@@ -40,7 +46,8 @@ library.add(
   faInfoCircle,
   faEdit,
   faTrashAlt,
-  faPlay
+  faPlay,
+  faBan
 );
 
 function getShortName(fullName) {
@@ -81,7 +88,7 @@ class ProjectDetails extends React.Component {
     this.apiGetProjectMembers.bind(this);
     this.apiGetTopics.bind(this);
     this.apiGetSubs.bind(this);
-    this.toggleModal.bind(this);
+    this.apiProjectMemberAdd.bind(this);
     this.handleCloseModal.bind(this);
 
     if (this.authen.isLogged()) {
@@ -214,23 +221,28 @@ class ProjectDetails extends React.Component {
     });
   }
 
-  toggleModal(modalName, schemaName) {
-    if (this.state !== undefined) {
-      if (modalName === "modalCreate") {
-        this.setState({
-          modalCreate: !this.state.modalCreate,
-          newSchemaData: "",
-          newSchemaName: "",
-        });
-      } else if (modalName === "modalEdit") {
-        this.setState({
-          modalEdit: !this.state.modalEdit,
-          selectedSchemaName: schemaName,
-          newSchemaName: schemaName,
-          newSchemaData: "",
-        });
+  apiProjectMemberAdd(username, role) {
+    let comp = this;
+    let data = {
+      "roles": [
+        role
+      ]
+    };
+    this.DM.projectMemberAdd(
+      this.props.match.params.projectname,
+      username,
+      data
+    ).then((r) => {
+      if (r.done) {
+        NotificationManager.info("Member added", null, 1000);
+        setTimeout(function () {
+          comp.props.history.push("#");
+        }, 1000);
       }
-    }
+      else {
+        NotificationManager.error("Failed to add member", null, 1000);
+      }
+    });
   }
 
   render() {
@@ -322,7 +334,13 @@ class ProjectDetails extends React.Component {
         Header: "Name",
         accessor: "name",
         Cell: (props) => (
-          <Link className="item-link" to={"/" + props.value}>
+          <Link className="item-link"
+            to={
+              "/projects/" +
+              this.props.match.params.projectname +
+              "/members/details/" +
+              props.value
+            }>
             {getShortName(props.value)}
           </Link>
         ),
@@ -337,17 +355,14 @@ class ProjectDetails extends React.Component {
           <div className="edit-buttons">
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
-              to={"/" + props.value}
+              to={"/projects/"+this.props.match.params.projectname+"/members/details/" + props.value}
             >
               <FontAwesomeIcon icon="list" />
             </Link>
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
               to={
-                "/projects/" +
-                this.state.project.name +
-                "/schemas/update/" +
-                getShortName(props.value)
+                "/projects/" + this.props.match.params.projectname + "/members/update/" + props.value
               }
             >
               <FontAwesomeIcon icon="pen" />
@@ -356,12 +371,12 @@ class ProjectDetails extends React.Component {
               className="btn btn-light btn-sm ml-1 mr-1"
               to={
                 "/projects/" +
-                this.state.project.name +
-                "/schemas/delete/" +
+                this.props.match.params.projectname +
+                "/members/remove/" +
                 getShortName(props.value)
               }
             >
-              <FontAwesomeIcon icon="times" />
+              <FontAwesomeIcon icon="ban" />
             </Link>
           </div>
         ),
@@ -394,9 +409,9 @@ class ProjectDetails extends React.Component {
       this.state.schemas.schemas.forEach((schema, i) => {
         schemas.push(
           <div key={"schema-control-buttons-" + i}>
-            <div class="btn-toolbar" role="toolbar">
+            <div className="btn-toolbar" role="toolbar">
               <div
-                class="btn-group mr-2 mt-2"
+                className="btn-group mr-2 mt-2"
                 role="group"
                 aria-label="First group"
               >
@@ -757,7 +772,7 @@ class ProjectDetails extends React.Component {
                     "/projects/" + this.state.project.name + "/schemas/create"
                   }
                 >
-                  + Create a new Schema
+                  + Create a new schema
                 </Link>
               </CardHeader>
               {this.state.schemas !== undefined &&
@@ -787,15 +802,48 @@ class ProjectDetails extends React.Component {
                   style={{ borderColor: "grey" }}
                   className="btn btn-light btn-sm ml-4"
                   to={
-                    "/projects/" + this.state.project.name + "/schemas/create"
+                    "/projects/" + this.state.project.name + "/members/create"
                   }
                 >
-                  + Create a new Schema
+                  + Create a new member
                 </Link>
               </CardHeader>
               {this.state.schemas !== undefined &&
                 this.state.schemas.schemas.length > 0 && (
                   <CardBody>
+                    <Card className="mb-2">
+                      <CardHeader>
+                      Add existing user as project member
+                      </CardHeader>
+                      <CardBody>
+                        <Form onSubmit={(e) => {
+                          e.preventDefault();
+                          this.apiProjectMemberAdd(e.target[0].value, e.target[1].value)
+                        }}>
+                          <FormGroup>
+                            <InputGroup>
+                              <InputGroupAddon addonType="prepend">Username</InputGroupAddon>
+                              <Input placeholder="" />
+                            </InputGroup>
+                          </FormGroup>
+                          <FormGroup>
+                            <InputGroup>
+                              <InputGroupAddon addonType="prepend">Role</InputGroupAddon>
+                              <Input type="select" name="select" id="select">
+                                <option value="project_admin">Project Admin</option>
+                                <option value="consumer">Consumer</option>
+                                <option value="publisher">Publisher</option>
+                              </Input>
+                            </InputGroup>
+                          </FormGroup>
+                          <Button
+                            color="success"
+                          >
+                            Add
+                          </Button>
+                        </Form>
+                      </CardBody>
+                    </Card>
                     <ReactTable
                       data={this.state.members}
                       columns={columnsMembers}

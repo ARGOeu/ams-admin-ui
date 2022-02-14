@@ -144,6 +144,16 @@ class DataManager {
     return this.doGet(url, "users");
   }
 
+  projectMemberDetailsGet(project, username) {
+    if (!this.token || !this.endpoint) return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" + this.endpoint + "/v1/projects/" + project + "/members/" + username;
+
+    return this.doGet(url);
+  }
+
   userGet(userName) {
     if (!this.token || !this.endpoint) return Promise.resolve({ done: false });
     let user = "";
@@ -576,6 +586,59 @@ class DataManager {
       project
 
     return this.doPut(url, data);
+  }
+
+  projectMemberUpdate(project, username, data) {
+    if (!username || !this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/members/" + username;
+
+    return this.doPut(url, data);
+  }
+
+  projectMemberCreate(project, username, data) {
+    if (!username || !this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/members/" + username;
+
+    return this.doPost(url, data);
+  }
+
+  projectMemberAdd(project, username, data) {
+    if (!username || !this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/members/" + username + ":add";
+
+    return this.doPost(url, data);
+  }
+
+  projectMemberRemove(project, username) {
+    if (!username || !this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/projects/" +
+      project + "/members/" + username +
+      ":remove";
+
+    return this.doPost(url);
   }
 
   userUpdate(username, data) {
