@@ -5,8 +5,8 @@ import {
 } from "react-notifications";
 import { Formik, Field, Form, ErrorMessage, FieldArray } from "formik";
 import Authen from "./Authen";
-
-import { Card, Button } from "reactstrap";
+import { Link } from "react-router-dom";
+import { Card, Button} from "reactstrap";
 import DataManager from "./DataManager";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -19,6 +19,16 @@ function clip() {
     document.execCommand("copy");
     NotificationManager.info("snippet copied to clipboard", null, 1000);
 }
+
+function getShortName(fullName) {
+    if (fullName !== undefined) {
+      if (fullName === "") {
+        return fullName;
+      }
+      let tokens = fullName.split("/");
+      return tokens[tokens.length - 1];
+    }
+  }
 
 function genCurlSnippet(endpoint, project, topic, token, msgBody) {
     return (
@@ -106,6 +116,7 @@ class TopicPublish extends Component {
             this.authen.getEndpoint(),
             this.authen.getToken()
         );
+        this.apiGetData.bind(this);
         this.state = {
             project: "",
             topic: "",
@@ -118,7 +129,11 @@ class TopicPublish extends Component {
         if (this.authen.isLogged()) {
             this.state = {
                 project: this.props.match.params.projectname,
-                topic: this.props.match.params.topicname
+                topic: this.props.match.params.topicname,
+                schema: this.apiGetData(
+                    this.props.match.params.projectname,
+                    this.props.match.params.topicname
+                )
             };
         }
 
@@ -155,6 +170,14 @@ class TopicPublish extends Component {
         }
     }
 
+    apiGetData(projectName, topicName) {
+        this.DM.topicGet(projectName, topicName).then(r => {
+            if (r.done) {
+                this.setState({ schema: r.data["schema"] });
+            }
+        });
+    }
+
     render() {
         let dispPost = "d-none";
         let dispForm = "d-block p-4";
@@ -168,13 +191,33 @@ class TopicPublish extends Component {
                 <NotificationContainer />
 
                 <div className="row mb-2">
-                    <div className="col-12">
+                    <div className="col-6">
                         <h2>
                             Publish message to topic:{" "}
                             <strong>{this.state.topic}</strong>{" "}
                             <small>({this.state.project})</small>
                         </h2>
                     </div>
+                    <div
+                        className="col-6"
+                        style={{ textAlign: "end" }}
+                    >
+                            <div
+                                class="btn btn-info"
+                                role="button"
+                              >
+                                <Link
+                                    style={{ color: "white", textDecoration: "none" }}
+                                    to={"/"+this.state.schema}
+                                >
+                                Subject to schema: {getShortName(this.state.schema)} &#8203;
+                                <FontAwesomeIcon
+                                  className="side-ico"
+                                  icon="external-link-alt"
+                                />
+                                </Link>
+                              </div>
+                            </div>
                 </div>
                 <Card className={dispPost}>
                     <div className="text-center">
