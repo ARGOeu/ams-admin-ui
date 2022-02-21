@@ -2,11 +2,12 @@ import React, { Component } from "react";
 import { Formik, Field, Form, ErrorMessage, FieldArray } from "formik";
 import {
   NotificationContainer,
-  NotificationManager
+  NotificationManager,
 } from "react-notifications";
-
+import Autocomplete from "react-autocomplete";
+import config from "./config";
 import Authen from "./Authen";
-import { Button, Card } from "reactstrap";
+import { Button, Card, Input } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -16,14 +17,29 @@ import {
   faHeartbeat,
   faCloudDownloadAlt,
   faCloudUploadAlt,
-  faShieldAlt
+  faShieldAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
-library.add(faExclamationTriangle, faUser, faCrown, faHeartbeat,  faCloudDownloadAlt,
-  faCloudUploadAlt,faShieldAlt);
+library.add(
+  faExclamationTriangle,
+  faUser,
+  faCrown,
+  faHeartbeat,
+  faCloudDownloadAlt,
+  faCloudUploadAlt,
+  faShieldAlt
+);
 
 window.valid_projects = [];
 
+function getProjectColorIcon(projectName) {
+  let color = "#616A6B";
+  if (projectName in config.project_colors) {
+    color = config.project_colors[projectName];
+  }
+
+  return <FontAwesomeIcon icon="dice-d6" style={{ color: color }} />;
+}
 
 function validate(values, other) {
   let errors = {};
@@ -41,73 +57,6 @@ function validate(values, other) {
       "Invalid name (use only letters, numbers, underscores and dashes)";
   }
 
-  if (!values.service_admin) {
-    let errListProjects = [];
-  values.projects.forEach(project => {
-    let pErrors = {};
-    if (!project.project) pErrors.project = "Required";
-    if (!project.roles) pErrors.roles = "Required";
-
-    if (project.project) {
-      // check projectv validity
-      if (!(window.valid_projects.indexOf(project.project) > -1)) {
-        pErrors.project = "Project " + project.project + " doesn't exist";
-      }
-
-      // check if project is already declared in roles list
-      let prCount = 0;
-      for (let projectItem of values.projects){          
-          
-          if (projectItem.project === project.project) {
-            prCount++;
-          }
-          if (prCount > 1) {
-            pErrors.project = "Project " + project.project + " duplicate declaration";
-            break;
-          }
-
-      }
-    
-    }
-
-  
-    
-
-    if (project.roles) {
-      // check each role validity
-      let roles = project.roles.split(",");
-
-      let errorRoles = [];
-
-      for (let role of roles) {
-        if (!(["project_admin", "consumer", "publisher"].indexOf(role.trim()) > -1)) {
-          errorRoles.push(role);
-        }
-      }
-
-      if (errorRoles.length > 0) {
-        pErrors.roles = "Roles " + errorRoles.toString() + " don't exist!";
-      }
-    }
-
-    errListProjects.push(pErrors);
-  });
-
-  // check if project errors are indeed empty
-  let empty = true;
-  for (let item of errListProjects) {
-    if (!(Object.keys(item).length === 0 && item.constructor === Object)) {
-      empty = false;
-    }
-  }
-
-  if (!empty) {
-    errors.projects = errListProjects;
-  }
-  }
-
-  
-
   return errors;
 }
 
@@ -115,7 +64,10 @@ class CreateUser extends Component {
   constructor(props) {
     super(props);
     this.authen = new Authen();
-    this.DM = new DataManager(this.authen.getEndpoint(), this.authen.getToken());
+    this.DM = new DataManager(
+      this.authen.getEndpoint(),
+      this.authen.getToken()
+    );
     this.doCreateUser.bind(this);
 
     if (this.props.action === "create") {
@@ -127,17 +79,17 @@ class CreateUser extends Component {
           name: "",
           email: "",
           service_admin: false,
-          projects: [{ project: "", roles: "" }]
-        }
+          projects: [{ project: "", roles: "" }],
+        },
+        values: [{project: "", roles: "consumer"}],
       };
     } else {
       this.state = {
         action: this.props.action, // create or update
         projects: [],
         roles: ["project_admin", "consumer", "producer"],
-        initialValues: this.apiGetData(
-          this.props.match.params.username
-        )
+        initialValues: this.apiGetData(this.props.match.params.username),
+        values: [{project: "", roles: "consumer"}],
       };
     }
 
@@ -145,17 +97,16 @@ class CreateUser extends Component {
   }
 
   apiGetData(username) {
-    this.DM.userGet(username).then(r => {
-      if (r.done){
-        
+    this.DM.userGet(username).then((r) => {
+      if (r.done) {
         let sa_value = false;
-        if (r.data.service_roles.length > 0) sa_value = true; 
+        if (r.data.service_roles.length > 0) sa_value = true;
 
         let initVal = {
           name: r.data.name,
           email: r.data.email,
           service_admin: sa_value,
-          projects: [{ project: "", roles: "" }]
+          projects: [{ project: "", roles: "" }],
         };
 
         if (r.data.projects.length > 0) {
@@ -164,7 +115,7 @@ class CreateUser extends Component {
           for (let project of r.data.projects) {
             projectList.push({
               project: project.project,
-              roles: project.roles.join()
+              roles: project.roles.join(),
             });
           }
           initVal.projects = projectList;
@@ -172,23 +123,40 @@ class CreateUser extends Component {
 
         this.setState({ initialValues: initVal });
       }
-    })
+    });
+  }
 
+  matchProjects(state, value) {
+    if (value["project"] !== undefined) {
+      return (
+        state.name.toLowerCase().indexOf(value["project"].toLowerCase()) !== -1
+      );
+    }
+    return state.name.toLowerCase().indexOf(value.toLowerCase()) !== -1;
   }
 
   apiGetProjects() {
-    this.DM.projectGet().then( r =>{
-      if (r.done){
-        let projects = [];
-        for (let project of r.data.projects) {
-          projects.push(project.name);
+    if (this.authen.isServiceAdmin()) {
+      this.DM.projectGet().then((r) => {
+        if (r.done) {
+          this.setState({ projects: r.data.projects });
         }
+      });
+      return;
+    } else if (this.authen.isProjectAdmin()) {
+      // get project list from allowed projects
+      let allowedProjects = this.authen.getProjectsPerRole()["project_admin"];
+      let results = [];
+      for (let project of allowedProjects)
+        results.push({
+          name: project,
+          created_on: "",
+          modified_on: "",
+        });
+      return results;
+    }
 
-        window.valid_projects = projects;
-        this.setState({ projects: projects });
-      }
-
-    })
+    return [];
   }
 
   prepUser(data) {
@@ -196,48 +164,50 @@ class CreateUser extends Component {
     let body = { email: data.email };
 
     if (data.service_admin) {
-      body["service_roles"] = ["service_admin"]
+      body["service_roles"] = ["service_admin"];
     } else {
       let projects = [];
       for (let project of data.projects) {
-        
         projects.push({
           project: project.project,
-          roles: project.roles.replace(/\s/g,"").split(",")
+          roles: project.roles.replace(/\s/g, "").split(","),
         });
       }
       body["projects"] = projects;
     }
-    return {name: name, body: body}
+    return { name: name, body: body };
   }
 
   doCreateUser(data) {
     let comp = this;
-    let {name, body} = this.prepUser(data);
+    let { name, body } = this.prepUser(data);
 
-    this.DM.userCreate(name,body).then(r => {
-      if (r.done){
+    this.DM.userCreate(name, body).then((r) => {
+      if (r.done) {
         NotificationManager.info("User Created!", null, 1000);
-        setTimeout(()=>{comp.props.history.push("/users/details/" + name)},1000)
+        setTimeout(() => {
+          comp.props.history.push("/users/details/" + name);
+        }, 1000);
       } else {
         NotificationManager.error("User Creation Failed...", null, 1000);
       }
-    })
+    });
   }
 
   doUpdateUser(data) {
     let comp = this;
-    let {name, body} = this.prepUser(data);
+    let { name, body } = this.prepUser(data);
 
-    this.DM.userUpdate(name,body).then(r => {
-      if (r.done){
+    this.DM.userUpdate(name, body).then((r) => {
+      if (r.done) {
         NotificationManager.info("User Updated!", null, 1000);
-          setTimeout(()=>{comp.props.history.push("/users/details/" + name)},1000)
-        } else {
-          NotificationManager.error("User Update Failed...", null, 1000);
-        }
-      
-    })
+        setTimeout(() => {
+          comp.props.history.push("/users/details/" + name);
+        }, 1000);
+      } else {
+        NotificationManager.error("User Update Failed...", null, 1000);
+      }
+    });
   }
 
   render() {
@@ -268,11 +238,12 @@ class CreateUser extends Component {
               this.state.initialValues || {
                 name: "",
                 email: "",
-                projects: [{ project: "", roles: "" }]
+                projects: [{ project: "", roles: "" }],
               }
             }
             validate={validate}
-            onSubmit={values => {
+            onSubmit={(values) => {
+              values["projects"] = this.state.values
               // request to backend to create user
               if (this.state.action === "create") {
                 this.doCreateUser(values);
@@ -317,7 +288,7 @@ class CreateUser extends Component {
                             <button
                               type="button"
                               className="btn btn-success"
-                              onClick={() => push({ project: "", roles: "" })}
+                              onClick={() => push({ project: "", roles: ["consumer"] })}
                             >
                               Assign project/roles
                             </button>
@@ -338,11 +309,51 @@ class CreateUser extends Component {
                                         Project:
                                       </div>
                                     </div>
-                                    <Field
-                                      name={`projects.${index}.project`}
-                                      type="text"
-                                      className="form-control"
-                                    />
+                                      <Autocomplete
+                                        name={`projects.${index}.project`}
+                                        value={
+                                          this.state.values[index]["project"]
+                                        }
+                                        inputProps={{
+                                          id: `projects.${index}.project`,
+                                          className: "form-control",
+                                        }}
+                                        wrapperProps={{
+                                          className: "input-group-append",
+                                        }}
+                                        wrapperStyle={{ width: "75%" }}
+                                        items={this.state.projects}
+                                        getItemValue={(item) => item.name}
+                                        shouldItemRender={this.matchProjects}
+                                        onChange={(event, value) => {
+                                          let values = this.state.values;
+                                          values[index] = { project: value };
+                                          this.setState({ values });
+                                        }}
+                                        onSelect={(value) => {
+                                          let values = this.state.values;
+                                          values[index] = { project: value };
+                                          this.setState({ values });
+                                        }}
+                                        renderMenu={(children) => (
+                                          <div className="menu">{children}</div>
+                                        )}
+                                        renderItem={(item, isHighlighted) => (
+                                          <div
+                                            className={`item ${
+                                              isHighlighted
+                                                ? "item-highlighted"
+                                                : ""
+                                            }`}
+                                            key={item.name}
+                                          >
+                                            {getProjectColorIcon(item.name)}
+                                            <span className="ml-2">
+                                              {item.name}
+                                            </span>
+                                          </div>
+                                        )}
+                                      />
                                   </div>
                                   <ErrorMessage
                                     name={`projects.${index}.project`}
@@ -363,11 +374,28 @@ class CreateUser extends Component {
                                         Roles:
                                       </div>
                                     </div>
-                                    <Field
+                                    <Input
+                                      type="select"
                                       name={`projects.${index}.roles`}
-                                      className="form-control"
-                                      type="text"
-                                    />
+                                      onSelect={(e) => {
+                                        let values = this.state.values;
+                                        values[index]["roles"] = e.target.value;
+                                        this.setState({ values });
+                                      }}
+                                      onChange={(e) => {
+                                        let values = this.state.values;
+                                        values[index]["roles"] = e.target.value;
+                                        this.setState({ values });
+                                      }}
+                                    >
+                                      <option value="project_admin">
+                                        Project Admin
+                                      </option>
+                                      <option value="publisher">
+                                        Publisher
+                                      </option>
+                                      <option value="consumer" selected>Consumer</option>
+                                    </Input>
                                   </div>
                                   <ErrorMessage
                                     name={`projects.${index}.roles`}
@@ -387,24 +415,41 @@ class CreateUser extends Component {
                               </div>
                             ))}
                         </div>
-                        
-                        
                       )}
                     />
                     <div>
-                        <strong>Available roles:</strong>
-                        <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="shield-alt" /> project admin</span>
-                        <span className="border p-2 mx-2 rounded"><FontAwesomeIcon className="ml-1 mr-1" icon="cloud-upload-alt" /> publisher
-                        </span>
-                        <span className="border p-2 mx-2 rounded"> <FontAwesomeIcon className="ml-1 mr-1" icon="cloud-download-alt" /> consumer</span> 
-                        </div>
+                      <strong>Available roles:</strong>
+                      <span className="border p-2 mx-2 rounded">
+                        <FontAwesomeIcon
+                          className="ml-1 mr-1"
+                          icon="shield-alt"
+                        />{" "}
+                        project admin
+                      </span>
+                      <span className="border p-2 mx-2 rounded">
+                        <FontAwesomeIcon
+                          className="ml-1 mr-1"
+                          icon="cloud-upload-alt"
+                        />{" "}
+                        publisher
+                      </span>
+                      <span className="border p-2 mx-2 rounded">
+                        {" "}
+                        <FontAwesomeIcon
+                          className="ml-1 mr-1"
+                          icon="cloud-download-alt"
+                        />{" "}
+                        consumer
+                      </span>
+                    </div>
                   </div>
                 )}
                 <button type="submit" className="btn btn-success">
                   {actionOnUser}
                 </button>
                 <span> </span>
-                <Button type="button"
+                <Button
+                  type="button"
                   onClick={() => {
                     this.props.history.goBack();
                   }}
@@ -415,8 +460,6 @@ class CreateUser extends Component {
               </Form>
             )}
           />
-          
-           
         </Card>
       </div>
     );
