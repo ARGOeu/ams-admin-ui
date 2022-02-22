@@ -15,6 +15,11 @@ import {
   Row,
   Table,
   Badge,
+  Form,
+  FormGroup,
+  InputGroup,
+  InputGroupAddon,
+  Input
 } from "reactstrap";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -31,6 +36,7 @@ import {
   faEdit,
   faTrashAlt,
   faPlay,
+  faBan
 } from "@fortawesome/free-solid-svg-icons";
 import DataManager from "./DataManager";
 library.add(
@@ -40,7 +46,8 @@ library.add(
   faInfoCircle,
   faEdit,
   faTrashAlt,
-  faPlay
+  faPlay,
+  faBan
 );
 
 function getShortName(fullName) {
@@ -78,15 +85,17 @@ class ProjectDetails extends React.Component {
     };
 
     this.apiGetData.bind(this);
+    this.apiGetProjectMembers.bind(this);
     this.apiGetTopics.bind(this);
     this.apiGetSubs.bind(this);
-    this.toggleModal.bind(this);
+    this.apiProjectMemberAdd.bind(this);
     this.handleCloseModal.bind(this);
 
     if (this.authen.isLogged()) {
       this.state = {
         toDelete: this.props.toDelete,
         project: this.apiGetData(this.props.match.params.projectname),
+        members: this.apiGetProjectMembers(),
         topics: this.apiGetTopics(this.props.match.params.projectname),
         subs: this.apiGetSubs(this.props.match.params.projectname),
         metrics: this.apiGetMetrics(this.props.match.params.projectname),
@@ -103,6 +112,7 @@ class ProjectDetails extends React.Component {
   componentWillReceiveProps(props) {
     this.setState({
       toDelete: this.props.toDelete,
+      members: this.apiGetProjectMembers(),
       project: this.apiGetData(this.props.match.params.projectname),
       topics: this.apiGetTopics(this.props.match.params.projectname),
       subs: this.apiGetSubs(this.props.match.params.projectname),
@@ -187,6 +197,14 @@ class ProjectDetails extends React.Component {
     });
   }
 
+  apiGetProjectMembers() {
+    this.DM.projectMembersGet(this.props.match.params.projectname).then(r => {
+      if (r.done) {
+        this.setState({ members: r.data.users });
+      }
+    });
+  }
+
   apiGetTopics(projectName) {
     this.DM.topicGet(projectName).then((r) => {
       if (r.done) {
@@ -203,23 +221,28 @@ class ProjectDetails extends React.Component {
     });
   }
 
-  toggleModal(modalName, schemaName) {
-    if (this.state !== undefined) {
-      if (modalName === "modalCreate") {
-        this.setState({
-          modalCreate: !this.state.modalCreate,
-          newSchemaData: "",
-          newSchemaName: "",
-        });
-      } else if (modalName === "modalEdit") {
-        this.setState({
-          modalEdit: !this.state.modalEdit,
-          selectedSchemaName: schemaName,
-          newSchemaName: schemaName,
-          newSchemaData: "",
-        });
+  apiProjectMemberAdd(username, role) {
+    let comp = this;
+    let data = {
+      "roles": [
+        role
+      ]
+    };
+    this.DM.projectMemberAdd(
+      this.props.match.params.projectname,
+      username,
+      data
+    ).then((r) => {
+      if (r.done) {
+        NotificationManager.info("Member added", null, 1000);
+        setTimeout(function () {
+          comp.props.history.push("#");
+        }, 1000);
       }
-    }
+      else {
+        NotificationManager.error("Failed to add member", null, 1000);
+      }
+    });
   }
 
   render() {
@@ -234,7 +257,7 @@ class ProjectDetails extends React.Component {
     let subList = null;
     let metrics = null;
 
-    const columns = [
+    const columnsSchemas = [
       {
         Header: "#",
         accessor: "type",
@@ -298,6 +321,71 @@ class ProjectDetails extends React.Component {
       },
     ];
 
+    const columnsMembers = [
+      {
+        Header: "#",
+        accessor: "name",
+        Cell: props => <FontAwesomeIcon icon="dice-d6" />,
+        width: 40,
+        headerClassName: "list-header",
+        className: "text-center"
+      },
+      {
+        Header: "Name",
+        accessor: "name",
+        Cell: (props) => (
+          <Link className="item-link"
+            to={
+              "/projects/" +
+              this.props.match.params.projectname +
+              "/members/details/" +
+              props.value
+            }>
+            {getShortName(props.value)}
+          </Link>
+        ),
+        minWidth: 55,
+        filterable: true,
+        headerClassName: "list-header",
+      },
+      {
+        Header: "Actions",
+        accessor: "name",
+        Cell: (props) => (
+          <div className="edit-buttons">
+            <Link
+              className="btn btn-light btn-sm ml-1 mr-1"
+              to={"/projects/"+this.props.match.params.projectname+"/members/details/" + props.value}
+            >
+              <FontAwesomeIcon icon="list" />
+            </Link>
+            <Link
+              className="btn btn-light btn-sm ml-1 mr-1"
+              to={
+                "/projects/" + this.props.match.params.projectname + "/members/update/" + props.value
+              }
+            >
+              <FontAwesomeIcon icon="pen" />
+            </Link>
+            <Link
+              className="btn btn-light btn-sm ml-1 mr-1"
+              to={
+                "/projects/" +
+                this.props.match.params.projectname +
+                "/members/remove/" +
+                getShortName(props.value)
+              }
+            >
+              <FontAwesomeIcon icon="ban" />
+            </Link>
+          </div>
+        ),
+        width: 130,
+        headerClassName: "list-header",
+        className: "text-center",
+      },
+    ];
+
     if (this.state.topics !== null && this.state.topics !== undefined) {
       let topics = [];
       for (let topic of this.state.topics) {
@@ -321,9 +409,9 @@ class ProjectDetails extends React.Component {
       this.state.schemas.schemas.forEach((schema, i) => {
         schemas.push(
           <div key={"schema-control-buttons-" + i}>
-            <div class="btn-toolbar" role="toolbar">
+            <div className="btn-toolbar" role="toolbar">
               <div
-                class="btn-group mr-2 mt-2"
+                className="btn-group mr-2 mt-2"
                 role="group"
                 aria-label="First group"
               >
@@ -610,6 +698,7 @@ class ProjectDetails extends React.Component {
     return (
       <div>
         <NotificationContainer />
+        {willDelete}
         <Row>
           <Col>
             <h2>Project Details</h2>
@@ -627,139 +716,203 @@ class ProjectDetails extends React.Component {
             >
               <FontAwesomeIcon icon="times" /> Delete Project
             </a>
+            {willBack}
           </Col>
         </Row>
-
-        <div>
-          <Row>
-            <div className="col-md-4 col-sm-12 col-xs-12">
-              <Card>
-                <CardBody>
-                  <div className="mx-auto profile-circle">
-                    <div className="mt-3">
-                      {getProjectColorIcon(this.state.project.name)}
-                    </div>
+        <Row>
+          <div className="col-md-12 col-sm-12 col-xs-12">
+            <Card>
+              <CardBody>
+                <div className="mx-auto profile-circle">
+                  <div className="mt-3">
+                    {getProjectColorIcon(this.state.project.name)}
                   </div>
-                  <br />
-                  <span className="text-center">
-                    <h4>{this.state.project.name}</h4>
-                  </span>
-                  <hr />
-                  <span className="text-center d-block">
-                    {this.state.project.description}
-                  </span>
-                </CardBody>
-                <CardFooter>
-                  <small>
-                    <strong>created:</strong>
-                  </small>
-                  <small> {this.state.project.created_on}</small>
-                  <br />
-                  <small>
-                    <strong>updated:</strong>
-                  </small>
-                  <small> {this.state.project.modified_on}</small>
-                  {this.state.project.created_by ? (
-                    <React.Fragment>
-                      <small>
-                        <br />
-                        <strong>created by:</strong>
-                      </small>
-                      <small> {this.state.project.created_by}</small>
-                    </React.Fragment>
-                  ) : null}
-                </CardFooter>
-              </Card>
-              <Card className="mt-3">
-                <CardHeader>
-                  <strong>Schemas</strong>
-                  <Link
-                    style={{ borderColor: "grey" }}
-                    className="btn btn-light btn-sm ml-4"
-                    to={
-                      "/projects/" + this.state.project.name + "/schemas/create"
-                    }
-                  >
-                    + Create a new Schema
-                  </Link>
-                </CardHeader>
-                {this.state.schemas !== undefined &&
-                  this.state.schemas.schemas.length > 0 && (
-                    <CardBody>
-                      <ReactTable
-                        data={this.state.schemas.schemas}
-                        columns={columns}
-                        className="-striped -highlight"
-                        defaultPageSize={20}
-                        defaultFilterMethod={(filter, row, column) => {
-                          const id = filter.pivotId || filter.id;
-                          return row[id] !== undefined
-                            ? String(row[id]).includes(filter.value)
-                            : true;
-                        }}
-                      />
-                    </CardBody>
-                  )}
-              </Card>
-            </div>
-            <div className="col-md-8 col-sm-12 col-xs-12">
-              {willDelete}
+                </div>
+                <br />
+                <span className="text-center">
+                  <h4>{this.state.project.name}</h4>
+                </span>
+                <hr />
+                <span className="text-center d-block">
+                  {this.state.project.description}
+                </span>
+              </CardBody>
+              <CardFooter>
+                <small>
+                  <strong>created:</strong>
+                </small>
+                <small> {this.state.project.created_on}</small>
+                <br />
+                <small>
+                  <strong>updated:</strong>
+                </small>
+                <small> {this.state.project.modified_on}</small>
+                {this.state.project.created_by ? (
+                  <React.Fragment>
+                    <small>
+                      <br />
+                      <strong>created by:</strong>
+                    </small>
+                    <small> {this.state.project.created_by}</small>
+                  </React.Fragment>
+                ) : null}
+              </CardFooter>
+            </Card>
+          </div>
+        </Row>
+        <Row>
+          <div className="col-md-3 col-sm-12 col-xs-12">
+            <Card className="mt-3">
+              <CardHeader>
+                <strong>Schemas</strong>
+                <Link
+                  style={{ borderColor: "grey" }}
+                  className="btn btn-light btn-sm ml-4"
+                  to={
+                    "/projects/" + this.state.project.name + "/schemas/create"
+                  }
+                >
+                  + Create a new schema
+                </Link>
+              </CardHeader>
+              {this.state.schemas !== undefined &&
+                this.state.schemas.schemas.length > 0 && (
+                  <CardBody>
+                    <ReactTable
+                      data={this.state.schemas.schemas}
+                      columns={columnsSchemas}
+                      className="-striped -highlight"
+                      defaultPageSize={20}
+                      defaultFilterMethod={(filter, row, column) => {
+                        const id = filter.pivotId || filter.id;
+                        return row[id] !== undefined
+                          ? String(row[id]).includes(filter.value)
+                          : true;
+                      }}
+                    />
+                  </CardBody>
+                )}
+            </Card>
+          </div>
+          <div className="col-md-3 col-sm-12 col-xs-12">
+            <Card className="mt-3">
+              <CardHeader>
+                <strong>Members</strong>
+                <Link
+                  style={{ borderColor: "grey" }}
+                  className="btn btn-light btn-sm ml-4"
+                  to={
+                    "/projects/" + this.state.project.name + "/members/create"
+                  }
+                >
+                  + Create a new member
+                </Link>
+              </CardHeader>
+              {this.state.schemas !== undefined &&
+                this.state.schemas.schemas.length > 0 && (
+                  <CardBody>
+                    <Card className="mb-2">
+                      <CardHeader>
+                      Add existing user as project member
+                      </CardHeader>
+                      <CardBody>
+                        <Form onSubmit={(e) => {
+                          e.preventDefault();
+                          this.apiProjectMemberAdd(e.target[0].value, e.target[1].value)
+                        }}>
+                          <FormGroup>
+                            <InputGroup>
+                              <InputGroupAddon addonType="prepend">Username</InputGroupAddon>
+                              <Input placeholder="" />
+                            </InputGroup>
+                          </FormGroup>
+                          <FormGroup>
+                            <InputGroup>
+                              <InputGroupAddon addonType="prepend">Role</InputGroupAddon>
+                              <Input type="select" name="select" id="select">
+                                <option value="project_admin">Project Admin</option>
+                                <option value="consumer">Consumer</option>
+                                <option value="publisher">Publisher</option>
+                              </Input>
+                            </InputGroup>
+                          </FormGroup>
+                          <Button
+                            color="success"
+                          >
+                            Add
+                          </Button>
+                        </Form>
+                      </CardBody>
+                    </Card>
+                    <ReactTable
+                      data={this.state.members}
+                      columns={columnsMembers}
+                      className="-striped -highlight"
+                      defaultPageSize={20}
+                      defaultFilterMethod={(filter, row, column) => {
+                        const id = filter.pivotId || filter.id;
+                        return row[id] !== undefined
+                          ? String(row[id]).includes(filter.value)
+                          : true;
+                      }}
+                    />
+                  </CardBody>
+                )}
+            </Card>
+          </div>
+          <div className="col-md-6 col-sm-12 col-xs-12">
+            <Card className="mt-3">
+              <CardHeader>
+                <strong>Topics</strong>
+                <Link
+                  style={{ borderColor: "grey" }}
+                  className="btn btn-light btn-sm ml-4"
+                  to={"/topics/create#" + this.state.project.name}
+                >
+                  + Create a new topic
+                </Link>
+              </CardHeader>
+              <CardBody>{topicList}</CardBody>
+            </Card>
+            <Card className="mt-3">
+              <CardHeader>
+                <strong>Subscriptions</strong>
+                <Link
+                  style={{ borderColor: "grey" }}
+                  className="btn btn-light btn-sm ml-4"
+                  to={"/subs/create#" + this.state.project.name}
+                >
+                  + Create a new subscription
+                </Link>
+              </CardHeader>
+              <CardBody>{subList}</CardBody>
+            </Card>
+            <Card className="mt-2 text-secondary">
+              <CardFooter>
+                <strong>Icon legend:</strong>
+                <span className="border p-2 mx-2 rounded">
+                  <FontAwesomeIcon className="ml-1 mr-1" icon="envelope" />{" "}
+                  topic
+                </span>
+                <span className="border p-2 mx-2 rounded">
+                  <FontAwesomeIcon
+                    className="ml-1 mr-1"
+                    icon="envelope-open"
+                  />{" "}
+                  subscription
+                </span>
+              </CardFooter>
+            </Card>
 
-              <Card>
-                <CardHeader>
-                  <strong>Topics</strong>
-                  <Link
-                    style={{ borderColor: "grey" }}
-                    className="btn btn-light btn-sm ml-4"
-                    to={"/topics/create#" + this.state.project.name}
-                  >
-                    + Create a new topic
-                  </Link>
-                </CardHeader>
-                <CardBody>{topicList}</CardBody>
-              </Card>
-              <Card className="mt-3">
-                <CardHeader>
-                  <strong>Subscriptions</strong>
-                  <Link
-                    style={{ borderColor: "grey" }}
-                    className="btn btn-light btn-sm ml-4"
-                    to={"/subs/create#" + this.state.project.name}
-                  >
-                    + Create a new subscription
-                  </Link>
-                </CardHeader>
-                <CardBody>{subList}</CardBody>
-              </Card>
-              <Card className="mt-2 text-secondary">
-                <CardFooter>
-                  <strong>Icon legend:</strong>
-                  <span className="border p-2 mx-2 rounded">
-                    <FontAwesomeIcon className="ml-1 mr-1" icon="envelope" />{" "}
-                    topic
-                  </span>
-                  <span className="border p-2 mx-2 rounded">
-                    <FontAwesomeIcon
-                      className="ml-1 mr-1"
-                      icon="envelope-open"
-                    />{" "}
-                    subscription
-                  </span>
-                </CardFooter>
-              </Card>
-
-              <Card className="mt-4">
-                <CardHeader>
-                  <strong>Metrics</strong>
-                </CardHeader>
-                <CardBody>{metrics}</CardBody>
-              </Card>
-
-              <div className="m-2 text-right">{willBack}</div>
-            </div>
-          </Row>
-        </div>
-      </div>
+            <Card className="mt-4">
+              <CardHeader>
+                <strong>Metrics</strong>
+              </CardHeader>
+              <CardBody>{metrics}</CardBody>
+            </Card>
+          </div>
+        </Row>
+      </div >
     );
   }
 }

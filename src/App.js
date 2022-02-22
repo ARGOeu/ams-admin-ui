@@ -14,6 +14,7 @@ import {
 import About from "./About";
 import ProjectTable from "./ProjectTable";
 import ProjectDetails from "./ProjectDetails";
+import ProjectMemberUpdate from "./ProjectMemberUpdate";
 import TopicTable from "./TopicTable";
 import CreateUser from "./CreateUser";
 import CreateProject from "./CreateProject";
@@ -83,6 +84,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import config from "./config";
+import ProjectMemberDetails from "./ProjectMemberDetails";
 
 library.add(
     faBell,
@@ -765,6 +767,46 @@ class App extends Component {
                                             auth={this.authen.isLogged()}
                                             path="/"
                                             component={Welcome}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowUsers
+                                            }
+                                            path="/projects/:projectname/members/details/:username"
+                                            component={ProjectMemberDetails}
+                                            toDelete={false}
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowUsers
+                                            }
+                                            path="/projects/:projectname/members/update/:username"
+                                            component={ProjectMemberUpdate}
+                                            action="update"
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowUsers
+                                            }
+                                            path="/projects/:projectname/members/create"
+                                            component={ProjectMemberUpdate}
+                                            action="create"
+                                        />
+                                        <ProtectedRoute
+                                            exact
+                                            auth={
+                                                this.authen.isLogged() &&
+                                                allowUsers
+                                            }
+                                            path="/projects/:projectname/members/remove/:username"
+                                            component={ProjectMemberDetails}
+                                            toDelete={true}
                                         />
                                         <ProtectedRoute
                                             exact
