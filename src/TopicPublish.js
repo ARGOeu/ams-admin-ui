@@ -6,7 +6,7 @@ import {
 import { Formik, Field, Form, ErrorMessage, FieldArray } from "formik";
 import Authen from "./Authen";
 import { Link } from "react-router-dom";
-import { Card, Button} from "reactstrap";
+import { Card, Button, Alert} from "reactstrap";
 import DataManager from "./DataManager";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -123,7 +123,8 @@ class TopicPublish extends Component {
             msg: "",
             payload: "",
             published: false,
-            msgId: 0
+            msgId: 0,
+            validationErrorMessage: ""
         };
 
         if (this.authen.isLogged()) {
@@ -133,7 +134,8 @@ class TopicPublish extends Component {
                 schema: this.apiGetData(
                     this.props.match.params.projectname,
                     this.props.match.params.topicname
-                )
+                ),
+                validationErrorMessage: ""
             };
         }
 
@@ -153,10 +155,14 @@ class TopicPublish extends Component {
                     null,
                     1000
                 );
+                this.setState({
+                    "validationErrorMessage": ""
+                });
             } else {
-
-                NotificationManager.error("Message Publish Failed...", null, 1000);
-
+                // NotificationManager.error("Message Publish Failed...", null, 1000);
+                this.setState({
+                    "validationErrorMessage": r.data.error.message
+                });
             }
         });
     }
@@ -218,6 +224,13 @@ class TopicPublish extends Component {
                                 </Link>
                               </div>
                             </div>
+                </div>
+                <div className="form-group">
+                    {this.state.validationErrorMessage ?
+                    <Alert color="danger">
+                        {this.state.validationErrorMessage}
+                    </Alert>
+                    :null}
                 </div>
                 <Card className={dispPost}>
                     <div className="text-center">
