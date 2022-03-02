@@ -215,16 +215,6 @@ class Registrations extends React.Component {
 
         const columns = [
             {
-                Header: "UUID",
-                accessor: "uuid",
-                Cell: (props) => (
-                    <span>{props.value}</span>
-                ),
-                minWidth: 85,
-                headerClassName: "list-header",
-                className: "text-center",
-            },
-            {
                 Header: "Status",
                 accessor: "status",
                 Cell: (props) => {
@@ -292,6 +282,9 @@ class Registrations extends React.Component {
                         to={"/registrations/" + props.value}
                     >
                         <FontAwesomeIcon icon="list" />
+                        <span>
+                        &#8203; Details
+                        </span>
                     </Link>),
                 width: 130,
                 headerClassName: "list-header",
@@ -308,6 +301,7 @@ class Registrations extends React.Component {
                             <CardBody>
                                 <div style={{ overflow: "hidden" }}>
                                     <div className="row p-3">
+                                        <h4 className="pt-2 pb-2">List of Registrations</h4>
                                         <ReactTable
                                             data={this.state.registrations}
                                             columns={columns}
