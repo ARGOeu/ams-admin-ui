@@ -79,7 +79,7 @@ class CreateUser extends Component {
           name: "",
           email: "",
           service_admin: false,
-          projects: [{ project: "", roles: "" }],
+          projects: [{ project: "", roles: "consumer" }],
         },
         values: [{project: "", roles: "consumer"}],
       };
@@ -327,12 +327,12 @@ class CreateUser extends Component {
                                         shouldItemRender={this.matchProjects}
                                         onChange={(event, value) => {
                                           let values = this.state.values;
-                                          values[index] = { project: value };
+                                          values[index] = { ...values[index], project: value };
                                           this.setState({ values });
                                         }}
                                         onSelect={(value) => {
                                           let values = this.state.values;
-                                          values[index] = { project: value };
+                                          values[index] = { ...values[index], project: value };
                                           this.setState({ values });
                                         }}
                                         renderMenu={(children) => (
@@ -374,9 +374,9 @@ class CreateUser extends Component {
                                         Roles:
                                       </div>
                                     </div>
-                                    <Input
-                                      type="select"
+                                    <Input type="select"
                                       name={`projects.${index}.roles`}
+                                      value={this.state.values[0]["roles"]}
                                       onSelect={(e) => {
                                         let values = this.state.values;
                                         values[index]["roles"] = e.target.value;
