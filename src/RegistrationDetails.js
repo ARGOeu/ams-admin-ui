@@ -150,24 +150,29 @@ class RegistrationDetails extends React.Component {
           <CardHeader className="border-danger text-danger text-center">
             <h5>
               <FontAwesomeIcon className="mx-3" icon="exclamation-triangle" />
-              <strong>Registration Deletion</strong></h5>
+              <strong>Decline Registration</strong></h5>
           </CardHeader>
           <CardBody className="border-danger text-center">
             <Row>
+            <Col style={{textAlign: "start"}}>
               Are you sure you want to decline registration: <strong>{this.state.registration.name}</strong> ?
+            </Col>
             </Row>
             <Row>
               <span>&#8203;</span>
             </Row>
             <Row>
+              <Col>
               <InputGroup>
                 <Input
                   placeholder="Leave a comment to justify the declination."
+                  type="textarea"
                   onChange={(e) => {
                     this.setState({ declineComment: e.target.value });
                   }}
                 />
               </InputGroup>
+              </Col>
             </Row>
           </CardBody>
           <CardFooter className="border-danger text-danger text-center">
@@ -235,8 +240,8 @@ class RegistrationDetails extends React.Component {
               : <div>{willBack}</div>}
           </Col>
         </Row>
-        <Row>
-          <Col>
+        <Row style={{justifyContent: "center"}}>
+          <Col className="col-8">
             <div className="m-2 text-right">
               {willDelete}
             </div>
