@@ -250,7 +250,7 @@ class RegistrationDetails extends React.Component {
 
         <div>
           <Row>
-            <div className="col-md-12 col-sm-12 col-xs-12">
+            <div className="col-md-6 col-sm-6 col-xs-6">
               <Card>
                 <CardBody>
                   <div className="mx-auto profile-circle">
@@ -259,7 +259,15 @@ class RegistrationDetails extends React.Component {
                     </div>
                   </div>
                   <br />
-                  <span><strong>Name:</strong> {this.state.registration.name}</span>
+                  <span>{this.state.registration.name}</span>
+                  <hr />
+                  <span><strong>First Last Name:</strong> {this.state.registration.first_name} {this.state.registration.last_name}</span>
+                  <hr />
+                  <span><strong>Email:</strong> {this.state.registration.email}</span>
+                  <hr />
+                  <span><strong>Organization:</strong> {this.state.registration.organization}</span>
+                  <hr />
+                  <span><strong>Description:</strong> {this.state.registration.description}</span>
                   <hr />
                   <strong>Status: </strong>
                   {this.state.registration.status === "accepted" &&
@@ -271,9 +279,29 @@ class RegistrationDetails extends React.Component {
                   {this.state.registration.status === "pending" &&
                     <Badge color="info">{this.state.registration.status}</Badge>
                   }
-                  <hr />
-                  {this.state.registration.activation_token ?
+                  {this.state.registration.decline_comment &&
                     <div>
+                      <hr />
+                      <span><strong>Declination Comment:</strong> {this.state.registration.decline_comment}</span>
+                    </div>
+                  }
+                </CardBody>
+                <CardFooter>
+                  <small>
+                    <strong>Registered at:</strong>
+                  </small>
+                  <small> {this.state.registration.registered_at}</small>
+                </CardFooter>
+              </Card>
+              </div>
+              <div className="col-md-6 col-sm-6 col-xs-6">
+              <Card>
+                <CardBody>
+                  <div>
+                    <span><strong>UUID:</strong> {this.state.registration.uuid}</span>
+                    { this.state.registration.activation_token &&
+                    <div>
+                      <hr />
                       <strong>Token: </strong>
                       <code className="p-2 border ml-2 rounded d-none">
                         {this.state.registration.activation_token}
@@ -288,31 +316,10 @@ class RegistrationDetails extends React.Component {
                       <button onClick={clip} className="btn btn-secondary">
                         Copy
                       </button>
-                      <hr />
                     </div>
-                    : <div></div>}
-                  <span><strong>UUID:</strong> {this.state.registration.uuid}</span>
-                  <hr />
-                  <span><strong>Email:</strong> {this.state.registration.email}</span>
-                  <hr />
-                  <span><strong>Organization:</strong> {this.state.registration.organization}</span>
-                  <hr />
-                  <span><strong>First Name:</strong> {this.state.registration.first_name}</span>
-                  <hr />
-                  <span><strong>Last Name:</strong> {this.state.registration.last_name}</span>
-                  <hr />
-                  <span><strong>Description:</strong> {this.state.registration.description}</span>
-                  <hr />
-                  {this.state.registration.decline_comment &&
-                    <span><strong>Declination Comment:</strong> {this.state.registration.decline_comment}</span>
-                  }
+                    }
+                  </div>
                 </CardBody>
-                <CardFooter>
-                  <small>
-                    <strong>registered at:</strong>
-                  </small>
-                  <small> {this.state.registration.registered_at}</small>
-                </CardFooter>
               </Card>
             </div>
           </Row>
