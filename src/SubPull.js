@@ -260,9 +260,9 @@ class SubPull extends Component {
                                          <em style={{color:"#888888"}}><FontAwesomeIcon icon="clock" /> <code style={{color:"grey"}}>{msg["publishTime"]}</code></em>
                                          </div>
                                          <div className="row mx-1">
-                                         <code className="form-control mt-2 mb-2">
+                                         <textarea className="form-control" rows="4" readOnly = {true} style={{backgroundColor:"white"}}>
                                              {atob(msg["data"])}
-                                         </code>
+                                         </textarea>
                                          <div>{attrList}</div>
                                          </div>
                                          
