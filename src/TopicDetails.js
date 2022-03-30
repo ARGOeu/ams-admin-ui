@@ -16,7 +16,7 @@ import {
     InputGroupAddon,
     InputGroupText
 } from "reactstrap";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -78,6 +78,7 @@ class TopicDetails extends React.Component {
         this.state = { topic: {}, acl: null, selectedSchema: "" };
 
         this.apiGetData.bind(this);
+        this.apiGetData(this.props.match.params.projectname);
 
         if (this.authen.isLogged()) {
             this.state = {
@@ -137,7 +138,12 @@ class TopicDetails extends React.Component {
     apiGetData(projectName, topicName) {
         this.DM.topicGet(projectName, topicName).then(r => {
             if (r.done) {
-                this.setState({ topic: r.data });
+                if (topicName) {
+                    this.setState({ topic: r.data });
+                }
+                else {
+                    this.setState({ topics: r.data });
+                }
             }
         });
     }
@@ -201,6 +207,21 @@ class TopicDetails extends React.Component {
             this.state.isServiceAdmin === false &&
             this.state.isProjectAdmin === false &&
             this.state.isPublisher === true;
+
+        if (this.state.topics) {
+            let flag = true;
+            this.state.topics.topics.forEach(item => {
+                if (getShortName(item.name) === this.props.match.params.topicname) {
+                    flag = false;
+                }
+            });
+            if (flag) {
+                return <Redirect to={"/topics/#"+this.props.match.params.projectname} />
+            }
+        }
+        else {
+            return <h3>loading</h3>;
+        }
 
         if (this.state.topic === undefined) {
             return <h3>loading</h3>;
