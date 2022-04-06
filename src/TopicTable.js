@@ -214,7 +214,7 @@ class TopicTable extends React.Component {
                         { !onlyPublisher && 
                         <Link
                             className="btn btn-light btn-sm ml-1 mr-1"
-                            to={"/topics/delete/" + props.value}
+                            to={"/topics/delete" + props.value}
                         >
                             <FontAwesomeIcon icon="times" />
                         </Link>
