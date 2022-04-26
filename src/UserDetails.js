@@ -13,7 +13,7 @@ import {
   CardFooter,
   Row
 } from "reactstrap";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import ProjectRoles from "./ProjectRoles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -55,9 +55,9 @@ class UserDetails extends React.Component {
       this.state = {
         toDelete: this.props.toDelete,
         user: this.apiGetData(
-         
           this.props.match.params.username
-        )
+        ),
+        users: this.apiGetData()
       };
     } else {
       this.state = { user: null, popoverOpen: false };
@@ -122,12 +122,32 @@ class UserDetails extends React.Component {
   apiGetData(username) {
     this.DM.userGet(username).then(r => {
       if (r.done){
-        this.setState({user:r.data})
+        if (username) {
+          this.setState({user:r.data})
+        }
+        else {
+          this.setState({users:r.data.users})
+        }
       }
     })
   }
 
   render() {
+    if (this.state.users) {
+      let flag = true;
+      this.state.users.forEach(item => {
+          if (item.name === this.props.match.params.username) {
+              flag = false;
+          }
+      });
+      if (flag) {
+          return <Redirect to={"/users"} />
+      }
+    }
+    else {
+        return <h3>loading</h3>;
+    }
+
     if (this.state.user === undefined) {
       return <h3>loading</h3>;
     }
