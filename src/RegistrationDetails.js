@@ -72,6 +72,9 @@ class RegistrationDetails extends React.Component {
           }
         });
       }
+      else {
+        this.props.history.push("/404");
+      }
     });
   }
 
@@ -132,6 +135,9 @@ class RegistrationDetails extends React.Component {
     this.DM.userGet(username).then(r => {
       if (r.done) {
         this.setState({ user: r.data })
+      }
+      else {
+        this.props.history.push("/404");
       }
     })
   }

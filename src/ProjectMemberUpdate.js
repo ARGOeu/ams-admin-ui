@@ -148,6 +148,9 @@ class ProjectMemberUpdate extends Component {
 
         this.setState({ initialValues: initVal });
       }
+      else {
+        this.props.history.push("/404");
+      }
     })
 
   }
@@ -163,7 +166,9 @@ class ProjectMemberUpdate extends Component {
         window.valid_projects = projects;
         this.setState({ projects: projects });
       }
-
+      else {
+        this.props.history.push("/404");
+      }
     })
   }
 

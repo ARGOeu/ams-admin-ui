@@ -16,7 +16,7 @@ import {
     InputGroupAddon,
     InputGroupText
 } from "reactstrap";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -136,6 +136,7 @@ class TopicDetails extends React.Component {
     }
 
     apiGetData(projectName, topicName) {
+        
         this.DM.topicGet(projectName, topicName).then(r => {
             if (r.done) {
                 if (topicName) {
@@ -144,6 +145,9 @@ class TopicDetails extends React.Component {
                 else {
                     this.setState({ topics: r.data });
                 }
+            }
+            else {
+                this.props.history.push("/404");
             }
         });
     }
@@ -216,7 +220,7 @@ class TopicDetails extends React.Component {
                 }
             });
             if (flag) {
-                return <Redirect to={"/topics/#"+this.props.match.params.projectname} />
+                return <h3>The page you requested does not exist</h3>
             }
         }
         else {

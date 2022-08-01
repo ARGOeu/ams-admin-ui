@@ -59,6 +59,9 @@ class ProjectTable extends React.Component {
         this.setState({projects: r.data.projects})
         
       }
+      else {
+        this.props.history.push("/404");
+      }
     })
   }
 
