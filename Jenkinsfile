@@ -11,7 +11,7 @@ pipeline {
         stage ('Build and Deploy ams-admin-ui') {
             agent {
                 docker {
-                    image 'node:buster'
+                    image 'node:lts-buster'
                 }
             }
             steps {
