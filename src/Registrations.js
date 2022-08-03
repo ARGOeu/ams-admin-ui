@@ -74,6 +74,9 @@ class Registrations extends React.Component {
             if (r.done) {
                 this.setState({ registrations: r.data["user_registrations"] });
             }
+            else {
+                this.props.history.push("/404");
+              }
         });
     }
 

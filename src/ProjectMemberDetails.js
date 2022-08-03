@@ -125,6 +125,9 @@ class ProjectMemberDetails extends React.Component {
       if (r.done){
         this.setState({user:r.data})
       }
+      else {
+        this.props.history.push("/404");
+      }
     })
   }
 

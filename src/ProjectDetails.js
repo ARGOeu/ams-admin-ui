@@ -194,6 +194,9 @@ class ProjectDetails extends React.Component {
       if (r.done) {
         this.setState({ project: r.data });
       }
+      else {
+        this.props.history.push("/404");
+      }
     });
   }
 
@@ -355,7 +358,7 @@ class ProjectDetails extends React.Component {
           <div className="edit-buttons">
             <Link
               className="btn btn-light btn-sm ml-1 mr-1"
-              to={"/projects/"+this.props.match.params.projectname+"/members/details/" + props.value}
+              to={"/projects/" + this.props.match.params.projectname + "/members/details/" + props.value}
             >
               <FontAwesomeIcon icon="list" />
             </Link>
@@ -813,7 +816,7 @@ class ProjectDetails extends React.Component {
                   <CardBody>
                     <Card className="mb-2">
                       <CardHeader>
-                      Add existing user as project member
+                        Add existing user as project member
                       </CardHeader>
                       <CardBody>
                         <Form onSubmit={(e) => {

@@ -38,6 +38,7 @@ import SchemaCreate from "./SchemaCreate";
 import SchemaValidate from "./SchemaValidate";
 import Registrations from "./Registrations";
 import RegistrationDetails from "./RegistrationDetails";
+import NotFound from "./NotFound";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import DataManager from "./DataManager";
@@ -580,6 +581,11 @@ class App extends Component {
                                             exact
                                             path="/login"
                                             component={withRouter(Login)}
+                                        />
+                                        <Route
+                                            exact
+                                            path="/404"
+                                            component={withRouter(NotFound)}
                                         />
                                         <ProtectedRoute
                                             exact

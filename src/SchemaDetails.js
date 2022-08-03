@@ -124,6 +124,9 @@ class SchemaDetails extends React.Component {
       if (r.done) {
         this.setState({ metrics: r.data });
       }
+      else {
+        this.props.history.push("/404");
+      }
     });
   }
 
@@ -136,6 +139,9 @@ class SchemaDetails extends React.Component {
           }
         });
       }
+      else {
+        this.props.history.push("/404");
+      }
     });
   }
 
@@ -143,6 +149,9 @@ class SchemaDetails extends React.Component {
     this.DM.projectCreateSchema(projectName, schemaName, schema).then((r) => {
       if (r.done) {
         this.apiGetSchemas(projectName);
+      }
+      else {
+        this.props.history.push("/404");
       }
     });
   }

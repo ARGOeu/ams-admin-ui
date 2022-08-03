@@ -181,6 +181,9 @@ class SubDetails extends React.Component {
             if (r.done) {
                 this.setState({ sub: r.data });
             }
+            else {
+                this.props.history.push("/404");
+              }
         });
     }
 
@@ -189,6 +192,9 @@ class SubDetails extends React.Component {
             if (r.done) {
                 this.setState({ metrics: r.data });
             }
+            else {
+                this.props.history.push("/404");
+              }
         });
     }
 
