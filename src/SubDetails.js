@@ -16,7 +16,7 @@ import {
     PopoverHeader
 
 } from "reactstrap";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -96,6 +96,7 @@ class SubDetails extends React.Component {
                     this.props.match.params.projectname,
                     this.props.match.params.subname
                 ),
+                subs: this.apiGetSubs(this.props.match.params.projectname),
                 acl: this.apiGetAcl(
                     this.props.match.params.projectname,
                     this.props.match.params.subname
@@ -179,7 +180,21 @@ class SubDetails extends React.Component {
     apiGetData(projectName, subName) {
         this.DM.subGet(projectName, subName).then(r => {
             if (r.done) {
-                this.setState({ sub: r.data });
+                if (subName) {
+                    this.setState({ sub: r.data });
+                }
+                else {
+                    this.setState({ subs: r.data });
+                }
+            }
+        });
+    }
+
+    // get subscription data
+    apiGetSubs(project) {
+        this.DM.subGet(project).then(r => {
+            if (r.done) {
+                this.setState({ subs: r.data.subscriptions });
             }
             else {
                 this.props.history.push("/404");
@@ -217,6 +232,22 @@ class SubDetails extends React.Component {
     }
 
     render() {
+
+        if (this.state.subs) {
+            let flag = true;
+            this.state.subs.forEach(item => {
+                if (getShortName(item.name) === this.props.match.params.subname) {
+                    flag = false;
+                }
+            });
+            if (flag) {
+                return <Redirect to={"/subs/#"+this.props.match.params.projectname} />
+            }
+        }
+        else {
+            return <h3>loading</h3>;
+        }
+
         if (this.state.sub === undefined) {
             return <h3>loading</h3>;
         }
