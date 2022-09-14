@@ -355,6 +355,9 @@ class AverageProjectsMetricsTable extends React.Component {
                                                     };
                                                     this.setState({metricsQuery: newMetricsQuery});
                                                 }}
+                                                onChange={(event, value) => {
+                                                    this.setState({ value });
+                                                }}
                                                 renderMenu={children => (
                                                     <div className="menu">{children}</div>
                                                 )}
