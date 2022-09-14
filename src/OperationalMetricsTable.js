@@ -1,6 +1,6 @@
 import React from "react";
 import Authen from "./Authen";
-import { Card, CardBody, CardHeader, Table} from "reactstrap";
+import { Card, CardBody, CardHeader, Table } from "reactstrap";
 import "react-table/react-table.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -41,22 +41,22 @@ class OperationalMetricsTable extends React.Component {
             this.authen.getEndpoint(),
             this.authen.getToken()
         );
-        if (!this.authen.isLogged()){
+        if (!this.authen.isLogged()) {
             this.state = {
                 allProjects: true,
                 users: [],
                 projects: [],
-                value:"",
+                value: "",
                 isServiceAdmin: false,
                 isProjectAdmin: false,
                 operationalMetrics: []
             };
-        }else {
+        } else {
             this.state = {
                 allProjects: true,
                 users: [],
                 projects: [],
-                value:"",
+                value: "",
                 isServiceAdmin: this.authen.isServiceAdmin(),
                 isProjectAdmin: this.authen.isProjectAdmin(),
                 operationalMetrics: []
@@ -65,14 +65,23 @@ class OperationalMetricsTable extends React.Component {
     }
 
     apiGetOperationalMetrics() {
-        this.DM.operationalGetMetrics().then(r => {
-          if (r.done) {
-            this.setState({ operationalMetrics: r.data.metrics });
-          }
-        });
+        if (this.state.isServiceAdmin) {
+            this.DM.operationalGetMetrics().then(r => {
+                if (r.done) {
+                    this.setState({ operationalMetrics: r.data.metrics });
+                }
+            });
+        }
+        else if (this.state.isProjectAdmin) {
+            this.DM.getUsageReport().then(r => {
+                if (r.done) {
+                    this.setState({ operationalMetrics: r.data.operational_metrics.metrics });
+                }
+            });
+        }
     }
 
-    componentDidMount(){
+    componentDidMount() {
         if (this.authen.isLogged()) {
             this.setState({
                 value: "",
@@ -145,15 +154,15 @@ class OperationalMetricsTable extends React.Component {
                 }
             });
         } else {
-            if (this.authen.isServiceAdmin()){
-                this.setState({users:undefined, value: "", allProjects: true})
-            this.DM.userGet().then(r => {
-                if (r.done) {
-                    this.setState({ users: r.data.users });
-                }
-            });
+            if (this.authen.isServiceAdmin()) {
+                this.setState({ users: undefined, value: "", allProjects: true })
+                this.DM.userGet().then(r => {
+                    if (r.done) {
+                        this.setState({ users: r.data.users });
+                    }
+                });
             } else {
-                this.setState({users:[], value: "", allProjects: true})
+                this.setState({ users: [], value: "", allProjects: true })
             }
         }
     }
@@ -189,7 +198,7 @@ class OperationalMetricsTable extends React.Component {
 
     // based on service role return an appropriate fa icon
     beautifyServiceRoles(serviceRoles) {
-        if (serviceRoles){
+        if (serviceRoles) {
             if (serviceRoles.includes("service_admin")) {
                 return <FontAwesomeIcon className="service-crown" icon="crown" />;
             } else if (serviceRoles.includes("metric_viewer")) {
@@ -218,35 +227,44 @@ class OperationalMetricsTable extends React.Component {
                 {userHeading}
                 <Card className="mb-2">
                     <CardHeader>
-                       Operational
+                        Operational
                     </CardHeader>
                     <CardBody>
-                    <div style={{ overflow: "hidden" }}>
-                        <div className="row p-3">
-                            <Table key="opmetric-table-{i}" hover>
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Metric</th>
-                                        <th>Resource Type</th>
-                                        <th>Resource Name</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                        {this.state.operationalMetrics && this.state.operationalMetrics.map((item,i) =>
-                                    <tr key={"opmetric-" + i}>
-                                        <th scope="row">{i}</th>
-                                        <td>{item.metric}</td>
-                                        <td>{item.resource_type}</td>
-                                        <td>{item.resource_name}</td>
-                                        <td>{item.timeseries[0]["value"]*10}%</td>
-                                    </tr>
-                        )}
-                                </tbody>
-                            </Table>
+                        <div style={{ overflow: "hidden" }}>
+                            <div className="row p-3">
+                                <Table key="opmetric-table-{i}" hover>
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Metric</th>
+                                            <th>Resource Type</th>
+                                            <th>Resource Name</th>
+                                            <th>Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.state.operationalMetrics && this.state.operationalMetrics.metrics && this.state.operationalMetrics.metrics.map((item, i) =>
+                                            <tr key={"opmetric-" + i}>
+                                                <th scope="row">{i}</th>
+                                                <td>{item.metric}</td>
+                                                <td>{item.resource_type}</td>
+                                                <td>{item.resource_name}</td>
+                                                <td>{item.timeseries[0]["value"] * 10}%</td>
+                                            </tr>
+                                        )}
+                                        {this.state.operationalMetrics && this.state.operationalMetrics.map((item, i) =>
+                                            <tr key={"opmetric-" + i}>
+                                                <th scope="row">{i}</th>
+                                                <td>{item.metric}</td>
+                                                <td>{item.resource_type}</td>
+                                                <td>{item.resource_name}</td>
+                                                <td>{item.timeseries[0]["value"] * 10}%</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </Table>
+                            </div>
                         </div>
-                    </div>
                     </CardBody>
                 </Card>
             </div>

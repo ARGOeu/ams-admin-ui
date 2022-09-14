@@ -369,6 +369,18 @@ class DataManager {
     return this.doGet(url, "metrics");
   }
 
+  getUsageReport() {
+    if (!this.token || !this.endpoint)
+      return Promise.resolve({ done: false });
+
+    // quickly construct request url
+    let url =
+      "https://" +
+      this.endpoint +
+      "/v1/users/usageReport"
+    return this.doGet(url, "metrics");
+  }
+
   subGetOffsets(project, sub) {
     if (!project || !sub || !this.token || !this.endpoint)
       return Promise.resolve({ done: false });
