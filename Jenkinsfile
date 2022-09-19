@@ -16,7 +16,7 @@ pipeline {
             }
             steps {
                 echo 'Build ams-admin-ui'
-                withCredentials([file(credentialsId: 'ams-admin-ui-conf', variable: 'AMS_ADMIN_CONF')]) {
+                withCredentials([file(credentialsId: 'ams-admin-ui-conf-v2', variable: 'AMS_ADMIN_CONF')]) {
                     sh '''
                         cd $WORKSPACE/$PROJECT_DIR
                         rm ./src/config.js
