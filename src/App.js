@@ -216,8 +216,8 @@ class App extends Component {
             this.state.isServiceAdmin ||
             this.state.isProjectAdmin ||
             this.state.isConsumer;
-        const allowOperationalMetrics = this.state.isServiceAdmin
-        const allowAverageProjectMetrics = this.state.isServiceAdmin
+        const allowOperationalMetrics = this.state.isServiceAdmin || this.state.isProjectAdmin
+        const allowAverageProjectMetrics = this.state.isServiceAdmin || this.state.isProjectAdmin
         const allowSchema = this.state.isServiceAdmin || this.state.isProjectAdmin;
         const allowRegistrations = this.state.isServiceAdmin
 

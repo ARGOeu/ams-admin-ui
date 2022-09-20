@@ -167,6 +167,7 @@ class CreateUser extends Component {
       body["service_roles"] = ["service_admin"];
     } else {
       let projects = [];
+      console.log(data.projects);
       for (let project of data.projects) {
         projects.push({
           project: project.project,
@@ -312,7 +313,7 @@ class CreateUser extends Component {
                                       <Autocomplete
                                         name={`projects.${index}.project`}
                                         value={
-                                          this.state.values[index]["project"]
+                                          this.state.values[index] && this.state.values[index]["project"]
                                         }
                                         inputProps={{
                                           id: `projects.${index}.project`,
@@ -376,7 +377,8 @@ class CreateUser extends Component {
                                     </div>
                                     <Input type="select"
                                       name={`projects.${index}.roles`}
-                                      value={this.state.values[0]["roles"]}
+                                      value={this.state.values[index] && this.state.values[index]["roles"]}
+                                      key={`projects.${index}.role`}
                                       onSelect={(e) => {
                                         let values = this.state.values;
                                         values[index]["roles"] = e.target.value;

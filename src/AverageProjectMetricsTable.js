@@ -79,11 +79,21 @@ class AverageProjectsMetricsTable extends React.Component {
     }
 
     apiGetProjectOperationalMetrics(start_date, from_date, projects) {
-        this.DM.projectOperationalGetMetrics(start_date, from_date, projects).then(r => {
-          if (r.done) {
-            this.setState({ projectOperationalMetrics: r.data });
-          }
-        });
+        if (this.state.isServiceAdmin) {
+            this.DM.projectOperationalGetMetrics(start_date, from_date, projects).then(r => {
+                if (r.done) {
+                    console.log(r.data);
+                    this.setState({ report: r.data });
+                }
+            });
+        }
+        else if (this.state.isProjectAdmin) {
+            this.DM.getUsageReport(start_date, from_date, projects).then(r => {
+                if (r.done) {
+                    this.setState({ report: r.data.va_metrics });
+                }
+            });
+        }
     }
 
     componentDidMount(){
@@ -93,7 +103,7 @@ class AverageProjectsMetricsTable extends React.Component {
                 allProjects: true,
                 users: [],
                 projects: this.apiGetProjects(),
-                projectOperationalMetrics: this.apiGetProjectOperationalMetrics(),
+                report: this.apiGetProjectOperationalMetrics(),
                 metricsQuery: {
                     to: "",
                     from: "",
@@ -235,13 +245,13 @@ class AverageProjectsMetricsTable extends React.Component {
         return (
             <div>
                 {userHeading}
-                {this.state.projectOperationalMetrics &&
+                {this.state.report &&
                 <Row>
                     <Col className="" xs="4">
                         <Card className="mb-2">
                             <CardHeader>Total Messages</CardHeader>
                             <CardBody>
-                                {this.state.projectOperationalMetrics.projects_metrics.total_message_count}
+                                {this.state.report.projects_metrics.total_message_count}
                             </CardBody>
                         </Card>
                     </Col>
@@ -249,7 +259,7 @@ class AverageProjectsMetricsTable extends React.Component {
                         <Card className="mb-2">
                             <CardHeader>Average Daily Messages</CardHeader>
                             <CardBody>
-                                {this.state.projectOperationalMetrics.projects_metrics.average_daily_messages}
+                                {this.state.report.projects_metrics.average_daily_messages}
                             </CardBody>
                         </Card>
                     </Col>
@@ -257,7 +267,7 @@ class AverageProjectsMetricsTable extends React.Component {
                         <Card className="mb-2">
                             <CardHeader>Total Users</CardHeader>
                             <CardBody>
-                                {this.state.projectOperationalMetrics.total_users_count}
+                                {this.state.report.total_users_count}
                             </CardBody>
                         </Card>
                     </Col>
@@ -265,7 +275,7 @@ class AverageProjectsMetricsTable extends React.Component {
                         <Card className="mb-2">
                             <CardHeader>Total Topics</CardHeader>
                             <CardBody>
-                                {this.state.projectOperationalMetrics.total_topics_count}
+                                {this.state.report.total_topics_count}
                             </CardBody>
                         </Card>
                     </Col>
@@ -273,7 +283,7 @@ class AverageProjectsMetricsTable extends React.Component {
                         <Card className="mb-2">
                             <CardHeader>Total Subscriptions</CardHeader>
                             <CardBody>
-                                {this.state.projectOperationalMetrics.total_subscriptions_count}
+                                {this.state.report.total_subscriptions_count}
                             </CardBody>
                         </Card>
                     </Col>
@@ -411,7 +421,7 @@ class AverageProjectsMetricsTable extends React.Component {
                                                 let value = this.apiGetProjectOperationalMetrics(this.state.metricsQuery.from,
                                                                                     this.state.metricsQuery.to,
                                                                                     this.state.metricsQuery.projects);
-                                                this.setState({projectOperationalMetrics: value});
+                                                this.setState({report: value.va_metrics});
                                                 }}>
                                                 Submit
                                             </Button>
@@ -438,8 +448,8 @@ class AverageProjectsMetricsTable extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                {this.state.projectOperationalMetrics &&
-                                this.state.projectOperationalMetrics.projects_metrics.projects.map((item,i)=>
+                                {this.state.report &&
+                                this.state.report.projects_metrics.projects.map((item,i)=>
                                         <tr key={"opmetric-" + i}>
                                             <td>{i}</td>
                                             <td>{item.project}</td>
