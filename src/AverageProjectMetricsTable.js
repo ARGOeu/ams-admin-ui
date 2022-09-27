@@ -421,7 +421,9 @@ class AverageProjectsMetricsTable extends React.Component {
                                                 let value = this.apiGetProjectOperationalMetrics(this.state.metricsQuery.from,
                                                                                     this.state.metricsQuery.to,
                                                                                     this.state.metricsQuery.projects);
-                                                this.setState({report: value.va_metrics});
+                                                if (value) {
+                                                    this.setState({report: value.va_metrics});
+                                                }
                                                 }}>
                                                 Submit
                                             </Button>

@@ -369,7 +369,7 @@ class DataManager {
     return this.doGet(url, "metrics");
   }
 
-  getUsageReport() {
+  getUsageReport(start_date, end_date, projects) {
     if (!this.token || !this.endpoint)
       return Promise.resolve({ done: false });
 
@@ -377,7 +377,19 @@ class DataManager {
     let url =
       "https://" +
       this.endpoint +
-      "/v1/users/usageReport"
+      "/v1/users/usageReport?";
+    if (start_date) {
+      let s = "&start_date=" + start_date;
+      url += s;
+    }
+    if (end_date) {
+      let s = "&end_date=" + end_date;
+      url += s;
+    }
+    if (projects) {
+      let s = projects.map((p, i) => `${p}`).join(',');
+      url += "&projects=" + s;
+    }
     return this.doGet(url, "metrics");
   }
 
