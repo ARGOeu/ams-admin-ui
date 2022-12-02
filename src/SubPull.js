@@ -94,6 +94,7 @@ class SubPull extends Component {
     componentDidMount(){
         // begin with return immediately box checked
         document.querySelector("#returnImmed-check").click()
+        clearInterval(this.interval)
     }
 
     doInterval() {
@@ -131,6 +132,7 @@ class SubPull extends Component {
 
 
     doPull(project, sub, max, returnImm) {
+        clearInterval(this.interval)
         this.setState({placeholder:"pulling messages...", messages:[]})
         
         this.DM.subGet(project,sub).then(r=>{
